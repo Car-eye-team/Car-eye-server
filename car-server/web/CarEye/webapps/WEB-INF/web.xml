@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+
+	<!-- 避免项目之间的名称冲突 -->
+	<display-name>TXAI</display-name>
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>TXAI</param-value>
+	</context-param>
+
+	<!-- 指定log4j.properties配置文件的位置 -->
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>classpath:properties/log4j.properties</param-value>
+	</context-param>
+
+	<!-- 指定以Listener方式启动Log4j -->
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener
+		</listener-class>
+	</listener>
+
+	<!--指定以Listener方式启动任务-->
+	 <listener>
+		<listener-class>com.careye.listener.ApplicationContextListener</listener-class>
+		</listener>
+	
+
+	<filter>
+		<filter-name>CharacterEncoding</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter
+		</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>CharacterEncoding</filter-name>
+		<url-pattern>*.*</url-pattern>
+	</filter-mapping>
+
+
+	<!-- 指定Spring的配置文件 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:spring/applicationContext.xml</param-value>
+	</context-param>
+
+	<!-- 指定以Listener方式启动Spring容器 -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener
+		</listener-class>
+	</listener>
+
+	<!-- struts2过滤器 -->
+
+	<filter>
+		<filter-name>struts2</filter-name>
+		<filter-class>
+			org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter
+		</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>struts2</filter-name>
+		<url-pattern>*.action</url-pattern>
+	</filter-mapping>
+
+	<!-- 验证码 -->
+	<servlet>
+		<description>This is the description of my J2EE component
+		</description>
+		<display-name>This is the display name of my J2EE component
+		</display-name>
+		<servlet-name>AuthImg</servlet-name>
+		<servlet-class>com.careye.servlet.AuthImg</servlet-class>
+	</servlet>
+  <servlet>
+    <description>InitServlet</description>
+    <display-name>InitServlet</display-name>
+    <servlet-name>InitServlet</servlet-name>
+    <servlet-class>com.careye.servlet.InitServlet</servlet-class>
+    <load-on-startup>0</load-on-startup>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>DeptTree</servlet-name>
+    <servlet-class>com.careye.servlet.DeptTree</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>test</servlet-name>
+    <servlet-class>com.careye.servlet.test</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>MenuTreeServlet</servlet-name>
+    <servlet-class>com.careye.servlet.MenuTreeServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description>AuthorityMenu</description>
+    <display-name>AuthorityMenu</display-name>
+    <servlet-name>AuthorityMenu</servlet-name>
+    <servlet-class>com.careye.servlet.AuthorityMenu</servlet-class>
+  </servlet>
+  <servlet>
+    <description>CarTree</description>
+    <display-name>CarTree</display-name>
+    <servlet-name>CarTree</servlet-name>
+    <servlet-class>com.careye.servlet.CarTree</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>ShowAllRemindTree</servlet-name>
+    <servlet-class>com.careye.servlet.ShowAllRemindTree</servlet-class>
+  </servlet>
+  <servlet>
+    <description>FileDownload</description>
+    <display-name>FileDownload</display-name>
+    <servlet-name>FileDownload</servlet-name>
+    <servlet-class>com.careye.servlet.FileDownload</servlet-class>
+  </servlet>
+
+
+
+
+	<servlet-mapping>
+		<servlet-name>DeptTree</servlet-name>
+		<url-pattern>/servlet/DeptTree</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AuthImg</servlet-name>
+		<url-pattern>/AuthImg</url-pattern>
+	</servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>InitServlet</servlet-name>
+    <url-pattern>/InitServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>MenuTreeServlet</servlet-name>
+    <url-pattern>/servlet/MenuTreeServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>AuthorityMenu</servlet-name>
+    <url-pattern>/servlet/AuthorityMenu</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>CarTree</servlet-name>
+    <url-pattern>/servlet/CarTree</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ShowAllRemindTree</servlet-name>
+    <url-pattern>/servlet/ShowAllRemindTree</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>FileDownload</servlet-name>
+    <url-pattern>/servlet/FileDownload</url-pattern>
+  </servlet-mapping>
+
+	<!-- 设置session过期时间为30分钟 -1 为永不过期 -->
+	<session-config>
+		<session-timeout>-1</session-timeout>
+	</session-config>
+
+
+	<!-- 设置默认页面 -->
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+	<!-- 表示当系统发生404就是不存在请求地址的错误的时候，页面跳转到error.htm页面 -->
+	<error-page>
+		<error-code>404</error-code>
+		<location>/common/error/error.html</location>
+	</error-page>
+
+	<!-- 表示当系统发生500也就是操作异常错误的时候，页面跳转到error.htm页面 -->
+	<error-page>
+		<error-code>500</error-code>
+		<location>/common/error/error.html</location>
+	</error-page>
+
+	<!-- 表示当系统发生空指针异常错误的时候，页面跳转到error.htm页面 -->
+	<error-page>
+		<exception-type>java.lang.NullPointerException</exception-type>
+		<location>/common/error/error.html</location>
+	</error-page>
+
+</web-app>

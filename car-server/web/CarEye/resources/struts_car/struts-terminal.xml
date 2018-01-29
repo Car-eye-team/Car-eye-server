@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="terminalpositionjson" extends="qhtaxijson" namespace="/terminalpositionjson">
+	
+		<!-- 终端相关信息-->
+		<action name="*" method="{1}"
+			class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+		</action>
+		
+		<!-- 车辆位置以及资料信息-->
+		<action name="queryCarTerminalDetail" method="queryCarTerminalDetail"
+			class="com.careye.common.action.CarPositionInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+		</action>
+		
+		<!-- 终端参数设置-->
+		<action name="terminalParmSet" method="terminalParmSet"
+			class="com.careye.common.action.TerminalParamAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+		</action>
+		
+		<!-- 终端参数查询-->
+		<action name="queryTerminalParm" method="queryTerminalParm"
+			class="com.careye.common.action.TerminalParamAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,data.*,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,data.*,result.*</param>
+			</result>
+		</action>
+		
+	</package>
+	
+</struts>

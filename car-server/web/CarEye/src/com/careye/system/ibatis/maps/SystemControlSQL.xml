@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-systemControlSQL">
+
+	<typeAlias alias="systemControl" type="com.careye.system.domain.SystemControl" />
+
+	
+
+    <!-- 获取控制项总数-->
+	<select id="findPageSystemControlListCount" resultClass="Integer" parameterClass="systemControl">
+		<![CDATA[
+			 select count(*) from SYSTEM_CONTROL t 
+			 where 1=1
+		 ]]>
+		 
+		  <dynamic>
+				<isNotEmpty prepend="and" property="scname">
+					t.scname like '%'||#scname#||'%' 
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="stime">
+					<![CDATA[
+			 		t.operationtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			 		]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="etime">
+					<![CDATA[
+			 		t.operationtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+			 		 ]]>
+				</isNotEmpty>
+		 </dynamic>
+	</select>
+	
+	<!-- 获取控制项列表 -->
+	<select id="findPageSystemControlList" resultClass="systemControl"  parameterClass="systemControl">
+		<![CDATA[
+			 select t.id,
+			           t.scname scname,
+				       t.scalias scalias,
+				       t.scdesc scdesc,
+				       t.scstatus scstatus,
+				       t.scnum scnum,
+				       t.remindspace,
+				       t.remindcount,
+				       t.unit,
+				       t.controlunit,
+				       to_char(t.operationtime, 'yyyy-MM-dd hh24:mi:ss') operationtime
+				  from SYSTEM_CONTROL t
+				  where 1=1
+                  ]]> 
+                  
+              <dynamic>
+				<isNotEmpty prepend="and" property="scname">
+					t.scname like '%'||#scname#||'%' 
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="stime">
+					<![CDATA[
+			 		t.operationtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			 		]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="etime">
+					<![CDATA[
+			 		t.operationtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+			 		 ]]>
+				</isNotEmpty>
+	       </dynamic>     
+                 order by t.id desc
+	</select>
+	
+	<!-- 控制项名称列表 -->
+	<select id="selectSystemControl" resultClass="systemControl">
+		<![CDATA[
+			select t.scname from SYSTEM_CONTROL t 
+               ]]> 
+	</select>
+	
+	<!-- 验证添加时控制项名称是否存在 -->
+	<select id="validateSystemControl" resultClass="Integer"  parameterClass="String">
+		<![CDATA[
+			select count(*) from SYSTEM_CONTROL t where t.scname = #scname#
+               ]]> 
+	</select>
+	
+	<!-- 验证添加时控制项别名是否存在 -->
+	<select id="validateSystemControlAlias" resultClass="Integer"  parameterClass="String">
+		<![CDATA[
+			select count(*) from SYSTEM_CONTROL t where t.scalias = #scalias#
+               ]]> 
+	</select>
+
+	<!-- 验证更新时控制项是否存在 -->
+	<select id="validateupSystemControl" resultClass="Integer"  parameterClass="systemControl">
+			select count(*) from SYSTEM_CONTROL t where t.scname = #scname# 
+			<isNotEmpty prepend="and" property="id">
+				t.id != #id#
+			</isNotEmpty>
+	</select>
+
+	<!-- 添加控制项-->
+	<insert id="addSystemControl" parameterClass="systemControl">
+		<![CDATA[
+				INSERT INTO SYSTEM_CONTROL
+				  (scname,
+				   scalias,
+				   scdesc,
+				   scstatus,
+				   scnum,
+				   remindspace,
+				   remindcount,
+				   unit,
+				   controlunit,
+				   operationtime)
+				VALUES
+				  (#scname#,
+				   #scalias#,
+				   #scdesc#,
+				   #scstatus#,
+				   #scnum#,
+				   #remindspace#,
+				   #remindcount#,
+				   #unit#,
+				   #controlunit#,
+				   to_date(#operationtime#, 'yyyy-mm-dd hh24:mi:ss'))
+		]]>
+		<selectKey resultClass="int" keyProperty="id">
+  	<![CDATA[SELECT SYSTEM_CONTROL_SEQ.CURRVAL AS ID FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 根据ID删除控制项 -->
+	<delete id="deleteSystemControl" parameterClass="Integer">
+		<![CDATA[
+			delete from SYSTEM_CONTROL where id = #id#
+		]]>
+	</delete>
+	
+	<!-- 更新控制项 -->
+	<update id="updateSystemControl" parameterClass="systemControl">
+		<![CDATA[
+			update SYSTEM_CONTROL set scname = #scname#,
+			 scdesc = #scdesc#, scstatus = #scstatus#,controlunit=#controlunit#,
+			  scnum = #scnum# ,remindspace=#remindspace#,remindcount=#remindcount#,unit=#unit#
+			  where id=#id#
+		]]>
+	</update>
+	
+	<!-- 通过控制别名找出对应控制值 -->
+	<select id="getScnumByScalias" resultClass="systemControl" parameterClass="String">
+		<![CDATA[
+			  select t.scnum ,t.remindspace ,t.remindcount
+			  from SYSTEM_CONTROL t where t.scalias = #scalias# and t.scstatus = 0
+        ]]> 
+	</select>
+	
+	<!-- 通过控制名找出对应控制值 -->
+	<select id="getScnumByScnum" resultClass="systemControl" parameterClass="String">
+		<![CDATA[
+			  select t.id, t.scalias ,t.remindspace ,t.remindcount,t.scstatus,t.unit,
+			  t.scdesc,t.scnum,t.controlunit
+			  from SYSTEM_CONTROL t where t.scname = #scname# and t.scstatus = 0
+        ]]> 
+	</select>
+	
+</sqlMap>
+
+
+
+
+
+
+

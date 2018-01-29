@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+
+	<!--cacheModelsEnabled全局性地启用或禁用SqlMapClient的所有缓存model。-->
+    <!--enhancementEnabled 全局性地启用或禁用运行时字节码增强  -->
+    <!--lazyLoadingEnabled全局性地启用或禁用SqlMapClient的所有延迟加载。调试程序时使用。  -->
+    <!-- useStatementNamespaces 可以使用命名规范 如 xx.id -->
+    <settings 
+	    cacheModelsEnabled="true"
+	    enhancementEnabled="true"
+	    lazyLoadingEnabled="true"     
+	    useStatementNamespaces="true" />
+	    
+	    
+	<!-- 写的sql语句的xml文件需要放到这里 -->
+	<!-- mysql数据库鉴权表 
+	<sqlMap resource="com/careye/dssservice/ibatis/maps/DssServiceSQL.xml" />-->
+	
+	<!-- oracle数据库鉴权表 -->
+	<sqlMap resource="com/careye/dssservice/ibatis/maps/OracleDssServiceSQL.xml" />
+	
+	<!-- 公共模块 -->
+	<!-- 省市县 -->
+	<sqlMap resource="com/careye/common/ibatis/maps/CityInfoSQL.xml" />
+	
+	<!-- 菜单树加载 -->
+	<sqlMap resource="com/careye/common/ibatis/maps/MenuTreeSQL.xml" />
+		
+	<!-- 车辆位置相关 -->
+	<sqlMap resource="com/careye/common/ibatis/maps/TerminalDeviceInfoSQL.xml" />
+	
+	<!-- 系统操作日志 -->
+	<sqlMap resource="com/careye/common/ibatis/maps/SysOperateLogSQL.xml" />
+	
+	<!-- 系统管理 -->
+	<!-- 系统功能管理 -->
+	<sqlMap resource="com/careye/system/ibatis/maps/SystemFunctionSQL.xml" />
+	<!-- 企业用户管理  -->
+	<sqlMap resource="com/careye/system/ibatis/maps/UserSQL.xml" />	
+	<!--企业组管理 -->
+	<sqlMap resource="com/careye/system/ibatis/maps/UserGroupSQL.xml" />
+	<!--企业管理-->
+	<sqlMap resource="com/careye/system/ibatis/maps/OrgazicationDeptSQL.xml" />
+	<!--权限管理 -->
+	<sqlMap resource="com/careye/system/ibatis/maps/AuthoritySQL.xml" />
+	
+	<!-- 车辆管理start -->
+	<!-- 车辆信息管理 -->
+	<sqlMap resource="com/careye/car/ibatis/maps/CarSQL.xml" />
+	<!-- 司机信息管理 -->
+	<sqlMap resource="com/careye/car/ibatis/maps/CarDriverSQL.xml" />
+	<!--POI设置  -->
+	<sqlMap resource="com/careye/car/ibatis/maps/PoiInfoSQL.xml" />
+	<!--区域设置  -->
+	<sqlMap resource="com/careye/car/ibatis/maps/AreaSetSQL.xml" />
+	<!--车辆信息统计  -->
+	<sqlMap resource="com/careye/car/ibatis/maps/CarConditionSQL.xml" />
+	<!--考勤信息  -->
+	<sqlMap resource="com/careye/car/ibatis/maps/ClockSQL.xml" />
+	<!-- 车辆管理end -->
+	
+	
+	<!-- 系统设置start -->
+	<!--车辆类型  -->
+	<sqlMap resource="com/careye/sysset/ibatis/maps/CarTypeSQL.xml" />
+	<!--车辆用途  -->
+	<sqlMap resource="com/careye/sysset/ibatis/maps/CarUseSQL.xml" />
+	<!--类型设置  -->
+	<sqlMap resource="com/careye/sysset/ibatis/maps/SetSQL.xml" />
+	<!--行政区划管理  -->
+	<sqlMap resource="com/careye/sysset/ibatis/maps/RegionSQL.xml" />
+	<!--电召费用设置  -->
+	<sqlMap resource="com/careye/sysset/ibatis/maps/DialfeeSetSQL.xml" />
+	<!--电召规则设置  -->
+	<sqlMap resource="com/careye/sysset/ibatis/maps/DialRuleSQL.xml" />
+	 <!--手机客户端设置  -->
+    <!-- 版本管理 -->
+    <sqlMap resource="com/careye/sysset/ibatis/maps/AppManageSQL.xml" />
+    <!-- 密钥管理 -->
+    <sqlMap resource="com/careye/sysset/ibatis/maps/KeySQL.xml" />
+    <!-- 意见反馈 -->
+    <sqlMap resource="com/careye/sysset/ibatis/maps/FeedbackAdviceSQL.xml" />
+    <!-- 视频参数设置 -->
+    <sqlMap resource="com/careye/sysset/ibatis/maps/VideoParamSetSQL.xml" />
+    <!-- 系统设置end -->
+    
+    
+	<!-- 报警处理 -->
+	<sqlMap resource="com/careye/common/ibatis/maps/AlarmSQL.xml" />
+	
+	<!-- 信息管理 start-->
+ 	<!-- 文本信息下发管理 -->
+    <sqlMap resource="com/careye/message/ibatis/maps/TextInfoSQL.xml" />   
+    <sqlMap resource="com/careye/message/ibatis/maps/EventSQL.xml" />   
+    <sqlMap resource="com/careye/message/ibatis/maps/QuestionSQL.xml" />   
+	    
+	<!-- 信息管理 end-->
+	
+	<!-- 客户信息管理 start -->
+	<!-- 客户信息管理 -->
+	 <sqlMap resource="com/careye/customer/ibatis/maps/CustomerSQL.xml" />   
+	 <!-- 客户来电管理 -->
+	 <sqlMap resource="com/careye/customer/ibatis/maps/CustomerInboundSQL.xml" />   
+	  <!-- 投诉管理 -->
+	 <sqlMap resource="com/careye/customer/ibatis/maps/ComplaintSQL.xml" />  
+	<!-- 客户信息管理 end -->
+	
+	<!-- 约车业务信息管理 start -->
+	<!-- 约车业务信息管理 -->
+	 <sqlMap resource="com/careye/transaction/ibatis/maps/TransactionSQL.xml" />
+	 <!-- 乘客人数统计-->
+	 <sqlMap resource="com/careye/transaction/ibatis/maps/PassageStatisticSQL.xml" />
+	 <!-- 司机评价乘客 -->
+	 <sqlMap resource="com/careye/transaction/ibatis/maps/DriverEvaluationSQL.xml" />
+	 <!-- 客户评价 -->
+	 <sqlMap resource="com/careye/transaction/ibatis/maps/CustomerEvaluationSQL.xml" />
+	 
+	 
+	 <!-- 统计评价 -->
+	 <sqlMap resource="com/careye/transaction/ibatis/maps/EvaluateCountSQL.xml" />
+	    
+	<!-- 约车业务信息管理 end -->
+	
+	<!-- 顺风车订单 -->
+	 <sqlMap resource="com/careye/transaction/ibatis/maps/RideOrderSQL.xml" />
+	 <!-- 对讲管理 -->
+	 <sqlMap resource="com/careye/transaction/ibatis/maps/IntercomSQL.xml" />
+			
+	
+	<!-- 报表管理 start -->
+	<!-- 报表信息管理 -->
+	 <sqlMap resource="com/careye/statement/ibatis/maps/CarKiloSQL.xml" />  
+	 <!-- 多区域信息管理 -->
+	 <sqlMap resource="com/careye/statement/ibatis/maps/AreaMoreSQL.xml" />   
+	 
+	 <!-- 电召 start -->
+	<!-- 电召业务数据统计 -->
+	 <sqlMap resource="com/careye/statement/oncalltransaction/ibatis/maps/OnCallCountSQL.xml" />
+	<!-- 抢答统计 -->
+	 <sqlMap resource="com/careye/statement/oncalltransaction/ibatis/maps/AnswerCountSQL.xml" />
+	 <!-- 电召业务统计管理 -->
+	 <sqlMap resource="com/careye/statement/ibatis/maps/TranStatementSQL.xml" />    
+	    
+	<!-- 电召 end -->
+	 
+	<!-- 报表信息管理 end -->
+	
+	<!-- 监控调度 start -->
+	 <!-- 远程控制记录 -->
+	 <sqlMap resource="com/careye/monitor/ibatis/maps/RemoteControlSQL.xml" />  
+	 <!-- 调度记录 -->
+	 <sqlMap resource="com/careye/monitor/ibatis/maps/DispatcherRecordSQL.xml" />  
+	 <!-- 摄像头立即拍照记录 -->
+	 <sqlMap resource="com/careye/monitor/ibatis/maps/PhotoSQL.xml" />  
+	 <!-- 多媒体数据 -->
+	 <sqlMap resource="com/careye/monitor/ibatis/maps/MultiMediaSQL.xml" /> 
+	 <!-- 下发日志列表-->
+	 <sqlMap resource="com/careye/monitor/ibatis/maps/CommondLogSQL.xml" />  
+	 <!-- 新车上线监控-->
+	 <sqlMap resource="com/careye/monitor/ibatis/maps/OnlineReportSQL.xml" />  
+	 <!-- 营运信息-->
+	 <sqlMap resource="com/careye/monitor/ibatis/maps/OperateDataSQL.xml" /> 
+	 <!-- 车辆在线率分析-->
+	 <sqlMap resource="com/careye/monitor/ibatis/maps/OnlineRateSQL.xml" />
+	 
+	<!-- 监控调度 end -->
+	
+	<!-- 电话管理 -->
+	<!-- 电话回拨管理 -->
+	<sqlMap resource="com/careye/tel/ibatis/maps/TelCallSQL.xml" />
+	<!-- 设置电话本 -->
+	<sqlMap resource="com/careye/tel/ibatis/maps/TelBookSQL.xml" />
+	
+	
+	<!-- 行业功能 -->
+    <!-- 广告类型管理 -->
+    <sqlMap resource="com/careye/advert/ibatis/maps/AdvertTypeSQL.xml" />
+    <!-- 后枕屏广告-->
+    <sqlMap resource="com/careye/advert/ibatis/maps/AdvertManageSQL.xml" />
+    <!-- 顶灯广告-->
+    <sqlMap resource="com/careye/advert/ibatis/maps/TopLightSQL.xml" />
+    <!-- 主机广告-->
+    <sqlMap resource="com/careye/advert/ibatis/maps/HostSQL.xml" />
+    
+    
+    <!-- 工作台 -->
+	<sqlMap resource="com/careye/common/ibatis/maps/WorkPlaceSQL.xml" />
+	<!-- Mysql录入 -->
+	<sqlMap resource="com/careye/common/ibatis/maps/CmssSQL.xml" />
+	
+	<!-- 即时聊天 -->
+	<sqlMap resource="com/careye/gtalk/ibatis/maps/GtalkSQL.xml" />
+	
+	</sqlMapConfig>	

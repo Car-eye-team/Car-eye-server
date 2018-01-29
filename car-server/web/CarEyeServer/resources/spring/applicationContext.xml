@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:properties/jdbc.properties" />
+	</bean>
+
+	<bean id="dataSource"
+		class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="${jdbc.driverClassName}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<!-- 连接池初始化时建立的连接数 默认值是3 -->  
+        <property name="initialPoolSize"><value>5</value></property>  
+        <!-- 连接的最大空闲时间  单位秒 默认是0-代表永远不会断开连接  超过设定时间的空闲连接将会断开 -->  
+        <property name="maxIdleTime"><value>60</value></property>  
+        <!-- 连接池中拥有的最大连接数 默认值为15个 -->  
+        <property name="maxPoolSize"><value>50</value></property>  
+        <!-- 连接池中保持的最小连接数  默认值为3个-->  
+        <property name="minPoolSize"><value>5</value></property>  
+        <!-- 将连接池的连接数保持在minpoolsize 必须小于maxIdleTime设置  默认值为0代表不处理  单位秒 -->  
+        <property name="maxIdleTimeExcessConnections"><value>30</value></property> 
+        <property name="checkoutTimeout"><value>30000</value></property>
+	</bean>
+	
+	<bean id="dataSource1"
+		class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="${jdbc.driverClassName1}" />
+		<property name="jdbcUrl" value="${jdbc.url1}" />
+		<property name="user" value="${jdbc.username1}" />
+		<property name="password" value="${jdbc.password1}" />
+		<!-- 连接池初始化时建立的连接数 默认值是3 -->  
+        <property name="initialPoolSize"><value>5</value></property>  
+        <!-- 连接的最大空闲时间  单位秒 默认是0-代表永远不会断开连接  超过设定时间的空闲连接将会断开 -->  
+        <property name="maxIdleTime"><value>60</value></property>  
+        <!-- 连接池中拥有的最大连接数 默认值为15个 -->  
+        <property name="maxPoolSize"><value>50</value></property>  
+        <!-- 连接池中保持的最小连接数  默认值为3个-->  
+        <property name="minPoolSize"><value>5</value></property>  
+        <!-- 将连接池的连接数保持在minpoolsize 必须小于maxIdleTime设置  默认值为0代表不处理  单位秒 -->  
+        <property name="maxIdleTimeExcessConnections"><value>30</value></property> 
+        <property name="checkoutTimeout"><value>30000</value></property>
+	</bean>
+	
+	<!-- 配置ibatis的配置文件 -->
+	<bean id="sqlMapClient"
+		class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation"
+			value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 配置ibatis的配置文件 -->
+	<bean id="sqlMapClient1"
+		class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation"
+			value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource1" />
+	</bean>
+	
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="txManager1"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource1" />
+	</bean>
+	
+	 <!-- 配置事务属性 -->  
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	 <!-- 配置事务属性 -->  
+	<tx:advice id="txAdvice1" transaction-manager="txManager1">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:advisor pointcut="execution(* com.careye..*ServiceImpl.*(..))" advice-ref="txAdvice"/>
+		<aop:advisor pointcut="execution(* com.careye..*ServiceImpl.*(..))" advice-ref="txAdvice1"/>
+	</aop:config>
+	
+	
+	<!-- 子系统配置文件 -->
+	<!-- 定时任务 -->
+	<import resource="classpath:spring/applicationContext-job.xml" />
+	
+	<!-- 车辆管理 -->
+	<import resource="classpath:spring_car/applicationContext-car.xml" />
+	
+	<!-- 车辆位置服务 -->
+	<import resource="classpath:spring_car/applicationContext-position.xml" />
+	
+	<!-- 约车业务 -->
+	<import resource="classpath:spring_car/applicationContext-transaction.xml" />
+		
+	<!-- 通用应答公共配置 -->
+	<import resource="classpath:spring_common/applicationContext-common.xml" />
+	
+	<import resource="classpath:spring_common/applicationContext-ocs.xml" />
+		
+</beans>

@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-advertManageSQL">
+	<typeAlias alias="advertType" type="com.careye.advert.domain.AdvertType" />
+	<typeAlias alias="advertPos" type="com.careye.advert.domain.AdvertPos" />
+	<typeAlias alias="advertVer" type="com.careye.advert.domain.AdvertVer" />
+	<typeAlias alias="advertCon" type="com.careye.advert.domain.AdvertCon" />
+	
+	
+	<!-- 广告位置列表 -->
+	<select id="getAdvertPosList"  resultClass="advertPos" parameterClass="advertPos">
+		select 
+				id,
+				position,
+				to_char(createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		
+		from TO_ADVERT_POSITION where 1=1
+		<dynamic>
+			<isNotEmpty prepend="AND" property="position">
+				position like '%'||#position#||'%'
+			</isNotEmpty>
+		</dynamic>
+		order by id desc
+	</select>
+	
+	<!-- 广告位置数量 -->
+	<select id="getAdvertPosListCount" resultClass="int" parameterClass="advertPos">
+		select count(*) 
+			from TO_ADVERT_POSITION
+			where 1=1
+			<dynamic>
+			<isNotEmpty prepend="AND" property="position">
+				position like '%'||#position#||'%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+	<!-- 广告位置是否存在 -->
+	<select id="posIsExist" parameterClass="advertPos" resultClass="int">
+		select count(*) from TO_ADVERT_POSITION  where  position = #position#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 修改位置-->
+     <update id="updatePos" parameterClass="advertPos">
+         update TO_ADVERT_POSITION SET
+		        position = #position#
+         WHERE id = #id#
+     </update>
+	
+	<!-- 添加位置-->
+     <insert id="savePos" parameterClass="advertPos">
+         insert into TO_ADVERT_POSITION(
+	              position,
+                  createtime
+               )
+          values(
+         	   #position#,
+         	   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+             )
+           <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_ADVERT_POSITION_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     <!-- 删除 -->
+     <delete id="deletePos">
+         delete from TO_ADVERT_POSITION where id=#id#
+     </delete>
+     
+     
+     <!-- 是否被使用-->
+     <select id="queryPos" resultClass="int"  parameterClass="int">
+		select count(*) from TO_ADVERT_VERSION  where positionid = #id#
+	 </select>
+	 <select id="queryPos1" resultClass="int"  parameterClass="int">
+		select count(*) from TO_ADVERT_CONTENT  where positionid = #id#
+	 </select>
+	 
+	 
+	 
+	 
+	 <!-- 位置下拉列表 -->
+	<select id="getPositionList"  resultClass="advertPos">
+		select 
+				id,
+				position
+		
+		from TO_ADVERT_POSITION 
+		order by id desc
+	</select>
+	
+	
+	<!-- 类型下拉列表 -->
+	<select id="getTypeList"  resultClass="advertType">
+		select 
+				id,
+				typename
+		
+		from TO_ADVERT_TYPE
+		order by id desc
+	</select>
+	
+	<!-- 版本下拉列表 -->
+	<select id="getVersionList"  resultClass="advertVer">
+		select 
+				id,
+				version
+		
+		from TO_ADVERT_VERSION
+		order by id desc
+	</select>
+	
+	
+	
+	
+	
+	 
+	 
+	 <!-- 广告版本列表 -->
+	<select id="getAdvertVerList"  resultClass="advertVer" parameterClass="advertVer">
+		select 
+				t.id,
+				t.positionid,
+				t.version,
+				t.verid,
+				to_char(t.dtime,'yyyy-mm-dd') dtime,
+				t.userid,
+				to_char(t.reltime,'yyyy-mm-dd hh24:mi:ss') reltime,
+				t.auditstatus,
+				t.adminid,
+				to_char(t.audittime,'yyyy-mm-dd hh24:mi:ss') audittime,
+				t.auditremark,
+				t.onstatus,
+				t.remark,
+				to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+				
+				tp.position position,
+				
+				tb.user_name username,
+				(select tb.user_name from TO_BLOC_USER tb where tb.id=t.adminid) auditname
+		
+		from TO_ADVERT_VERSION t,TO_ADVERT_POSITION tp ,TO_BLOC_USER tb
+		
+		where t.positionid = tp.id(+) and t.userid = tb.id(+) 
+		<dynamic>
+			<isNotEmpty prepend="AND" property="version">
+				t.version like '%'||#version#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="auditstatus">
+				t.auditstatus = #auditstatus#
+			</isNotEmpty>
+			 <isNotEmpty prepend="and" property="positionid" >
+			        t.positionid = #positionid#
+			  </isNotEmpty>
+			<isNotEmpty prepend="AND" property="onstatus">
+				t.onstatus = #onstatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+					t.reltime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+				<![CDATA[
+					t.reltime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.auditstatus
+	</select>
+	
+	<!-- 广告版本数量 -->
+	<select id="getAdvertVerListCount" resultClass="int" parameterClass="advertVer">
+		select count(*) 
+			
+		from TO_ADVERT_VERSION t,TO_ADVERT_POSITION tp ,TO_BLOC_USER tb
+		
+		where t.positionid = tp.id and t.userid = tb.id(+) 
+		<dynamic>
+			<isNotEmpty prepend="and" property="positionid" >
+			        t.positionid = #positionid#
+			  </isNotEmpty>
+			<isNotEmpty prepend="AND" property="version">
+				t.version like '%'||#version#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="auditstatus">
+				t.auditstatus = #auditstatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="onstatus">
+				t.onstatus = #onstatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+					t.reltime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+				<![CDATA[
+					t.reltime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+	<!-- 获取广告序号 -->
+	<select id="selconnumber" resultClass="int" parameterClass="int">
+		select nvl(max(connumber),0) as connumber from TO_ADVERT_CONTENT  where positionid = #pid#
+	</select>
+	
+	
+	<!-- 版本是否存在 -->
+	<select id="verIsExist" parameterClass="advertVer" resultClass="int">
+		select count(*) from TO_ADVERT_VERSION  where  version = #version# and positionid = #positionid#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 版本号是否存在 -->
+	<select id="veridIsExist" parameterClass="advertVer" resultClass="int">
+		select count(*) from TO_ADVERT_VERSION  where  verid = #verid# and positionid = #positionid#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 修改版本-->
+     <update id="updateVer" parameterClass="advertVer">
+         update TO_ADVERT_VERSION SET
+         		verid = #verid#,
+		        version = #version#,
+		        dtime = to_date(#dtime#,'yyyy-mm-dd'),
+		        reltime = to_date(#reltime#,'yyyy-mm-dd hh24:mi:ss'),
+		        remark = #remark#
+         WHERE id = #id#
+     </update>
+	
+	<!-- 添加版本-->
+     <insert id="saveVer" parameterClass="advertVer">
+         insert into TO_ADVERT_VERSION(
+        		 positionid,
+	              version,
+	              verid,
+	              dtime,
+	              reltime,
+	              remark,
+	              userid,
+	              auditstatus,
+	              onstatus,
+                  createtime
+               )
+          values(
+         	   #positionid#,
+         	   #version#,
+         	   #verid#,
+         	   to_date(#dtime#,'yyyy-mm-dd'),
+         	   to_date(#reltime#,'yyyy-mm-dd hh24:mi:ss'),
+         	   #remark#,
+         	   #userid#,
+         	   #auditstatus#,
+         	   #onstatus#,
+         	   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+             )
+           <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_ADVERT_VERSION_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	<!-- 删除 -->
+     <delete id="deleteVer">
+         delete from TO_ADVERT_VERSION where id=#id#
+     </delete>
+     
+     
+     <!-- 是否被使用-->
+	 <select id="queryVer" resultClass="int"  parameterClass="int">
+		select count(*) from TO_ADVERT_CONTENT  where versionid = #id#
+	 </select>
+	 
+	<!-- 审核版本-->
+     <update id="saveAuditVer" parameterClass="advertVer">
+         update TO_ADVERT_VERSION SET
+         		adminid = #adminid#,
+		        auditstatus = #auditstatus#,
+		        audittime = to_date(#audittime#,'yyyy-mm-dd hh24:mi:ss'),
+		        auditremark = #auditremark#
+         WHERE id = #id#
+     </update>
+     
+     <!-- 上架版本 -->
+	<update id="activeVer" parameterClass="int">
+		<![CDATA[
+		    update TO_ADVERT_VERSION set onstatus = 1 WHERE id = #id#
+		]]>
+	</update>
+	
+	<!-- 下架版本 -->
+	<update id="inactiveVer" parameterClass="int">
+		<![CDATA[
+		    update TO_ADVERT_VERSION set onstatus = 2 WHERE id = #id#
+		]]>
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- 广告内容列表 -->
+	<select id="getAdvertConList"  resultClass="advertCon" parameterClass="advertCon">
+		select 
+				t.id,
+				t.positionid,
+				t.typeid,
+				t.versionid,
+				t.connumber,
+				to_char(t.dtime,'yyyy-mm-dd') dtime,
+				t.userid,
+				to_char(t.reltime,'yyyy-mm-dd hh24:mi:ss') reltime,
+				
+				t.remark,
+				to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+				t.adname,
+				t.linkpath,
+				t.path,
+				
+				tv.version version,
+				tat.typename typename,
+				tp.position position,
+				
+				tb.user_name username,
+				(select tb.user_name from TO_BLOC_USER tb where tb.id=t.adminid) auditname
+		
+		from TO_ADVERT_CONTENT t,
+			 TO_ADVERT_VERSION tv,
+			 TO_ADVERT_POSITION tp ,
+			 TO_BLOC_USER tb,
+			 TO_ADVERT_TYPE tat
+		
+		where t.versionid = tv.id 
+		and t.positionid = tp.id 
+		and t.typeid = tat.id
+		and t.userid = tb.id(+) 
+		<dynamic>
+		<isNotEmpty prepend="and" property="versionidStr" >
+			        t.versionid in ( $versionidStr$ )
+			  </isNotEmpty>
+			  <isNotEmpty prepend="and" property="positionid" >
+			        t.positionid = #positionid#
+			  </isNotEmpty>
+			<isNotEmpty prepend="AND" property="adname">
+				t.adname like '%'||#adname#||'%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+					t.reltime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+				<![CDATA[
+					t.reltime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.auditstatus
+	</select>
+	
+	<!-- 广告内容数量 -->
+	<select id="getAdvertConListCount" resultClass="int" parameterClass="advertCon">
+		select count(*) 
+			
+		from TO_ADVERT_CONTENT t,
+			 TO_ADVERT_VERSION tv,
+			 TO_ADVERT_POSITION tp ,
+			 TO_BLOC_USER tb,
+			 TO_ADVERT_TYPE tat
+		
+		where t.versionid = tv.id 
+		and t.positionid = tp.id 
+		and t.typeid = tat.id
+		and t.userid = tb.id(+)
+		<dynamic>
+		<isNotEmpty prepend="and" property="versionidStr" >
+			        t.versionid in ( $versionidStr$ )
+			  </isNotEmpty>
+			   <isNotEmpty prepend="and" property="positionid" >
+			        t.positionid = #positionid#
+			  </isNotEmpty>
+			<isNotEmpty prepend="AND" property="adname">
+				t.adname like '%'||#adname#||'%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+					t.reltime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+				<![CDATA[
+					t.reltime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 内容是否存在 -->
+	<select id="conIsExist" parameterClass="advertCon" resultClass="int">
+		select count(*) from TO_ADVERT_CONTENT  where  adname = #adname# and positionid = #positionid#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 修改内容-->
+     <update id="updateCon" parameterClass="advertCon">
+         update TO_ADVERT_CONTENT SET
+		        typeid = #typeid#,
+		        adname = #adname#,
+		        path = #path#,
+		        linkpath = #linkpath#,
+		        dtime = to_date(#dtime#,'yyyy-mm-dd'),
+		        reltime = to_date(#reltime#,'yyyy-mm-dd hh24:mi:ss'),
+		        remark = #remark#
+         WHERE id = #id#
+     </update>
+	
+	<!-- 添加内容-->
+     <insert id="saveCon" parameterClass="advertCon">
+         insert into TO_ADVERT_CONTENT(
+        		 positionid,
+	              versionid,
+	              typeid,
+	              adname,
+	              path,
+	              linkpath,
+	              dtime,
+	              reltime,
+	              remark,
+	              userid,
+	              connumber,
+                  createtime
+               )
+          values(
+         	   #positionid#,
+         	   #versionid#,
+         	   #typeid#,
+         	   #adname#,
+         	   #path#,
+         	   #linkpath#,
+         	   to_date(#dtime#,'yyyy-mm-dd'),
+         	   to_date(#reltime#,'yyyy-mm-dd hh24:mi:ss'),
+         	   #remark#,
+         	   #userid#,
+         	   #connumber#,
+         	   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+             )
+           <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_ADVERT_CONTENT_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 删除内容 -->
+     <delete id="deleteCon">
+         delete from TO_ADVERT_CONTENT where id=#id#
+     </delete>
+	
+	
+	
+	
+</sqlMap>
+
+
+
+
+
+
+

@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-evaluateCountSQL">
+
+	<typeAlias alias="evaluateCount" type="com.careye.transaction.domain.EvaluateCount"/>
+	<typeAlias alias="cusEvaluation" type="com.careye.transaction.domain.CustomerEvaluation"/>
+	
+	<select id="getEvaluateCountListByYear" parameterClass="evaluateCount"  resultClass="evaluateCount" >
+		select one.one,two.two,three.three,four.four,five.five,six.six,seven.seven,eight.eight,nine.nine,ten.ten,eleven.eleven,twelve.twelve from 
+               (select  count(s.id) one 
+                  from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') = 1
+                   and to_char(s.createtime, 'yyyy') =#year# )  one,
+               (select count(s.id) two
+                  from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					   tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') = 2
+                   and to_char(s.createtime, 'yyyy') =#year#)  two,
+               (select count(s.id) three
+                 from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					   tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') = 3
+                   and to_char(s.createtime, 'yyyy') =#year#)  three,
+               (select count(s.id) four
+                 from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					   tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') = 4
+                   and to_char(s.createtime, 'yyyy') =#year#)  four,
+               (select count(s.id) five
+                from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') = 5
+                   and to_char(s.createtime, 'yyyy') =#year#)  five,
+               (select count(s.id) six
+                from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') =6
+                   and to_char(s.createtime, 'yyyy') =#year#)  six,
+               (select count(s.id) seven
+                 from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') =7
+                   and to_char(s.createtime, 'yyyy') =#year#)  seven,
+               (select count(s.id) eight
+                 from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') =8
+                   and to_char(s.createtime, 'yyyy') =#year#)  eight,
+               (select count(s.id)  nine
+                 from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') =9
+                   and to_char(s.createtime, 'yyyy') =#year#)  nine,
+               (select count(s.id) ten
+                  from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') = 10
+                   and to_char(s.createtime, 'yyyy') =#year#)  ten,
+               (select count(s.id)  eleven
+                 from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') = 11
+                   and to_char(s.createtime, 'yyyy') =#year#)  eleven,
+               (select count(s.id) twelve
+                from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                   and s.evalevel=#evalevel#
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+                   and to_char(s.createtime, 'mm') = 12
+                   and to_char(s.createtime, 'yyyy') =#year#)  twelve 
+	</select>
+	
+	
+	
+	<select id="getEvaluateCountListByMonth" parameterClass="evaluateCount"  resultClass="evaluateCount" >
+		select to_char(d.datetime, 'yyyy-MM-dd') datetime,
+       
+		(select count(*)
+          from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+         where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                and s.evalevel=1
+               and to_char(d.datetime, 'yyyy-mm-dd') =
+               to_char(s.createtime, 'yyyy-mm-dd')
+                <isNotEmpty prepend="and" property="carnumber">
+					   tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>)  count1,
+		
+					
+		(select count(*)
+           from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+         where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                and s.evalevel=3
+               and to_char(d.datetime, 'yyyy-mm-dd') =
+               to_char(s.createtime, 'yyyy-mm-dd')
+                <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>)  count2,			
+					
+					
+					(select count(*)
+           from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+         where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                and s.evalevel=2
+               and to_char(d.datetime, 'yyyy-mm-dd') =
+               to_char(s.createtime, 'yyyy-mm-dd')
+                <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber = #carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>)  count3
+  from (select to_date(#month#, 'yyyy-mm') + (rownum - 1) datetime
+          from dual
+        connect by rownum
+        <![CDATA[
+					<=
+		]]> 
+         last_day(to_date(#month#, 'yyyy-mm')) -
+                   to_date(#month#, 'yyyy-mm') + 1) d
+	</select>
+	
+	
+	
+	<!-- 根据企业ID获取企业名称 -->
+	<select id="selBlocname" resultClass="string"  parameterClass="java.lang.Integer">
+		<![CDATA[ 
+	   	select  bloc_name from to_bloc where id = #blocid#
+		]]>
+	</select>
+	
+	
+	
+	
+	
+	
+	<select id="getECListByYear" parameterClass="evaluateCount"  resultClass="evaluateCount" >
+		select to_char(s.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+				s.orderid,
+				s.evalevel,
+				s.content,
+				tc.carnumber carnumber,
+				tb.bloc_name blocname				
+                from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="year">
+					    to_char(s.createtime, 'yyyy') =#year#
+					</isNotEmpty>
+	</select>
+	
+	<select id="getECListByMonth" parameterClass="evaluateCount"  resultClass="evaluateCount" >
+		select to_char(s.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+				s.orderid,
+				s.evalevel,
+				s.content,
+				tc.carnumber carnumber,
+				tb.bloc_name blocname				
+                from TO_CUSTOMER_EVALUATION s,TO_TRANSACTION_INFO tti,TO_CAR_INFO tc, TO_BLOC tb
+                 where s.orderid = tti.orderid and tti.carid = tc.id(+) and tc.blocid = tb.id(+)
+                    <isNotEmpty prepend="and" property="carnumber">
+					    tc.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="month">
+					    to_char(s.createtime, 'yyyy-mm') =#month#
+					</isNotEmpty>
+	</select>
+	
+	
+	
+	<!-- 获取评价统计详情-->
+	<select id="getEvaluateCountDetails" parameterClass="evaluateCount"  resultClass="cusEvaluation" >
+		select 
+             s.id,
+             s.orderid,
+             s.slevel,
+             s.evalevel,
+             s.content,
+             di.id did,
+             ti.username dname,
+             ti.phone dphone,
+             ci.id cid,
+             ci.cname,
+             ci.phone cphone,
+             ti.saddress,
+             ti.eaddress,
+             to_char(s.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+        from TO_CUSTOMER_EVALUATION s, TO_TRANSACTION_INFO ti, TO_CUSTOMER_INFO ci, TO_CAR_DRIVER_INFO di, TO_CAR_INFO tc
+       where s.orderid = ti.orderid(+) and ti.cid = ci.id(+) and ti.drivercode = di.drivercode(+) and ti.carid = tc.id(+)
+        <dynamic>
+            <isNotEmpty prepend="and" property="carnumber">
+					  tc.carnumber = #carnumber#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="blocid">
+					   tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="evalevel">
+					  s.evalevel = #evalevel#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="month">
+					    to_char(s.createtime, 'yyyy-mm') = #month#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="day">
+					    to_char(s.createtime, 'yyyy-mm-dd') = #day#
+				</isNotEmpty>
+		</dynamic>
+ 	   order by s.createtime desc
+	</select>
+	
+	<!-- 获取评价统计详情总条数-->
+	<select id="getEvaluateCountDetailsCount" parameterClass="evaluateCount"  resultClass="int" >
+		select 
+             count(s.id)
+        from TO_CUSTOMER_EVALUATION s, TO_TRANSACTION_INFO ti, TO_CUSTOMER_INFO ci, TO_CAR_DRIVER_INFO di, TO_CAR_INFO tc
+       where s.orderid = ti.orderid(+) and ti.cid = ci.id(+) and ti.drivercode = di.drivercode(+) and ti.carid = tc.id(+)
+        <dynamic>
+            <isNotEmpty prepend="and" property="carnumber">
+					  tc.carnumber = #carnumber#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="blocid">
+					   tc.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="evalevel">
+					  s.evalevel = #evalevel#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="month">
+					    to_char(s.createtime, 'yyyy-mm') = #month#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="day">
+					    to_char(s.createtime, 'yyyy-mm-dd') = #day#
+				</isNotEmpty>
+		</dynamic>
+	</select>
+	
+    
+</sqlMap>
+
+
+

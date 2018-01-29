@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-cityInfoSQL">
+
+	<typeAlias alias="cityInfo" type="com.careye.common.domain.CityInfo" />
+	<typeAlias alias="cityInfoEntry" type="com.careye.common.domain.CityInfoEntry" />
+
+	<!-- 得到地区列表 -->
+	<select id="getCityList" parameterClass="cityInfo" resultClass="cityInfo">
+		<![CDATA[
+			SELECT AREAID as areaid,PARENTID as parentid,SZCODE as szcode, CNNAME as cnname from TB_CITY_INFO
+			where ISDELETE=0
+		]]>
+	<dynamic prepend="">
+		<isNotEmpty prepend="and" property="id">
+			ID=#id#
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="clevel">
+			clevel=#clevel#
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="parentid">
+			parentid=#parentid#
+		</isNotEmpty>
+	</dynamic>
+	</select>
+	
+	<!-- 读取地区列表 -->
+	<select id="getCityListForMemCache" parameterClass="HashMap" resultClass="cityInfoEntry">
+					select
+			       SZCODE szcode,
+			       (select SZCODE from tb_city_info ci where ci.areaid = c.parentid) parentszcode,
+			       CNNAME cnname
+			  from TB_CITY_INFO c
+			 where ISDELETE = 0 and CLEVEL=#clevel#
+			 order by areaid
+	</select>
+	
+	<select id="getSZCODE" parameterClass="cityInfo" resultClass="String">
+		<![CDATA[
+			SELECT szcode from TB_CITY_INFO
+		]]>
+		<dynamic prepend="where">
+		<isNotEmpty prepend="and" property="areaid">
+			areaid=#areaid#
+		</isNotEmpty>
+	</dynamic>
+	</select>
+	
+	<!-- 通过行政编码得到区域信息 -->
+	<select id="getCityInfosBySZCODE" parameterClass="List" resultClass="cityInfo">
+		<![CDATA[
+			SELECT areaid, parentid,cnname from TB_CITY_INFO where szcode in 
+		]]>
+		<iterate open="(" close=")" conjunction="," property="">
+			#szcodes[]#
+		</iterate>
+	</select>
+	
+	<insert id="addCityInfo" parameterClass="cityInfo">
+		insert into TB_CITY_INFO
+	      (
+	       AREAID,
+	       PARENTID,
+	       "CLEVEL",
+	       BMCODE,
+	       SZCODE,
+	       CNNAME,
+	       ENNAME,
+	       STENNAME,
+	       STCNNAME,
+	       ISDELETE,
+	       CREATETIME,
+	       UPDATETIME)
+	    values
+	      (
+	       #areaid#,
+	       #parentid#,
+	       #clevel#,
+	       #bmcode#,
+	       #szcode#,
+	       #cnname#,
+	       #enname#,
+	       #stenname#,
+	       #stcnname#,
+	       #isdelete#,
+	       #createtime#,
+	       #updatetime#)
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TB_CITY_INFO_ID_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	<!-- 根据城市名称获取行政区编码 -->
+	<select id="getCityCode" parameterClass="String" resultClass="String">
+        <![CDATA[ 
+         select szcode
+		  from (select t.szcode from tb_city_info t where t.cnname like '%'||#cityname#||'%')
+		 where rownum <2
+		]]> 
+	</select>
+	
+	<!-- 根据行政区编码获取行政区名 -->
+	<select id="getCnname" parameterClass="String" resultClass="String">
+        <![CDATA[ 
+         select cnname from tb_city_info where szcode = #code#
+		]]> 
+	</select>
+	
+	<!-- 根据城市名称获取城市信息 -->
+	<select id="getCityInfo" parameterClass="String" resultClass="cityInfo">
+        <![CDATA[ 
+         select *
+	      from (select t.areaid,t.cnname,t.szcode from tb_city_info t where t.cnname like '%'||#cityname#||'%')
+	     where rownum <2
+		]]> 
+	</select>
+	
+	<!-- 根据省份城市名称获取市级城市信息 -->
+	<select id="getProvinceCityList" parameterClass="String" resultClass="cityInfo">
+        <![CDATA[ 
+	         select c.cnname from tb_city_info t,tb_city_info c  where c.parentid = t.areaid and t.cnname like '%'||#pname#||'%' and c.clevel =2
+		]]> 
+	</select>	
+	<!-- 根据上级编码获取下级编码和名称 -->
+	<select id="findMapByParentCode" parameterClass="long" resultClass="HashMap">
+        select szcode,cnname from tb_city_info where parentid in (select areaid from tb_city_info t where szcode=#pcode#)
+	</select>
+	<!-- 根据下级编码获取上级编码和名称 -->
+	<select id="findMapByChildCode" parameterClass="long" resultClass="HashMap">
+        select szcode,cnname from tb_city_info where areaid=(select parentid from tb_city_info t where szcode=#pcode#)
+	</select>
+</sqlMap>

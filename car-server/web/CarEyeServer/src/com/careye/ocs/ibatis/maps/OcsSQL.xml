@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-ocsSQL">
+
+	<typeAlias alias="orderInfo" type="com.careye.ocs.domain.OrderInfo" />
+
+	<!--根据订单号更新微信订单状态 -->
+	<update id="updateOrderStatus" parameterClass="orderInfo">
+		update WX_TRANSPORTATION_RECORD 
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="orderstatus">
+			    orderstatus = #orderstatus#
+			</isNotEmpty>
+		</dynamic>
+		where orderid=#orderid# 
+	</update>
+   
+   <!--根据订单号更新APP订单状态 -->
+	<update id="updateAppOrderStatus" parameterClass="orderInfo">
+		update APP_TRANSPORTATION_RECORD 
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="orderstatus">
+			    orderstatus = #orderstatus#
+			</isNotEmpty>
+		</dynamic>
+		where orderid=#orderid# 
+	</update>
+	
+</sqlMap>
+
+
+
+

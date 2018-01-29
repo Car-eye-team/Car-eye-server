@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-clockQL">
+
+	<typeAlias alias="clockInfo" type="com.careye.car.domain.ClockInfo" />
+     
+	<!-- 查询考勤信息列表-->
+	<select id="getClockInfoList" resultClass="clockInfo" parameterClass="clockInfo">
+        select t.id,
+               ci.blocid,
+               r.bloc_name blocname,
+               ci.carnumber,
+               ci.terminal,
+               t.carid,
+               t.type,
+               t.count,
+               t.result,
+               t.mcs,
+               t.cardnum,
+               t.totalnumber,
+               t.vehicletrips,
+               t.companycode,
+               t.drivercode,
+               t.vehicleid,
+               to_char(t.signintime,'yyyy-mm-dd hh24:mi:ss') signintime,
+               t.driverid,
+               to_char(t.stime,'yyyy-mm-dd hh24:mi:ss') stime,
+               to_char(t.etime,'yyyy-mm-dd hh24:mi:ss') etime,
+               t.dbmileage,
+               t.dbyymileage,
+               t.jstmie,
+               t.totalamount,
+               t.cardamount,
+               t.bjmileage,
+               t.totalmileage,
+               t.totalyymileage,
+               t.price,
+               t.totalwaittime,
+               t.sbblng,
+               t.sbblat,
+               t.sbbaddress,
+               t.xbblng,
+               t.xbblat,
+               t.xbbaddress,
+               to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+          from TO_CLOCK_INFO t,TO_BLOC r,to_car_info ci
+          where t.carid = ci.id(+) and  ci.blocid=r.id(+)
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+		   	    </isNotNull>
+		   	    <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+					<isNotEmpty prepend="and" property="id">
+					 		t.id=#id#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carid in (select id from to_car_info where carnumber  like '%'||#carnumber#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.carid in (select id from to_car_info where "terminal"  like '%'||#"terminal"#||'%')
+					</isNotEmpty>
+					<isNotEmpty property="startstime" prepend="and">
+					<![CDATA[ 
+						t.stime >= to_date(#startstime#, 'yyyy-mm-dd hh24:mi:ss')  
+						]]>
+					</isNotEmpty>
+					<isNotEmpty property="startetime" prepend="and">
+						<![CDATA[ 
+						t.stime <= to_date(#startetime#, 'yyyy-mm-dd hh24:mi:ss')  
+						]]>
+					</isNotEmpty>
+					<isNotEmpty property="endstime" prepend="and">
+					<![CDATA[ 
+						t.etime >= to_date(#endstime#, 'yyyy-mm-dd hh24:mi:ss')  
+						]]>
+					</isNotEmpty>
+					<isNotEmpty property="endetime" prepend="and">
+						<![CDATA[ 
+						t.etime <= to_date(#endetime#, 'yyyy-mm-dd hh24:mi:ss')  
+						]]>
+					</isNotEmpty>
+		        </dynamic>
+		        order by stime desc
+     </select>
+     
+     <!-- 查询考勤信息列表总数-->
+	<select id="getClockInfoListCount" resultClass="int" parameterClass="clockInfo">
+        select count(t.id)
+          from TO_CLOCK_INFO t,TO_BLOC r,to_car_info ci
+          where t.carid = ci.id(+) and  ci.blocid=r.id(+)
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+		   	    </isNotNull>
+		   	    <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+					<isNotEmpty prepend="and" property="id">
+					 		t.id=#id#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carid in (select id from to_car_info where carnumber  like '%'||#drivername#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.carid in (select id from to_car_info where "terminal"  like '%'||#"terminal"#||'%')
+					</isNotEmpty>
+					<isNotEmpty property="startstime" prepend="and">
+					<![CDATA[ 
+						t.stime >= to_date(#startstime#, 'yyyy-mm-dd hh24:mi:ss')  
+						]]>
+					</isNotEmpty>
+					<isNotEmpty property="startetime" prepend="and">
+						<![CDATA[ 
+						t.stime <= to_date(#startetime#, 'yyyy-mm-dd hh24:mi:ss')  
+						]]>
+					</isNotEmpty>
+					<isNotEmpty property="endstime" prepend="and">
+					<![CDATA[ 
+						t.etime >= to_date(#endstime#, 'yyyy-mm-dd hh24:mi:ss')  
+						]]>
+					</isNotEmpty>
+					<isNotEmpty property="endetime" prepend="and">
+						<![CDATA[ 
+						t.etime <= to_date(#endetime#, 'yyyy-mm-dd hh24:mi:ss')  
+						]]>
+					</isNotEmpty>
+		        </dynamic>
+     </select>
+	
+	
+</sqlMap>

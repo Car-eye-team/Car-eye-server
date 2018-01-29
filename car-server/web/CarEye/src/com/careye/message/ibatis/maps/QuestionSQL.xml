@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-questionSQL">
+
+	<typeAlias alias="questionInfo" type="com.careye.message.domain.QuestionInfo" />
+	<typeAlias alias="answerInfo" type="com.careye.message.domain.AnswerInfo" />
+	<typeAlias alias="questionSendRecord" type="com.careye.message.domain.QuestionSendRecord" />
+	
+	<!-- id查询问题 -->
+	<select id="selectQuestionInfoById" resultClass="questionInfo" parameterClass="int">
+           select * from to_question_info t  where t.id = #id#
+     </select>
+	
+	<!-- 通过问题ID查询 问题答案表   -->
+	<select id="selectAnswerInfoByQid" resultClass="answerInfo" parameterClass="int">
+            select t.id as answerid,
+			       t.blocid,
+			       t.userid,
+			       t.qid,
+			       t.answer,
+				   to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+			       t.flag
+			  from to_question_answer_info t 
+			  where t.qid = #qid# and t.flag=0
+		  order by t.id desc
+     </select>
+	<!-- 通过问题ID查询 问题答案表  临时数据 -->
+	<select id="selectAnswerInfoByQidLin" resultClass="answerInfo" parameterClass="int">
+            select t.id as answerid,
+			       t.blocid,
+			       t.userid,
+			       t.qid,
+			       t.answer,
+				   to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+			       t.flag
+			  from to_question_answer_info t 
+			  where flag=1 and
+					 		t.qid = #qid#
+		  order by t.id desc
+     </select>
+     
+	<!-- 通过问题ID查询 问题答案表  临时数据 -->
+	<select id="selectAnswerInfoLin" resultClass="answerInfo">
+            select t.id as answerid,
+			       t.blocid,
+			       t.userid,
+			       t.qid,
+			       t.answer,
+				   to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+			       t.flag
+			  from to_question_answer_info t 
+			  where flag=1 
+		  order by t.id desc
+     </select>
+     
+	<!-- 查询问题答案文本-->
+	<select id="selectAnswerContent" resultClass="string" parameterClass="int">
+            select  t.answer
+			  from to_question_answer_info t 
+			  where t.id = #aid# 
+     </select>
+	<!-- 查询发送记录列表数量-->
+	<select id="selectQuestionSendRecord" resultClass="int" parameterClass="questionSendRecord">
+               select count(*)
+				   from to_question_send_record       t,
+				        to_bloc r,
+				        to_bloc_user              e,
+				        to_question_info              d,
+				        to_question_answer_info       qai
+				  where t.blocid = r.id(+)
+				    and t.userid = e.id(+)
+				    and t.qid = d.id(+)
+				    and t.aid = qai.id(+)
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select blocid from  to_bloc_user where userid = #userid#) CONNECT BY PRIOR  id = parentid )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+     </select>
+     
+	
+	<!-- 查询发送记录列表-->
+	<select id="selectCheckQuestionSendRecord" resultClass="questionSendRecord" parameterClass="questionSendRecord">
+                 select t.id,
+				        t.blocid,
+				        r.bloc_name blocname,
+				        t.userid,
+				        e.user_name username,
+				        t.qid,
+				        d.content as question,
+				        t.aid,
+				        qai.answer,
+				        t.emergency,
+				        t.tts,
+				        t.adv,
+				        t.content,
+				        t.carnumber,
+				        t.seq,
+				        t.result,
+				        t.data,
+				        to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				   from to_question_send_record       t,
+				        to_bloc r,
+				        to_bloc_user              e,
+				        to_question_info              d,
+				        to_question_answer_info       qai
+				  where t.blocid = r.id(+)
+				    and t.userid = e.id(+)
+				    and t.qid = d.id(+)
+				    and t.aid = qai.id(+)
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+	
+	<!-- 查询问题数量 -->
+	<select id="selectQuestionInfo" resultClass="int" parameterClass="questionInfo">
+       
+           select count(*) from to_question_info t 
+				 where 1=1
+           <dynamic>
+           		 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+		  </dynamic>
+     </select>
+     
+	<!-- 查询问题列表-->
+	<select id="selectCheckQuestionInfo" resultClass="questionInfo" parameterClass="questionInfo">
+                 select t.id,
+				        t.blocid,
+				        t.userid,
+				        t.content,
+				        t.emergency,
+				        t.tts,
+				        t.adv,
+				        to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				   from to_question_info t
+				  where 1=1
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     	<!-- 查询问题列表BYID-->
+	<select id="selectCheckQuestionInfoById" resultClass="questionInfo" parameterClass="int">
+                 select t.id,
+				        t.blocid,
+				        t.userid,
+				        t.content,
+				        t.emergency,
+				        t.tts,
+				        t.adv,
+				        to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				   from to_question_info t
+				  where t.id=#id#
+		  order by t.id desc
+				
+     </select>
+     
+     <!--   删除问题 -->
+     <delete id="deleteQuestionInfo">
+        <![CDATA[
+		    delete from  to_question_info  WHERE id = #id#
+		]]>	
+     </delete>
+     
+      <!--   删除问题答案 -->
+     <delete id="deleteAnswerInfo" parameterClass="Integer">
+        <![CDATA[
+		    delete from  to_question_answer_info  WHERE qid = #qid#
+		]]>	
+     </delete>
+     <!--   删除临时问题答案 -->
+     <delete id="deleteAnswerInfoLin">
+		    delete from  to_question_answer_info  WHERE 1=1  and
+		        flag=1
+     </delete>
+       <!-- 删除真实问题答案 -->
+     <delete id="deleteAnswerInfoLinByFlag" parameterClass="int">
+		    delete from  to_question_answer_info  WHERE qid=#qid#  and
+		        flag=0
+     </delete>
+     
+     <!--   删除临时问题答案 -->
+      <delete id="deleteAnswerInfoLinById" parameterClass="int">
+        <![CDATA[
+		    delete from  to_question_answer_info  WHERE id=#id# and flag=1
+		]]>	
+     </delete>
+     
+	
+     
+      <!-- 增加问题 -->
+     <insert id="insertQuestionInfo" parameterClass="questionInfo">
+     <![CDATA[ 
+        insert into to_question_info(
+	        blocid,
+		    userid,
+		    emergency,
+			tts,
+			adv,
+	        content,
+	        createtime
+        )values(
+	        #blocid#,
+	        #userid#,
+	        #emergency#,
+			#tts#,
+			#adv#,
+	        #content#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_QUESTION_INFO_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新问题 -->
+     <update id="updateQuestionInfo" parameterClass="questionInfo">
+         update to_question_info
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="blocid" >
+		        blocid = #blocid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        userid = #userid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="emergency" >
+		        emergency = #emergency#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="tts" >
+		        tts = #tts#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="adv" >
+		        adv = #adv#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="content" >
+		        content = #content#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+	
+	
+	  <!-- 增加问题答案 -->
+     <insert id="insertAnswerInfo" parameterClass="answerInfo">
+     <![CDATA[ 
+        insert into to_question_answer_info(
+	        blocid,
+		    userid,
+		    qid,
+		    flag,
+		    answer,
+	        createtime
+        )values(
+	        #blocid#,
+	        #userid#,
+	        #qid#,
+	        #flag#,
+	        #answer#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_QUESTION_ANSWER_INFO_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新问题答案 -->
+     <update id="updateAnswerInfo" parameterClass="answerInfo">
+         update to_question_answer_info
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="blocid" >
+		        blocid = #blocid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        userid = #userid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="qid" >
+		        qid = #qid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="answer" >
+		        answer = #answer#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="flag" >
+		        flag = #flag#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+	
+	 <!-- 更新问题答案 -->
+     <update id="updateAnswerInfoByQid" parameterClass="int">
+         update to_question_answer_info
+         set flag=0 ,qid=#qid#
+		      WHERE flag = 1 
+     </update>
+		
+	
+	  <!-- 增加问题发送记录 -->
+     <insert id="insertQuestionSendRecord" parameterClass="questionSendRecord">
+     <![CDATA[ 
+        insert into to_question_send_record(
+	        blocid,
+		    userid,
+		    qid,
+		    aid,
+		    content,
+		    carnumber,
+		    emergency,
+			tts,
+			adv,
+	        seq,
+	        result,
+	        data,
+	        createtime
+        )values(
+	        #blocid#,
+	        #userid#,
+		    #qid#,
+		    #aid#,
+	        #content#,
+	        #carnumber#,
+	        #emergency#,
+			#tts#,
+			#adv#,
+	        #seq#,
+	        #result#,
+	        #data#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_QUESTION_SEND_RECORD_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新问题发送记录-->
+     <update id="updateQuestionSendRecord" parameterClass="questionSendRecord">
+         update to_question_send_record
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="blocid" >
+		        blocid = #blocid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        userid = #userid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="qid" >
+		        qid = #qid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="aid" >
+		        aid = #aid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="content" >
+		        content = #content#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="carnumber" >
+		        carnumber = #carnumber#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="emergency" >
+		        emergency = #emergency#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="tts" >
+		        tts = #tts#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="adv" >
+		        adv = #adv#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="seq" >
+		        seq = #seq#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="result" >
+		        result = #result#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="data" >
+		        data = #data#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+     
+     
+    <!-- 根据流水号更新问题处理结果 -->
+	<update id="updateQuestionResult" parameterClass="questionSendRecord">
+		<![CDATA[
+			UPDATE to_question_send_record SET result = #result#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber#
+	</update>
+	
+	<!-- 提问应答 -->
+	<update id="updateQuestionAnswer" parameterClass="questionSendRecord">
+		<![CDATA[
+			UPDATE to_question_send_record SET aid = #aid#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber#
+	</update>
+	
+</sqlMap>

@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-poiInfoSQL">
+
+	<typeAlias alias="poiInfo" type="com.careye.car.domain.PoiInfo" />
+	<typeAlias alias="terminalPositionInfo" type="com.careye.common.domain.TerminalPositionInfo" />
+	<typeAlias alias="obdParamSetTemp" type="com.careye.sysset.domain.ObdParamSetTemp" />
+	
+
+
+	 <!-- 删除内容 -->
+     <delete id="deleteRecord">
+         delete from TO_POI_INFO_SEND_RECORD where id=#id#
+     </delete>
+     <!--增加发送记录 -->
+     <insert id="insertPoiInfo" parameterClass="poiInfo">
+     <![CDATA[ 
+        insert into TO_POI_INFO_SEND_RECORD(
+			blocid,
+			userid,
+			lng,
+			lat,
+			poiname,
+			carnumber,
+			seq,
+			result,
+			createtime,
+			datapacket
+        )values(
+	        #blocid#,
+			#userid#,
+			#lng#,
+			#lat#,
+			#poiname#,
+			#carnumber#,
+			#seq#,
+			#result#,
+			to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+			#datapacket#
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_POI_INFO_SEND_RECORD_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+    <!--发送记录列表总数  -->  
+	<select id="queryPoiInfoRecordListCount" resultClass="int" parameterClass="poiInfo">
+            select count(*)
+                        from  TO_POI_INFO_SEND_RECORD  vp,to_car_info ci,to_bloc b
+                        where 1=1
+                        and vp.carnumber=ci.carnumber(+)
+                        and ci.blocid=b.id(+)
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  ci.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+				<isNotEmpty prepend="and" property="stime">
+				 	<![CDATA[
+				 		vp.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				 	]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="etime">
+				 	<![CDATA[
+				 		vp.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				 	 ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carnumber">
+				 		vp.carnumber like '%'||#carnumber#||'%'
+				</isNotEmpty>
+		        </dynamic>
+     </select>
+     
+    <!--发送记录列表 -->  
+	<select id="queryPoiInfoRecordList" resultClass="poiInfo" parameterClass="poiInfo">
+               select   
+                        vp.id,
+                        ci.terminal, 
+                        vp.carnumber, 
+                        vp.blocid,
+						vp.userid,
+						vp.lng,
+						vp.lat,
+						vp.poiname,
+						vp.seq,
+						vp.result,
+						vp.datapacket,
+                        b.bloc_name blocname,
+                        to_char(vp.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+                        from TO_POI_INFO_SEND_RECORD  vp,to_car_info ci,to_bloc b
+                        where 1=1
+                        and vp.carnumber=ci.carnumber(+)
+                        and ci.blocid=b.id(+)
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  ci.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select id from  to_bloc where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+				<isNotEmpty prepend="and" property="stime">
+				 	<![CDATA[
+				 		vp.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				 	]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="etime">
+				 	<![CDATA[
+				 		vp.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				 	 ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carnumber">
+				 		vp.carnumber like '%'||#carnumber#||'%'
+				</isNotEmpty>
+		        </dynamic>
+		  order by vp.createtime desc
+     </select>
+	
+	
+	 <!--根据流水号更新处理结果 -->
+	<update id="updatePoiInfoResult" parameterClass="poiInfo">
+		<![CDATA[
+			UPDATE TO_POI_INFO_SEND_RECORD SET result = #result#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber#
+		
+	</update>
+	
+	
+	<!-- ======================根据距离经纬度条件查询车辆信息===================== -->
+	
+	
+	<!-- 根据距离经纬度条件查询车辆信息数量 -->
+	<select id="queryCarInfoListCount" resultClass="int" parameterClass="terminalPositionInfo">
+           select count(*)
+			    from TO_CAR_POSITION_INFO t, TO_CAR_INFO c, TO_CAR_STATE cs
+			   where t.carnumber = c.carnumber
+			     and c.id = cs.carid
+			     and c.flag = 1
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+					 c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	   		</isNotNull>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.terminal like '%'||#terminal#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="" property="lng">
+					 		<isNotEmpty prepend="" property="lat">
+					 			<isNotEmpty prepend="and" property="mileage">
+					 				<![CDATA[GETDISTANCE(t.blat,t.blng,#lat#,#lng#) <= #mileage#]]>	
+					 			</isNotEmpty>
+							</isNotEmpty>
+					</isNotEmpty>
+		        </dynamic>
+     </select>
+     
+	<!-- 根据距离经纬度条件查询车辆信息-->
+	<select id="queryCarInfoList" resultClass="terminalPositionInfo" parameterClass="terminalPositionInfo">
+			  select c.id carid,
+			         c.phone,
+			         (case cs.carstatus
+			           WHEN 7 THEN
+			            '在线'
+			           WHEN 1 THEN
+			            '长时间离线'
+			           WHEN 2 THEN
+			            '离线'
+			           WHEN 3 THEN
+			            '熄火'
+			           WHEN 4 THEN
+			            '停车'
+			           WHEN 5 THEN
+			            '行驶'
+			           WHEN 6 THEN
+			            '报警'
+			           WHEN 8 THEN
+			            '未定位'
+			           ELSE
+			            ''
+			         END) carstatus,
+			         t.carnumber,
+			         t.speed,
+			         t.direction,
+			         t.altitude,
+			         t.blng,
+			         t.blat,
+			         (case t.gpsflag
+			           WHEN 0 THEN
+			            '无效'
+			           WHEN 1 THEN
+			            '有效'
+			           WHEN 2 THEN
+			            '上次信号有效'
+			           ELSE
+			            ''
+			         END) gpsflagtext,
+			         t.address,
+			         t.mileage,
+			         t.terminal,
+			         t.acc,
+			         to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+			    from TO_CAR_POSITION_INFO t, TO_CAR_INFO c, TO_CAR_STATE cs
+			   where t.carnumber = c.carnumber
+			     and c.id = cs.carid
+			     and c.flag = 1
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+					 c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	   		</isNotNull>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.terminal like '%'||#terminal#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="" property="lng">
+					 		<isNotEmpty prepend="" property="lat">
+					 			<isNotEmpty prepend="and" property="mileage">
+					 				<![CDATA[GETDISTANCE(t.blat,t.blng,#lat#,#lng#) <= #mileage#]]>	
+					 			</isNotEmpty>
+							</isNotEmpty>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="kzstate">
+					 		cs.kzstate = #kzstate#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  order by c.id desc
+     </select>
+	
+	<!-- 参数设置车辆列表-->
+	<select id="queryDsobdParamSetList" resultClass="obdParamSetTemp" parameterClass="poiInfo">
+                select  t.id as carid, t.terminal,t.carnumber, t.blocid, e.bloc_name blocname
+		           from TO_CAR_INFO t,TO_BLOC e 
+				 where t.blocid = e.id(+) 
+				 and t.devicetype in (select typeid from TO_CAR_DEVICE_TYPE where usertype = #usertype#)
+				<dynamic>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					 	t.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.terminal like '%'||#terminal#||'%'
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     <!-- 参数设置车辆列表数量 -->
+	<select id="queryDsobdParamSetListCount" resultClass="int" parameterClass="poiInfo">
+       
+           select count(*)  
+            from TO_CAR_INFO t,TO_BLOC e 
+				 where t.blocid = e.id(+) 
+				 and t.devicetype in (select typeid from TO_CAR_DEVICE_TYPE where usertype = #usertype#)
+				<dynamic>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					 	t.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.terminal like '%'||#terminal#||'%'
+					</isNotEmpty>
+		        </dynamic>
+     </select>
+	
+</sqlMap>

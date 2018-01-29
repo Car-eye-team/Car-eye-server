@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sqlMap namespace="oracle-commonSQL">
+
+    <typeAlias alias="phoneAuthCode" type="com.careye.api.domain.PhoneAuthCode" />
+    
+     
+     <!-- 查询手机号数量 -->
+	<select id="getPhoneCount" parameterClass="String" resultClass="Integer" >
+		 select count(*) from PHONE_AUTHCODE t where t.phone = #phone#
+	</select>
+	
+	<!-- 插入手机验证码 -->
+	<insert id="addPhoneAuthCode" parameterClass="phoneAuthCode">
+		insert into PHONE_AUTHCODE
+		(
+			phone,
+			content,
+			authcode,
+			createtime
+	    )
+		values
+		(
+			#phone#,
+			#content#,
+			#authcode#,
+			to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		)
+
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT PHONE_AUTHCODE_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+
+	</insert>
+	<!-- 更新手机验证码 -->
+	<update id="updatePhoneAuthCode" parameterClass="phoneAuthCode">
+		update PHONE_AUTHCODE set
+		content=#content#,
+		authcode=#authcode#,
+		createtime=to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		where PHONE=#phone# 
+	</update>
+	
+	<!-- 根据手机号得到验证码 -->
+	<select id="queryAuthCodeByPhone" parameterClass="String" resultClass="phoneAuthCode" >
+		 select 
+			 phone,
+			 content,
+			 authcode,
+		     to_char(createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		 from PHONE_AUTHCODE t where t.phone = #phone#
+	</select>
+     
+		<!-- 根据typeid得到内容 -->
+	 <select id="getContentByType" parameterClass="int" resultClass="String" >
+	 select  content  from  to_company_info t1,to_company_type t2
+   	 where  t1.typeid= t2.id and t2.typeid = #typeid#
+	</select>
+	
+</sqlMap>
+
+

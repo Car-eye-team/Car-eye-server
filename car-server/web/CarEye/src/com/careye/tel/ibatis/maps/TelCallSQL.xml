@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-telCallQL">
+
+	<typeAlias alias="telCall" type="com.careye.tel.domain.TelCall" />
+	<typeAlias alias="telCallSend" type="com.careye.tel.domain.TelCallSend" />
+	
+	<!-- id查询电话回拨消息 -->
+	<select id="selectTelCallById" resultClass="telCall" parameterClass="int">
+           select * from tel_callback_message t  where t.id = #id#
+     </select>
+
+   <!-- 电话号码是否已存在-->
+	<select id="queryTelIsExist" resultClass="Integer" parameterClass="telCall">
+		select count(*) from tel_callback_message  where tel=#tel#
+		  <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+	
+     
+     <!-- 查询发送记录列表数量 -->
+	<select id="selectTelCallTelCallSend" resultClass="int" parameterClass="telCallSend">
+           select count(*)  from tel_callback_msg_send_record t where 1=1
+           <dynamic>
+           		<isNotNull prepend="and" property="userid" >
+					   t.deptid in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   		    </isNotNull>
+					<isNotEmpty prepend="and" property="tel">
+					 		t.tel like '%'||#tel#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="flag">
+					 		t.flag = #flag#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		  </dynamic>
+        
+     </select>
+     
+     <!-- 查询发送记录列表-->
+	<select id="selectCheckTelCallTelCallSend" resultClass="telCallSend" parameterClass="telCallSend">
+                select t.id,
+				       t.deptid,
+				       r.bloc_name deptname,
+				       t.userid,
+				       e.user_name username,
+				       t.tel,
+				       t.msgid,
+				       t.carnumber,
+				       t.calltype,
+				       t.seq,
+				       t.result,
+				       t.data,
+				       t.flag,
+				       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				  from tel_callback_msg_send_record t ,to_bloc r,to_bloc_user e
+				 where t.deptid=r.id and t.userid=e.id
+
+				<dynamic>
+				<isNotNull prepend="and" property="userid" >
+					   t.deptid in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   		    </isNotNull>
+					<isNotEmpty prepend="and" property="tel">
+					 		t.tel like '%'||#tel#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="flag">
+					 		t.flag = #flag#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     	
+	<!-- 查询电话回拨消息数量 -->
+	<select id="selectTelCall" resultClass="int" parameterClass="telCall">
+       
+           select count(*) from tel_callback_message t where 1=1
+           <dynamic>
+           		 <isNotNull prepend="and" property="userid" >
+					  t.deptid in (SELECT id FROM to_bloc  START WITH id = 
+						(select deptid from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parentid )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="tel">
+					 		t.tel like '%'||#tel#||'%'
+					</isNotEmpty>
+		  </dynamic>
+        
+     </select>
+     
+	<!-- 查询电话回拨消息列表-->
+	<select id="selectCheckTelCall" resultClass="telCall" parameterClass="telCall">
+                 select t.id,
+				        t.deptid,
+				        t.userid,
+				        t.calltype,
+				        t.remark,
+				        t.tel,
+				        t.flag,
+				        to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				   from tel_callback_message t
+                   where 1=1
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					   t.deptid in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   		    </isNotNull>
+					<isNotEmpty prepend="and" property="tel">
+					 		t.tel like '%'||#tel#||'%'
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     
+     <!--   删除电话回拨消息 -->
+     <delete id="deleteTelCall">
+        <![CDATA[
+		    delete from  tel_callback_message  WHERE id = #id#
+		]]>	
+     </delete>
+     
+     
+      <!-- 增加电话回拨消息 -->
+     <insert id="insertTelCall" parameterClass="telCall">
+     <![CDATA[ 
+        insert into tel_callback_message(
+	        deptid,
+		    userid,
+		    calltype,
+			remark,
+	        tel,
+			flag,
+	        createtime
+        )values(
+	        #deptid#,
+	        #userid#,
+	        #calltype#,
+			#remark#,
+	        #tel#,
+	        #flag#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TEL_CALLBACK_MESSAGE_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新电话回拨消息 -->
+     <update id="updateTelCall" parameterClass="telCall">
+         update tel_callback_message
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="deptid" >
+		        deptid = #deptid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        userid = #userid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="calltype" >
+		        calltype = #calltype#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="remark" >
+		        remark = #remark#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="tel" >
+		        tel = #tel#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="flag" >
+		        flag = #flag#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+	
+	
+	  <!-- 增加电话回拨消息发送记录 -->
+     <insert id="insertTelCallTelCallSend" parameterClass="telCallSend">
+     <![CDATA[ 
+        insert into tel_callback_msg_send_record(
+	        deptid,
+		    userid,
+		    calltype,
+			msgid,
+	        tel,
+	        carnumber,
+	        seq,
+	        result,
+	        data,
+	        flag,
+	        createtime
+        )values(
+	        #deptid#,
+	        #userid#,
+	        #calltype#,
+			#msgid#,
+	        #tel#,
+	        #carnumber#,
+	        #seq#,
+	        #result#,
+	        #data#,
+	        #flag#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TEL_SEND_RECORD_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+     
+     <!-- 根据流水号修改电话回拨消息发送结果 -->
+	<update id="updateTelCallResule" parameterClass="telCallSend">
+		<![CDATA[
+			UPDATE tel_callback_msg_send_record SET result = #result#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber#
+		
+	</update>
+	
+	
+</sqlMap>

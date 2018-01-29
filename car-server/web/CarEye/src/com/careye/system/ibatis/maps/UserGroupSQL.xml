@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-userGroupSQL">
+
+	<typeAlias alias="blocGroup" type="com.careye.system.domain.BlocGroup" />
+	
+	<!-- 根据用户组得到部门机构 -->
+	<select id="quertDeptByUserGroupId" resultClass="Integer" parameterClass="Integer">
+		 select t.bloc_id blocid
+		  from TO_BLOC_GROUP t 
+		  where t.id = #usergroupid# 
+	</select>
+	
+	<select id="quertDeptByUsergroupname" resultClass="Integer" parameterClass="String">
+		 select t.bloc_id blocid
+		  from TO_BLOC_GROUP t 
+		  where t.BLOC_GROUP_NAME = #usergroupname# 
+	</select>
+	
+	<select id="quertUsergroupidByUsergroupname" resultClass="Integer" parameterClass="String">
+		select t.id
+		  from TO_BLOC_GROUP t 
+		  where t.BLOC_GROUP_NAME = #blocgroupname#
+	</select>
+	
+	<!-- 用户组下拉列表 -->
+	<select id="userGroupList" resultClass="blocGroup" parameterClass="blocGroup">
+		 select t.ID blocgroupid,
+		       t.BLOC_GROUP_NAME blocgroupname
+		  from TO_BLOC_GROUP t  WHERE 1=1
+		   <isNotNull prepend="and" property="userid" >
+					   t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   </isNotNull>
+		   <isNotNull prepend="AND" property="blocgroupname" >
+			  t.BLOC_GROUP_NAME like '%'||#blocgroupname#||'%'
+   		    </isNotNull>
+		  order by t.id desc 
+	</select>
+	
+	
+	<!-- 获取符合条件的用户组列表 -->
+	<select id="findPageUserGroupList" resultClass="blocGroup" parameterClass="blocGroup">
+		     select t.id,
+             t.BLOC_GROUP_NAME blocgroupname,
+             t.BLOC_GROUP_DESC blocgroupdesc,
+             t.user_id userid,
+             o.ID blocid,
+             o.BLOC_NAME blocname,
+             sa.login_name username,
+              to_char(t.create_time,'yyyy-mm-dd hh24:mi:ss') createtime
+        from TO_BLOC_GROUP t, TO_BLOC_USER sa,TO_BLOC o
+       where t.user_id = sa.id(+) and t.BLOC_ID = o.id(+)
+      <isNotEmpty prepend="and" property="blocgroupname">
+						 t.BLOC_GROUP_NAME like '%'||#blocgroupname#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    t.BLOC_ID in (SELECT t.id FROM TO_BLOC t START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					<isNotNull prepend="and" property="userid" >
+					   t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   		    </isNotNull>
+      order by t.id desc
+	</select>
+	
+	<!-- 获取符合条件的用户组总数 -->
+	<select id="findPageUserGroupListcount" resultClass="int" parameterClass="blocGroup">
+	
+		 select count(t.id)
+        from TO_BLOC_GROUP t, TO_BLOC_USER sa,TO_BLOC o
+       where t.user_id = sa.id(+) and t.BLOC_ID = o.id(+)
+      <isNotEmpty prepend="and" property="blocgroupname">
+						t.BLOC_GROUP_NAME like '%'||#blocgroupname#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    t.BLOC_ID in (SELECT t.id FROM TO_BLOC t START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					<isNotNull prepend="and" property="userid" >
+					   t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   		    </isNotNull>
+      order by t.id desc
+		   
+	</select>
+	
+	<!-- 删除用户组信息 -->
+	<delete id="deleteUserGroup" parameterClass="int">
+		<![CDATA[
+		    delete from  TO_BLOC_GROUP  WHERE id = #id#
+		]]>
+	</delete>
+	
+	<!-- 查看用户名是否存在 -->
+	<select id="userGroupNameIsExist" parameterClass="blocGroup" resultClass="int">
+		 select count(*) from TO_BLOC_GROUP t where t.BLOC_GROUP_NAME = rtrim(ltrim(#blocgroupname#))
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					t.id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 添加用户组-->
+	<insert id="addUserGroupInfo" parameterClass="blocGroup">
+		<![CDATA[ 
+			insert into TO_BLOC_GROUP
+			  (bloc_group_name,
+			   bloc_group_desc,
+			   user_id,
+			   create_time,
+			   bloc_id
+			   )
+			values
+			  (#blocgroupname#,
+			   #blocgroupdesc#,
+			   #userid#,
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+			   #blocid#
+			  )
+		]]>
+		
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_BLOC_GROUP_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 更新用户组信息 -->
+	<update id="updateUserGroupInfo" parameterClass="blocGroup">
+			UPDATE TO_BLOC_GROUP SET
+			 bloc_id=#blocid#,
+			 bloc_group_name=#blocgroupname#,
+			 bloc_group_desc=#blocgroupdesc#
+			WHERE id = #id#
+	</update>
+	
+	
+	<!-- 查询用户组下是否存在用户信息 -->
+	<select id="queryUserGroupUser" resultClass="int"  parameterClass="int">
+		select count(*) from TO_BLOC_USER t where t.BLOC_GROUP_ID = #id#
+	</select>
+	
+	
+	<!-- 删除用户组信息 -->
+	<delete id="deleteUserGroupAuth" parameterClass="int">
+		<![CDATA[
+		    delete from  TO_BLOC_AUTHORITY  WHERE BLOC_GROUP_ID = #usergroupid#
+		]]>
+	</delete>
+	
+	<select id="getUserGroupByName" resultClass="Integer"  parameterClass="String">
+		select t.id from TO_BLOC_GROUP t where t.bloc_group_name = #blocgroupname#
+	</select>
+	
+</sqlMap>

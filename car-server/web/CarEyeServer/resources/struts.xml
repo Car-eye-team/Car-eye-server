@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- <include file="struts-default.xml"/>  -->
+	<constant name="struts.enable.DynamicMethodInvocation" value="true" />
+	<constant name="struts.devMode" value="true" />
+	<constant name="struts.multipart.parser" value="jakarta"/>
+    <constant name="struts.multipart.maxSize" value="104857600"/>
+    <constant name="struts.multipart.saveDir" value="d:/saveTempPath" />
+    <constant name="struts.objectFactory.spring.autoWire" value="type" />
+	<constant name="struts.i18n.reload" value="true" />
+	<constant name="struts.custom.i18n.resources" value="global" /> 
+	<constant name="struts.configuration.xml.reload" value="true" />
+	
+	<!-- ***********************************************-->
+	<!-- 以下是子系统配置，在开发阶段可以只include自己负责的子系统-->
+	<!-- 开发阶段：    include需要的子系统-->
+	<!-- 集成测试阶段：include所有子系统-->
+	<!-- ***********************************************-->
+	<package name="qhtaxi" extends="struts-default" namespace="/">
+	
+		<interceptors>
+			<!-- 权限验证拦截器 -->
+			<interceptor name="annotationInterceptor"
+				class="com.careye.interceptor.AuthorityIterceptor" />
+			
+			<!-- 异常拦截 -->
+			<interceptor name="exceptionInterceptor"
+				class="com.careye.interceptor.ExceptionInterceptor" />	
+			
+			<!-- 拦截器 组,按顺序执行-->
+			<interceptor-stack name="mydefault">
+				<interceptor-ref name="defaultStack" />
+                <interceptor-ref name="annotationInterceptor" />
+                <interceptor-ref name="exceptionInterceptor" />
+			</interceptor-stack>
+		
+		</interceptors>
+	
+		<!-- 将拦截栈设为默认，将作用于整个包中的所有Action -->
+		<default-interceptor-ref name="mydefault"/>
+		
+		<!-- 全局结果映射 -->
+		<global-results>
+			<result name="404">/index.jsp</result>
+		</global-results>
+		
+	</package>
+	
+	
+	<package name="qhtaxijson" extends="json-default" namespace="/">
+	 	<interceptors>
+			<!-- 权限验证拦截器 -->
+			<interceptor name="annotationInterceptor"
+				class="com.careye.interceptor.AuthorityJSONIterceptor" />
+	
+			<!-- 异常拦截 -->
+			<interceptor name="exceptionInterceptor"
+				class="com.careye.interceptor.ExceptionInterceptor" />
+	
+			<!-- 拦截器 组,按顺序执行-->
+			<interceptor-stack name="mydefaultJson">
+				<interceptor-ref name="defaultStack" />
+				<interceptor-ref name="annotationInterceptor" />
+				<interceptor-ref name="exceptionInterceptor" />
+			</interceptor-stack>
+	
+		</interceptors>
+		<default-interceptor-ref name="mydefaultJson" />
+		<!-- 全局结果映射 -->
+		<global-results>
+			<result name="index">/index.jsp</result>
+			<result name="error" type="json">
+				<param name="includeProperties">jsondata.*</param>
+			</result>
+			<result name="login" type="json">
+				<param name="includeProperties">login</param>
+			</result>
+			<result name="input" type="json">
+				<param name="includeProperties">jsondata.*</param>
+			</result>
+		</global-results>
+	</package>
+
+	<!--子系统配置   
+    <include file="struts/struts-userLogin.xml"></include> -->
+
+  
+    
+</struts>
+
+
+

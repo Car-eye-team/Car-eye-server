@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-customerEvalitionSQL">
+
+	<typeAlias alias="customerEvaluation" type="com.careye.transaction.domain.CustomerEvaluation"/>
+	
+	
+    <!-- 获得客户评价信息列表-->
+	<select id="getCustomerEvaluationList" resultClass="customerEvaluation"
+		parameterClass="customerEvaluation">
+      select 
+             t.id,
+             t.orderid,
+             t.slevel,
+             t.evalevel,
+             t.content,
+             di.id did,
+             di.drivername dname,
+             di.phone dphone,
+             ti.username cname,
+             ti.phone cphone,
+             ti.saddress,
+             ti.eaddress,
+             to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+        from TO_CUSTOMER_EVALUATION t, TO_TRANSACTION_INFO ti, TO_CAR_DRIVER_INFO di
+       where t.orderid = ti.orderid(+) and ti.drivercode = di.drivercode(+)
+        <dynamic>
+            <isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="dname">
+				t.orderid in (select orderid from TO_TRANSACTION_INFO where drivercode in 
+					(select drivercode from TO_CAR_DRIVER_INFO where drivername like '%'||#dname#||'%' ) )
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="cname">
+				ti.username like '%'||#cname#||'%' 
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="slevel">
+				t.slevel = #slevel# 
+			</isNotEmpty>
+		</dynamic>
+ 	   order by t.createtime desc
+	</select>
+
+	<!--  获得司机评价客户信息列表总条数-->
+	<select id="getCustomerEvaluationListCount" resultClass="int"
+		parameterClass="customerEvaluation">
+      select 
+             count(t.id)
+        from TO_CUSTOMER_EVALUATION t, TO_TRANSACTION_INFO ti, TO_CUSTOMER_INFO ci, TO_CAR_DRIVER_INFO di
+       where t.orderid = ti.orderid(+) and ti.cid = ci.id(+) and ti.drivercode = di.drivercode(+)
+        <dynamic>
+            <isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="dname">
+				t.orderid in (select orderid from TO_TRANSACTION_INFO where drivercode in 
+					(select drivercode from TO_CAR_DRIVER_INFO where drivername like '%'||#dname#||'%' ) )
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="cname">
+				ti.username like '%'||#cname#||'%' 
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="slevel">
+				t.slevel = #slevel# 
+			</isNotEmpty>
+		</dynamic>
+ 
+	</select>
+	
+    
+    
+</sqlMap>
+
+
+

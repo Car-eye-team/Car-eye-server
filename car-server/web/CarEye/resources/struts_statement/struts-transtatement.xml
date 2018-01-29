@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="transtatementjson" extends="qhtaxijson" namespace="/statement/transtatementjson">
+	<!-- 统计报表 -->
+	<action name="*" method="{1}"
+			class="com.careye.statement.action.TranStatementAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- Excel报表(客户取消数统计)-->
+	<action name="exportCusCancel" method="exportCusCancel"
+			class="com.careye.statement.action.TranStatementAction">
+	</action>
+	<!-- Excel报表 (司机取消数统计)-->
+	<action name="exportCarDriverCancel" method="exportCarDriverCancel"
+			class="com.careye.statement.action.TranStatementAction">
+	</action>
+	<!-- Excel报表 (客户违约数统计)-->
+	<action name="exportCusBreach" method="exportCusBreach"
+			class="com.careye.statement.action.TranStatementAction">
+	</action>
+	<!-- Excel报表 (终端功能使用统计)-->
+	<action name="excelTerminalFunCount" method="excelTerminalFunCount"
+			class="com.careye.statement.action.TranStatementAction">
+	</action>
+	
+	<!-- Word导出 (终端功能使用统计)-->
+	<action name="exportTFCWord" method="exportTFCWord"
+			class="com.careye.statement.action.TranStatementAction">
+	</action>
+	
+	</package>
+	
+</struts>

@@ -1,0 +1,831 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-UserSQL">
+
+	<typeAlias alias="blocUser" type="com.careye.system.domain.BlocUser" />
+	<typeAlias alias="userCar" type="com.careye.system.domain.UserCar" />
+	<typeAlias alias="userContact" type="com.careye.system.domain.UserContact" />
+	<typeAlias alias="windowSet" type="com.careye.system.domain.WindowSet" />
+	<typeAlias alias="loginLog" type="com.careye.system.domain.SysAuthLoginLog" />
+	
+	
+	
+	<!-- ==============================报警提示设置用户列表============================ -->
+	
+	<!-- 用户分页列表 -->
+	<select id="findPageUserListPrompt" resultClass="blocUser" parameterClass="blocUser">
+		<![CDATA[ 
+			select distinct  t.id,
+			       t.id userid,
+			       t.bloc_id blocid,
+			       o.bloc_name blocname,
+			       t.LOGIN_NAME loginname,
+			       (select count(*) from TO_ALARM_PROMPT where userid = t.id and category=1) type,
+			       t.BLOC_GROUP_ID blocgroupid,
+			       u.BLOC_GROUP_NAME blocgroupname,
+			      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+			  from TO_BLOC_USER t,TO_BLOC_GROUP u,TO_BLOC o , TO_ALARM_PROMPT a
+			  where t.BLOC_GROUP_ID=u.id(+) 
+			  and t.BLOC_ID = o.id(+) 
+			  and t.id = a.userid(+)
+		]]>
+			<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="blocgroupname">
+					u.BLOC_GROUP_NAME like '%'||#blocgroupname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="loginname">
+					t.LOGIN_NAME like '%'||#loginname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocgroupid">
+					t.BLOC_GROUP_ID = #blocgroupid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocid">
+					t.BLOC_ID in (SELECT t.id FROM TO_BLOC t START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+	            </isNotEmpty>
+	            <isNotNull prepend="and" property="userid" >
+					t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+		   	    
+		</dynamic>
+		 order by t.id desc
+	</select>
+	
+	<!-- 用户分页列表数量 -->
+	<select id="findPageUserListCountPrompt" resultClass="int" parameterClass="blocUser">
+			 select count(res.id) from ( 
+			<![CDATA[ 
+			  select distinct  t.id
+			  from TO_BLOC_USER t,TO_BLOC_GROUP u,TO_BLOC o , TO_ALARM_PROMPT a
+			  where t.BLOC_GROUP_ID=u.id(+) 
+			  and t.BLOC_ID = o.id(+) 
+			  and t.id = a.userid(+)
+			  and t.id = a.userid(+)
+		]]>
+			<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="blocgroupname">
+					u.BLOC_GROUP_NAME like '%'||#blocgroupname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="loginname">
+					t.LOGIN_NAME like '%'||#loginname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocgroupid">
+					t.BLOC_GROUP_ID = #blocgroupid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocid">
+					t.BLOC_ID in (SELECT t.id FROM TO_BLOC t START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+	            </isNotEmpty>
+	            <isNotNull prepend="and" property="userid" >
+					t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+		</dynamic>
+		) res
+	</select>
+	
+	<!-- ========================================================== -->
+	
+	<!-- 用户分页列表 -->
+	<select id="findPageUserList" resultClass="blocUser" parameterClass="blocUser">
+		<![CDATA[ 
+			select t.id,
+             t.bloc_id blocid,
+             o.bloc_name blocname,
+             t.LOGIN_NAME loginname,
+             t.password,
+             t.USER_NAME username,
+             t.user_sex usersex,
+             t.mobile,
+             t.TEL_PHONE telphone,
+             t.email,
+             t.BLOC_GROUP_ID blocgroupid,
+             t.CARD_NUMBER cardnumber,
+             t.state,
+             t.runnumber,
+             u.BLOC_GROUP_NAME blocgroupname,
+            
+            to_char(t.create_time,'yyyy-mm-dd hh24:mi:ss') createtime
+        from TO_BLOC_USER t,TO_BLOC_GROUP u,TO_BLOC o
+        where t.BLOC_GROUP_ID=u.id(+) 
+        and t.BLOC_ID = o.id(+) 
+		]]>
+			<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="blocgroupname">
+					u.BLOC_GROUP_NAME like '%'||#blocgroupname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="loginname">
+					t.LOGIN_NAME like '%'||#loginname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="username">
+					t.USER_NAME like '%'||#username#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocgroupid">
+					t.BLOC_GROUP_ID = #blocgroupid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocid">
+					t.BLOC_ID in (SELECT t.id FROM TO_BLOC t START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+	            </isNotEmpty>
+	            <isNotNull prepend="and" property="userid" >
+					t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.create_time >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.create_time <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				
+				<isNotEqual property="id" compareValue="1">
+					<![CDATA[
+			   	    and t.id <> 1
+			   	    ]]>
+		   	    </isNotEqual>
+			
+		</dynamic>
+		
+		 order by id desc
+	
+	</select>
+	
+	<!-- 用户分页列表数量 -->
+	<select id="findPageUserListCount" resultClass="int" parameterClass="blocUser">
+		<![CDATA[ 
+			select count(*)
+			 from TO_BLOC_USER t,TO_BLOC_GROUP u,TO_BLOC o
+	        where t.BLOC_GROUP_ID=u.id(+) 
+	        and t.BLOC_ID = o.id(+) 
+		]]>
+		
+			<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="blocgroupname">
+					u.BLOC_GROUP_NAME like '%'||#blocgroupname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="loginname">
+					t.LOGIN_NAME like '%'||#loginname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="username">
+					t.USER_NAME like '%'||#username#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocgroupid">
+					t.BLOC_GROUP_ID = #blocgroupid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocid">
+					t.BLOC_ID in (SELECT t.id FROM TO_BLOC t START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+	            </isNotEmpty>
+	            <isNotNull prepend="and" property="userid" >
+					t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.create_time >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.create_time <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEqual property="id" compareValue="1">
+					<![CDATA[
+			   	    and t.id <> 1
+			   	    ]]>
+		   	    </isNotEqual>
+			
+		</dynamic>
+		
+	</select>
+	<!-- 用户登陆日志分页列表 -->
+	<select id="findPageLoginLogList" resultClass="loginLog" parameterClass="loginLog">
+		<![CDATA[ 
+			select  
+					t.id,
+					t.BLOC_ID blocid,
+					o.BLOC_NAME blocname,
+					s.USER_NAME username,
+					s.LOGIN_NAME loginname,
+					to_char(t.LOGIN_DATE,'yyyy-mm-dd hh24:mi:ss') logindate,
+					t.LOGIN_IP loginip,
+					t.LOGIN_FLAG loginflag,
+					t.remark,
+					t.status
+			  from TO_SYS_AUTH_LOGIN_LOG t,TO_BLOC o,TO_BLOC_USER s
+			  where t.BLOC_ID = o.id(+) and t.USER_ID = s.id(+)
+		]]>
+		  <dynamic prepend="">
+				<isNotNull prepend="and" property="userid" >
+				  t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+					(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		  	 	</isNotNull>
+				<isNotEmpty prepend="AND" property="loginname">
+					s.LOGIN_NAME like '%'||#loginname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocname">
+					o.BLOC_NAME like '%'||#blocname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.LOGIN_DATE >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.LOGIN_DATE <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+			
+		</dynamic>
+		 order by t.id desc
+	</select>
+	
+	<!-- 用户登陆日志分页列表数量 -->
+	<select id="findPageLoginLogListCount" resultClass="int" >
+		<![CDATA[ 
+			select count(t.id)
+			  from TO_SYS_AUTH_LOGIN_LOG t,TO_BLOC o,TO_BLOC_USER s
+			  where t.BLOC_ID = o.id(+) and t.USER_ID = s.id(+)
+		]]>
+		  <dynamic prepend="">
+				<isNotNull prepend="and" property="userid" >
+				  t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+					(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		  	 	</isNotNull>
+				<isNotEmpty prepend="AND" property="loginname">
+					s.LOGIN_NAME like '%'||#loginname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocname">
+					o.BLOC_NAME like '%'||#blocname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.LOGIN_DATE >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.LOGIN_DATE <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+			
+		</dynamic>
+	</select>
+	
+	<!-- 添加用户 -->
+	<insert id="addUser" parameterClass="blocUser">
+		<![CDATA[ 
+		insert into TO_BLOC_USER
+		  (
+		   BLOC_ID,
+		   LOGIN_NAME,
+		   PASSWORD,
+		   USER_NAME,
+		   USER_SEX,
+		   MOBILE,
+		   TEL_PHONE,
+		   EMAIL,
+		   BLOC_GROUP_ID,
+		   CARD_NUMBER,
+		   STATE,
+		   runnumber,
+		   CREATE_TIME
+		   )
+		values
+		  (
+		   #blocid#,
+		   #loginname#,
+		   #password#,
+		   #username#,
+		   #usersex#,
+		   #mobile#,
+		   #telphone#,
+		   #email#,
+		   #blocgroupid#,
+		   #cardnumber#,
+		   #state#,
+		   #runnumber#,
+		   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		  )
+		]]>
+		
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_BLOC_USER_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 更新用户信息 -->
+	<update id="updateUser" parameterClass="blocUser">
+			update TO_BLOC_USER  set
+				BLOC_ID = #blocid#,
+				LOGIN_NAME = #loginname#,
+				password = #password#,
+				USER_NAME = #username#,
+				USER_SEX = #usersex#,
+				mobile = #mobile#,
+				TEL_PHONE = #telphone#,
+				email = #email#,
+				BLOC_GROUP_ID = #blocgroupid#,
+				CARD_NUMBER = #cardnumber#,
+				runnumber = #runnumber#,
+				state = #state#
+			where id=#id#
+	</update>
+	
+	<!-- 删除用户信息 -->
+	<delete id="deleteUser" parameterClass="int">
+		<![CDATA[
+		    delete from  TO_BLOC_USER  WHERE id = #id#
+		]]>
+		
+	</delete>
+	
+	<!-- 删除用户登陆日志信息 -->
+	<delete id="deleteLoginLog" parameterClass="int">
+		<![CDATA[
+		    delete from  TO_SYS_AUTH_LOGIN_LOG  WHERE id = #id#
+		]]>
+		
+	</delete>
+	
+	<!-- 激活用户 -->
+	<update id="activeUser" parameterClass="int">
+		<![CDATA[
+		    update TO_BLOC_USER set state = 1 WHERE id = #id#
+		]]>
+	</update>
+	
+	<!-- 禁用用户 -->
+	<update id="inactiveUser" parameterClass="int">
+		<![CDATA[
+		     update TO_BLOC_USER set state = 2 WHERE id = #id#
+		]]>
+		
+	</update>
+
+	<!-- 查看用户名是否存在 -->
+	<select id="loginNameIsExist" parameterClass="blocUser" resultClass="int">
+		select	count(*)
+		from TO_BLOC_USER where login_name=rtrim(ltrim(#loginname#))
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 根据用户信息获取用户详细信息 -->
+	<select id="getUserInfo" parameterClass="blocUser" resultClass="blocUser">
+		<![CDATA[ 
+			select t.id,
+			       t.BLOC_ID blocid,
+			       t.login_name loginname,
+			       t.password,
+			       t.user_name username,
+			       t.mobile,
+			       t.BLOC_GROUP_ID blocgroupid,
+			       t.state,
+			       t.warnswitch,
+			       t.runnumber,
+			       u.BLOC_GROUP_NAME blocgroupname,
+			       s.parent_id parentid,
+			       s.BLOC_NAME blocname,
+			       to_char(sysdate,'yyyy-mm-dd hh24:mi:ss') lastlogin,
+			       (select count(*) from TO_BLOC  START WITH id = 
+				(select bloc_id from  TO_BLOC_USER where login_name = #loginname#) CONNECT BY PRIOR  id = parent_id ) deptcount,
+				nvl(sp.leftpage,1) leftpage,
+                nvl(sp.bottompage,2) bottompage,
+                (select count(*) from TO_ALARM_PROMPT  where  userid = t.id) alarmcount
+							       
+			  from TO_BLOC_USER t,TO_BLOC_GROUP u,TO_BLOC s,TO_INTERFACE_SWITCH sp
+			  where t.BLOC_GROUP_ID=u.id(+) and t.BLOC_ID = s.id and t.id = sp.userid(+)
+		]]>
+			<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="loginname">
+					t.login_name =#loginname#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="password">
+					t.password = #password#
+	            </isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 根据用户软电话id -->
+	<select id="getSoftPhoneIds" parameterClass="blocUser" resultClass="int">
+		select  m.menu_id 
+            from TB_SYS_FUNCTION_MENU m,TO_BLOC_AUTHORITY t
+           where m.menu_id = t.menu_id 
+          	and t.BLOC_GROUP_ID = #blocgroupid# and m.PARENT_MENUID = '20'
+	</select>
+	
+	<select id="getUserDetatail" parameterClass="blocUser" resultClass="blocUser">
+		 <![CDATA[ 
+			select t.id,
+			       t.BLOC_ID blocid,
+			       t.login_name loginname,
+			       t.password,
+			       t.user_name username,
+			       t.mobile,
+			       t.BLOC_GROUP_ID blocgroupid,
+			       t.state,
+			       t.runnumber,
+			       u.BLOC_GROUP_NAME blocgroupname,
+			       s.parent_id parentid,
+			       s.BLOC_NAME blocname
+			  from TO_BLOC_USER t,TO_BLOC_GROUP u,TO_BLOC s
+			  where t.BLOC_GROUP_ID=u.id(+) and t.BLOC_ID = s.id
+		]]>
+			<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="userid">
+					t.id =#userid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="password">
+					t.password = #password#
+	            </isNotEmpty>
+		</dynamic>
+		
+	</select>
+	
+	<!-- 修改密码 -->
+	<update id="editPassWord" parameterClass="blocUser">
+		<![CDATA[
+			update TO_BLOC_USER
+		]]>
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="newpassword">
+				password = #newpassword#
+			</isNotEmpty>
+		<![CDATA[
+			where id=#id#
+		]]>
+	</dynamic>
+	</update>
+	
+	<!-- 修改报警声音 -->
+	<update id="updateUserWarnswitch" parameterClass="blocUser">
+		 <![CDATA[
+			update TO_BLOC_USER set warnswitch = #warnswitch# where id=#userid#
+		]]> 
+	</update>
+	
+
+	<!-- 添加登陆日志 -->
+	<insert id="loginLog" parameterClass="loginLog">
+		<![CDATA[
+		    INSERT INTO TO_SYS_AUTH_LOGIN_LOG (
+					BLOC_ID,
+					USER_ID,
+					LOGIN_DATE,
+					LOGIN_IP,
+					LOGIN_FLAG,
+					REMARK,
+					STATUS
+		        )
+		    VALUES (
+		    		#blocid#,
+		    		#userid#,
+					to_date(#logindate#,'yyyy-mm-dd hh24:mi:ss'),
+					#loginip#,
+					#loginflag#,
+					#remark#,
+					#status#
+		    )
+		]]>
+		
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_SYS_AUTH_LOGIN_LOG_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+
+	<!-- 删除用户所能查看车辆 -->
+	<delete id="delUserCar" parameterClass="int">
+		<![CDATA[
+		    delete from  SYS_AUTH_USER_CAR  WHERE id = #userid#
+		]]>
+		
+	</delete>
+
+	<!-- 批量增加用户所能查看车辆 -->
+	<insert id="addUserCar" parameterClass="java.util.List" >
+		<![CDATA[
+			insert into SYS_AUTH_USER_CAR
+			  (userid,
+			   carid,
+			   type,
+			   createtime
+			   )
+		]]>
+			
+		<iterate conjunction="union all" property="">
+		      <![CDATA[
+		          select
+		              #list[].userid#,
+		              #list[].carid#,
+		              #list[].type#,
+		              to_date(#list[].createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		          from dual 
+		      ]]>
+		 </iterate>
+	</insert>
+	<!-- 删除用户所能关闭提醒类型 -->
+	<delete id="delAssignRemind" parameterClass="int">
+		<![CDATA[
+		    delete from  TO_ALARM_PROMPT  WHERE id = #userid#
+		]]>
+		
+	</delete>
+
+	<!-- 批量增加用户所能关闭提醒类型 -->
+	<insert id="addAssignRemind" parameterClass="java.util.List" >
+		<![CDATA[
+			insert into TO_ALARM_PROMPT
+			  (userid,
+			   category,
+			   type
+			   )
+		]]>
+			
+		<iterate conjunction="union all" property="">
+		      <![CDATA[
+		          select
+		              #list[].userid#,
+		              #list[].category#,
+		              #list[].type#
+		          from dual 
+		      ]]>
+		 </iterate>
+	</insert>
+
+	<!-- 查看指定用户提醒类型 -->
+	<select id="queryRemindStatus" parameterClass="windowSet" resultClass="Integer">
+		select count(*) from TO_ALARM_PROMPT where 1=1 
+			<isNotEmpty prepend="AND" property="userid">
+				id = #userid#
+            </isNotEmpty>
+			<isNotEmpty prepend="AND" property="category">
+				category =#category#
+            </isNotEmpty>
+			<isNotEmpty prepend="AND" property="type">
+				type =#type#
+            </isNotEmpty>
+	</select>
+
+	<!-- 根据报警名称得到报警key-->
+	<select id="getAlarmkeyByName" parameterClass="String" resultClass="String">
+		select ALARMKEY from TO_ALARM_TYPE where ALARMNAME =#name#
+	</select>
+	
+	 <!-- 查看用户联系人记录数目 -->
+	<select id="queryUserContactCount" resultClass="Integer"  parameterClass="Integer">
+		select count(*)
+		  from SYS_USER_CONTACT t
+		 where t.id = #userid#
+	</select>
+	
+	 <!-- 增加用户联系人记录 -->
+     <insert id="addUserContact" parameterClass="userContact">
+     <![CDATA[ 
+        insert into SYS_USER_CONTACT(
+			userid,
+			complaintel,
+			mgrname,
+			mgrphone,
+			repairname,
+			repairphone,
+			supporttel,
+			servicetel,
+	        createtime    
+        )values(
+	        #userid#,
+	        #complaintel#,
+	        #mgrname#,
+	        #mgrphone#,
+	        #repairname#,
+	        #repairphone#,
+	        #supporttel#,
+	        #servicetel#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT SYS_USER_CONTACT_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+
+	 <!-- 更新用户联系人 -->
+     <update id="updateUserContact" parameterClass="userContact">
+         update SYS_USER_CONTACT set
+		        supporttel = #supporttel#,
+		        servicetel = #servicetel#,
+		        complaintel = #complaintel#,
+		        mgrname = #mgrname#,
+		        mgrphone = #mgrphone#,
+		        repairname = #repairname#,
+		        repairphone = #repairphone#
+		      WHERE id = #userid#
+     </update>
+	
+	<!-- 查询用户联系人信息-->
+	<select id="loadUserContact" parameterClass="Integer" resultClass="userContact">
+		select userid,
+				complaintel,
+				mgrname,
+				mgrphone,
+				repairname,
+				repairphone,
+				supporttel,
+				servicetel
+ 		from SYS_USER_CONTACT where userid =#userid#
+	</select>
+	
+	<!-- 用户平台车辆列表 -->
+	<select id="findPagePtcarList" resultClass="userCar" parameterClass="userCar">
+		<![CDATA[ 
+			select t.id,t.carid,t.userid,c.carnumber,sa.id deptid,sa.deptname,
+			  to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+			  from SYS_AUTH_USER_CAR t,SYS_AUTH_ORGAZICATION_DEPT sa,car_info c
+			  where t.carid = c.id and sa.id = c.deptid(+) and t.type = #type#  
+		]]>
+		
+		<dynamic prepend="">
+            <isNotNull prepend="and" property="userid" >
+				  t.id = #userid#
+		   	</isNotNull>
+            <isNotNull prepend="and" property="carnumber" >
+				  c.carnumber like '%'||#carnumber#||'%'
+		   	</isNotNull>
+		</dynamic>
+		
+		 order by t.createtime desc 
+	
+	</select>
+	
+	<!-- 用户平台车辆列表数量 -->
+	<select id="findPagePtcarListCount" resultClass="int" parameterClass="userCar">
+		<![CDATA[ 
+			select count(*)
+			  from SYS_AUTH_USER_CAR t,SYS_AUTH_ORGAZICATION_DEPT sa,car_info c
+			  where t.carid = c.id and sa.id = c.deptid(+) and t.type = #type#  
+		]]>
+		
+		<dynamic prepend="">
+            <isNotNull prepend="and" property="userid" >
+				  t.id = #userid#
+		   	</isNotNull>
+            <isNotNull prepend="and" property="carnumber" >
+				  c.carnumber like '%'||#carnumber#||'%'
+		   	</isNotNull>
+		</dynamic>
+	
+	</select>
+	
+	<!-- 删除平台分配车辆 -->
+	<delete id="deletePtcar" parameterClass="int">
+		<![CDATA[
+		    delete from  SYS_AUTH_USER_CAR  WHERE id = #id# and type =2
+		]]>
+		
+	</delete>
+	<!-- 删除内部分配车辆 -->
+	<delete id="deleteNbcar" parameterClass="int">
+		<![CDATA[
+		    delete from  SYS_AUTH_USER_CAR  WHERE id = #id# and type =1
+		]]>
+		
+	</delete>
+
+	<!-- 查看平台是否存在某车辆 -->
+	<select id="getPtcarCount" parameterClass="userCar" resultClass="int">
+		select	count(*)
+		from SYS_AUTH_USER_CAR where userid=#userid# and carid = #carid# and type = #type#
+	</select>
+	
+	<!-- 查看平台是否分配了车辆 -->
+	<select id="queryUserPtcarIsAssign" parameterClass="int" resultClass="int">
+		select	count(*)
+		from SYS_AUTH_USER_CAR where userid=#userid#  and type = 2
+	</select>
+	
+	
+	
+	
+	<!-- 界面展开分页列表 -->
+	<select id="findPageSetList" resultClass="blocUser" parameterClass="blocUser">
+		<![CDATA[ 
+	          select distinct t.id userid,
+       t.bloc_id blocid,
+       o.bloc_name blocname,
+       t.LOGIN_NAME loginname,
+       t.USER_NAME username,
+       t.BLOC_GROUP_ID blocgroupid,
+       u.BLOC_GROUP_NAME blocgroupname,
+       nvl(s.leftpage,1) leftpage,
+       nvl(s.bottompage,2) bottompage,
+       to_char(t.create_time,'yyyy-mm-dd hh24:mi:ss') createtime
+       from TO_BLOC_USER t,TO_BLOC_GROUP u,TO_BLOC o,TO_INTERFACE_SWITCH s
+       where t.BLOC_GROUP_ID=u.id(+) 
+       and t.BLOC_ID = o.id(+) 
+       and s.userid=t.id
+		]]>
+			<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="blocgroupname">
+					u.BLOC_GROUP_NAME like '%'||#blocgroupname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="loginname">
+					t.LOGIN_NAME like '%'||#loginname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="username">
+					t.USER_NAME like '%'||#username#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocgroupid">
+					t.BLOC_GROUP_ID = #blocgroupid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocid">
+					t.BLOC_ID in (SELECT t.id FROM TO_BLOC t START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+	            </isNotEmpty>
+	            <isNotNull prepend="and" property="userid" >
+					t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.create_time >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.create_time <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+			
+		</dynamic>
+		 order by t.id desc
+	</select>
+	
+	<!-- 界面展开分页列表数量 -->
+	<select id="findPageSetListCount" resultClass="int" parameterClass="blocUser">
+		<![CDATA[ 
+			select count(t.id)
+       from TO_BLOC_USER t,TO_BLOC_GROUP u,TO_BLOC o,TO_INTERFACE_SWITCH s
+       where t.BLOC_GROUP_ID=u.id(+) 
+       and t.BLOC_ID = o.id(+) 
+       and s.userid=t.id
+		]]>
+			<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="blocgroupname">
+					u.BLOC_GROUP_NAME like '%'||#blocgroupname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="loginname">
+					t.LOGIN_NAME like '%'||#loginname#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="username">
+					t.USER_NAME like '%'||#username#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocgroupid">
+					t.BLOC_GROUP_ID = #blocgroupid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="blocid">
+					t.BLOC_ID in (SELECT t.id FROM TO_BLOC t START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+	            </isNotEmpty>
+	            <isNotNull prepend="and" property="userid" >
+					t.BLOC_ID in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.create_time >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.create_time <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+			
+		</dynamic>
+		
+	</select>
+	
+	<select id="getLoginNameCount" parameterClass="String" resultClass="Integer">
+		select count(*) from to_bloc_user where login_name=#loginname#
+	</select>
+	
+	<select id="getUserIdByName" parameterClass="String" resultClass="Integer">
+		select id from to_bloc_user where login_name=#loginname#
+	</select>
+
+</sqlMap>
+
+
+
+
+

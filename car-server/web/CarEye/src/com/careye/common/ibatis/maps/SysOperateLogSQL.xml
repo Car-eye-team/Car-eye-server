@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-logSQL">
+
+	<typeAlias alias="log" type="com.careye.common.domain.SysOperateLog" />
+	<typeAlias alias="commondLog" type="com.careye.common.domain.CommondLog" />
+
+
+<!-- 得到日志数量 -->
+	<select id="findLogInfoPageListCount" parameterClass="log" resultClass="int">
+		<![CDATA[
+			SELECT  count(*)
+			from TO_SYS_LOG t,TO_BLOC_USER e
+			where t.user_id=e.id
+		]]>
+	<dynamic prepend="">
+		<isNotEmpty prepend="and" property="loginname">
+			e.login_name like '%'||#loginname#||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="operattype">
+			t.operat_type  like '%'||#operattype#||'%'
+		</isNotEmpty>
+		 <isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+				t.create_time >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+				<![CDATA[
+				t.create_time <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			
+	</dynamic>
+	</select>
+
+	<!-- 得到日志列表 -->
+	<select id="findLogInfoPageList" parameterClass="log" resultClass="log">
+		<![CDATA[
+		
+			SELECT  
+					t.log_id logid,
+					e.login_name loginname,
+					t.content ,
+					to_char(t.create_time,'yyyy-mm-dd hh24:mi:ss') createtime ,
+					t.operat_type operattype 
+			from TO_SYS_LOG t,TO_BLOC_USER e
+			where t.user_id=e.id
+		]]>
+	<dynamic prepend="">
+		<isNotEmpty prepend="and" property="loginname">
+			e.login_name like '%'||#loginname#||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="operattype">
+			t.operat_type  like '%'||#operattype#||'%'
+		</isNotEmpty>
+		 <isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+				t.create_time >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+				<![CDATA[
+				t.create_time <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			
+	</dynamic>
+	order by t.log_id desc
+	</select>
+	
+	
+	<insert id="addLogInfo" parameterClass="log">
+		insert into TO_SYS_LOG
+	      (
+	       user_id,
+	       content,
+	       operat_type,
+	       create_time)
+	    values
+	      (
+	       #userid#,
+	       #content#,
+	       #operattype#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+	       )
+	       
+	   	<selectKey resultClass="Integer" keyProperty="logid">
+  			<![CDATA[SELECT TO_SYS_LOG_ID_SEQ.NEXTVAL AS logid FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	
+	<!-- 添加指令下发日志记录 -->
+	<insert id="addCommondLog" parameterClass="commondLog">
+		INSERT INTO TO_COMMOND_SEND_LOG
+	      (
+	        CARID,
+			STATUS,
+			USERID,
+			RESTIME,
+			DATA,
+			MSGID,
+			MSGTYPE,
+			SEQ,
+			REMARK,
+	        CREATETIME
+	       )
+	    VALUES
+	      (
+	        #carid#,
+			#status#,
+			#userid#,
+			to_date(#restime#,'yyyy-mm-dd hh24:mi:ss'),
+			#data#,
+			#msgid#,
+			#msgtype#,
+			#seq#,
+			#remark#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+	       )
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_COMMOND_SEND_LOG_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	<!-- 删除操作日志信息 -->
+	<delete id="deleteLogInfo" parameterClass="int">
+		<![CDATA[
+		    delete from  TO_SYS_LOG  WHERE log_id = #id#
+		]]>
+		
+	</delete>
+</sqlMap>
+
+

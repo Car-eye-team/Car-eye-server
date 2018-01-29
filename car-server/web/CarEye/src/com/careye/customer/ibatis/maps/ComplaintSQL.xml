@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-complaintSQL">
+
+	<typeAlias alias="complaintType" type="com.careye.customer.domain.ComplaintType"/>
+	<typeAlias alias="complaintInfo" type="com.careye.customer.domain.ComplaintInfo"/>
+	<typeAlias alias="complaintCount" type="com.careye.customer.domain.ComplaintCount"/>
+	
+	<!-- 得到所有投诉类型列表-->
+	<select id="getAllComplaintTypeList" resultClass="complaintType">
+		SELECT
+      		a.id, 
+     		a.type,
+      		a.typename, 
+      		to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+      	from TO_COMPLAINT_TYPE a  
+      	 order by a.type
+	</select>
+		
+	<!-- 根据条件得到投诉类型列表-->
+	<select id="getComplaintTypeList" resultClass="complaintType"
+		parameterClass="complaintType">
+		SELECT
+      a.id, 
+      a.type,
+      a.typename, 
+      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+      from TO_COMPLAINT_TYPE a
+      where 1=1  
+      <dynamic>
+			<isNotEmpty prepend="and" property="typename">
+					 a.typename like  '%'||#typename#||'%'
+			</isNotEmpty>
+		</dynamic>
+        order by a.createtime
+	    desc 
+	</select>
+
+	<!--  根据条件得到投诉类型列表 数量-->
+	<select id="getComplaintTypeListCount" resultClass="int"
+		parameterClass="complaintType">
+	 SELECT
+	   count(a.id) 
+      from TO_COMPLAINT_TYPE a
+      where 1=1  
+      <dynamic>
+			<isNotEmpty prepend="and" property="typename">
+					 a.typename like  '%'||#typename#||'%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!--  添加投诉类型 -->
+	<insert id="addComplaintType" parameterClass="complaintType">
+		<![CDATA[ 
+		INSERT INTO TO_COMPLAINT_TYPE(
+                type, 
+                typename, 
+                createtime
+         ) VALUES (
+               #type#, 
+               #typename#, 
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+		]]>
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_COMPLAINT_TYPE_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+
+	<!--  删除投诉类型 -->
+	<delete id="delComplaintType" parameterClass="java.util.List">
+     DELETE FROM TO_COMPLAINT_TYPE where
+    <iterate property=""  conjunction="," open="id in (" close=")">#list[]#</iterate>
+    </delete> 	
+    
+	<!-- 修改投诉类型 -->
+	<update id="updateComplaintType" parameterClass="complaintType">
+		UPDATE TO_COMPLAINT_TYPE set
+			    type=#type#, 
+			    typename=#typename#
+			WHERE id = #id#
+	</update>
+
+    <!-- 查询当前投诉类型是否存在-->
+	<select id="queryComplaintTypeIsExits" resultClass="int" parameterClass="complaintType">
+	    select count(a.id) from  TO_COMPLAINT_TYPE  a  where  a.type=#type#
+	    <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>	
+	
+	<!-- 查询当前投诉类型名称是否存在-->
+	<select id="queryComplaintTypenameIsExits" resultClass="int" parameterClass="complaintType">
+	    select count(a.id) from  TO_COMPLAINT_TYPE  a  where  a.typename=#typename#
+	    <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>	
+    
+    
+    <!-- 根据条件得到投诉列表-->
+	<select id="getComplaintInfoList" resultClass="complaintInfo"
+		parameterClass="complaintInfo">
+		SELECT
+      t.id, 
+      (select tb.bloc_name from TO_BLOC tb, TO_CAR_INFO ci 
+           where tb.id = ci.blocid and ci.carnumber = t.carnumber) blocname,
+      t.carnumber,
+      to_char(t.complainttime,'yyyy-mm-dd hh24:mi:ss') complainttime,
+      t.phone,
+      t.passengerphone,
+      t.driverphone,
+      (select d.drivername from TO_CAR_DRIVER_INFO d,TO_CAR_INFO ci where d.phone=t.driverphone 
+                 	and ci.flag=1 and d.carid = ci.id and ci.carnumber = t.carnumber ) drivername,
+      t.type,
+      COMPLAINT_TYPE(t.type) typename,
+      t.remark,
+      t.orderid,
+      t.dealstatus,
+      to_char(t.dealtime,'yyyy-mm-dd hh24:mi:ss') dealtime,
+      (select user_name from to_bloc_user bu where bu.id=t.dealman) dealman,
+      t.dealcontent
+      from TO_COMPLAINT_INFO t
+      where 1=1  
+      <dynamic>
+			<isNotEmpty prepend="and" property="carnumber">
+					 t.carnumber like  '%'||#carnumber#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="type">
+					 t.type like  '%'||#type#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="dealstatus">
+					 t.dealstatus = #dealstatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+				<![CDATA[
+					 t.complainttime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+				<![CDATA[
+					 t.complainttime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+		</dynamic>
+        order by t.complainttime
+	    desc 
+	</select>
+
+	<!--  根据条件得到投诉列表 数量-->
+	<select id="getComplaintInfoListCount" resultClass="int"
+		parameterClass="complaintInfo">
+	 SELECT
+	   count(t.id) 
+      from TO_COMPLAINT_INFO t
+      where 1=1  
+      <dynamic>
+			<isNotEmpty prepend="and" property="carnumber">
+					 t.carnumber like  '%'||#carnumber#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="type">
+					 t.type like  '%'||#type#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="dealstatus">
+					 t.dealstatus = #dealstatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+				<![CDATA[
+					 t.complainttime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+				<![CDATA[
+					 t.complainttime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--  删除投诉 -->
+	<delete id="delComplaintInfo" parameterClass="java.util.List">
+     DELETE FROM TO_COMPLAINT_INFO where
+    <iterate property=""  conjunction="," open="id in (" close=")">#list[]#</iterate>
+    </delete>
+    
+    <!-- 投诉处理 -->
+	<update id="dealComplaintInfo" parameterClass="complaintInfo">
+		UPDATE TO_COMPLAINT_INFO set
+				dealstatus=#dealstatus#,
+			    dealman=#dealman#, 
+			    dealcontent=#dealcontent#,
+			    dealtime=to_date(#dealtime#,'yyyy-mm-dd hh24:mi:ss')
+			WHERE id = #id#
+	</update>
+	
+	
+	<!-- 查询投诉按年列表  -->
+	<select id="getAllComplaintCountByYear" parameterClass="complaintCount"  resultClass="complaintCount" >
+		select one.one,two.two,three.three,four.four,five.five,six.six,seven.seven,eight.eight,nine.nine,ten.ten,eleven.eleven,twelve.twelve from 
+               (select  count(s.id) one
+                  from TO_COMPLAINT_INFO s
+                 where 1=1
+                    <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') = 1
+                   and to_char(s.complainttime, 'yyyy') =#year# )  one,
+               (select count(s.id) two
+                  from TO_COMPLAINT_INFO s
+                 where 1=1
+                   <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') = 2
+                   and to_char(s.complainttime, 'yyyy') =#year#)  two,
+               (select count(s.id) three
+                 from TO_COMPLAINT_INFO s
+                 where 1=1
+                   <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') = 3
+                   and to_char(s.complainttime, 'yyyy') =#year#)  three,
+               (select count(s.id) four
+                 from TO_COMPLAINT_INFO s
+                 where 1=1
+                  <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') = 4
+                   and to_char(s.complainttime, 'yyyy') =#year#)  four,
+               (select count(s.id) five
+                from TO_COMPLAINT_INFO s
+                 where 1=1
+                  <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') = 5
+                   and to_char(s.complainttime, 'yyyy') =#year#)  five,
+               (select count(s.id) six
+                from TO_COMPLAINT_INFO s
+                 where 1=1
+                   <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') =6
+                   and to_char(s.complainttime, 'yyyy') =#year#)  six,
+               (select count(s.id) seven
+                 from TO_COMPLAINT_INFO s
+                 where 1=1
+                  <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') =7
+                   and to_char(s.complainttime, 'yyyy') =#year#)  seven,
+               (select count(s.id) eight
+                 from TO_COMPLAINT_INFO s
+                 where 1=1
+                  <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') =8
+                   and to_char(s.complainttime, 'yyyy') =#year#)  eight,
+               (select count(s.id)  nine
+                 from TO_COMPLAINT_INFO s
+                 where 1=1
+                  <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') =9
+                   and to_char(s.complainttime, 'yyyy') =#year#)  nine,
+               (select count(s.id) ten
+                  from TO_COMPLAINT_INFO s
+                 where 1=1
+                  <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') = 10
+                   and to_char(s.complainttime, 'yyyy') =#year#)  ten,
+               (select count(s.id)  eleven
+                 from TO_COMPLAINT_INFO s
+                 where 1=1
+                   <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') = 11
+                   and to_char(s.complainttime, 'yyyy') =#year#)  eleven,
+               (select count(s.id) twelve
+                from TO_COMPLAINT_INFO s
+                 where 1=1
+                  <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+					</isNotEmpty>
+                   and to_char(s.complainttime, 'mm') = 12
+                   and to_char(s.complainttime, 'yyyy') =#year#)  twelve 
+	</select>
+	
+	<!-- 查询投诉按月列表  -->
+	<select id="getAllComplaintCountByMonth" parameterClass="complaintCount"  resultClass="complaintCount" >
+		select to_char(d.datetime, 'yyyy-MM-dd') datetime,
+       (select count(*)
+          from TO_COMPLAINT_INFO s
+         where 1=1
+               and to_char(d.datetime, 'yyyy-mm-dd') =
+               to_char(s.complainttime, 'yyyy-mm-dd')
+                <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+				</isNotEmpty>
+				)  count
+  from (select to_date(#month#, 'yyyy-mm') + (rownum - 1) datetime
+          from dual
+        connect by rownum
+        <![CDATA[
+					<=
+		]]> 
+         last_day(to_date(#month#, 'yyyy-mm')) -
+                   to_date(#month#, 'yyyy-mm') + 1) d
+	</select>
+	
+	<!-- 投诉统计详情  -->
+	<select id="getComplaintCountDetails" parameterClass="complaintCount"  resultClass="complaintInfo" >
+		select 
+			  s.id, 
+		      (select tb.bloc_name from TO_BLOC tb, TO_CAR_INFO ci 
+		           where tb.id = ci.blocid and ci.carnumber = s.carnumber) blocname,
+		      s.carnumber,
+		      to_char(s.complainttime,'yyyy-mm-dd hh24:mi:ss') complainttime,
+		      s.phone,
+		      s.passengerphone,
+		      s.driverphone,
+		      (select d.drivername from TO_CAR_DRIVER_INFO d,TO_CAR_INFO ci where d.phone=s.driverphone 
+		                 	and ci.flag=1 and d.carid = ci.id and ci.carnumber = s.carnumber ) drivername,
+		      s.type,
+		      COMPLAINT_TYPE(s.type) typename,
+		      s.remark,
+		      s.orderid,
+		      s.dealstatus,
+		      to_char(s.dealtime,'yyyy-mm-dd hh24:mi:ss') dealtime,
+		      (select user_name from to_bloc_user bu where bu.id=s.dealman) dealman,
+		      s.dealcontent
+          from TO_COMPLAINT_INFO s
+         where 1=1
+         <dynamic>
+                <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="month">
+					    to_char(s.complainttime, 'yyyy-mm') = #month#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="day">
+					    to_char(s.complainttime, 'yyyy-mm-dd') = #day#
+				</isNotEmpty>
+			</dynamic>
+			order by s.dealstatus, s.complainttime desc 
+	</select>
+	
+	<!-- 投诉统计详情总条数  -->
+	<select id="getComplaintCountDetailsCount" parameterClass="complaintCount"  resultClass="int" >
+		select 
+			count(s.id)
+          from TO_COMPLAINT_INFO s
+         where 1=1
+         <dynamic>
+                <isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber = #carnumber#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="month">
+					    to_char(s.complainttime, 'yyyy-mm') = #month#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="day">
+					    to_char(s.complainttime, 'yyyy-mm-dd') = #day#
+				</isNotEmpty>
+			</dynamic>
+	</select>
+	
+	
+	<!-- 投诉统计word  年 -->
+	<select id="getTSWordByYear" parameterClass="complaintCount"  resultClass="complaintInfo" >
+		select 
+		      s.carnumber,
+		      to_char(s.complainttime,'yyyy-mm-dd hh24:mi:ss') createtime,
+		      s.passengername,
+		      (select d.drivername from TO_CAR_DRIVER_INFO d,TO_CAR_INFO ci where d.phone=s.driverphone 
+		                 	and ci.flag=1 and d.carid = ci.id and ci.carnumber = s.carnumber ) drivername,
+		      COMPLAINT_TYPE(s.type) typename,
+		      s.remark
+          from TO_COMPLAINT_INFO s
+         where 1=1
+         <dynamic>
+                <isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="year">
+					    to_char(s.complainttime, 'yyyy') =#year#
+					</isNotEmpty>
+			</dynamic>
+			order by s.complainttime desc 
+	</select>
+    
+    
+    <!-- 投诉统计word  月 -->
+	<select id="getTSWordByMonth" parameterClass="complaintCount"  resultClass="complaintInfo" >
+		select 
+		      s.carnumber,
+		      to_char(s.complainttime,'yyyy-mm-dd hh24:mi:ss') createtime,
+		      s.passengername,
+		      (select d.drivername from TO_CAR_DRIVER_INFO d,TO_CAR_INFO ci where d.phone=s.driverphone 
+		                 	and ci.flag=1 and d.carid = ci.id and ci.carnumber = s.carnumber ) drivername,
+		      COMPLAINT_TYPE(s.type) typename,
+		      s.remark
+          from TO_COMPLAINT_INFO s
+         where 1=1
+         <dynamic>
+                <isNotEmpty prepend="and" property="carnumber">
+					    s.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					    s.carnumber in (select ci.carnumber from TO_CAR_INFO ci where ci.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="month">
+					    to_char(s.complainttime, 'yyyy-mm') =#month#
+					</isNotEmpty>
+			</dynamic>
+			order by s.complainttime desc 
+	</select>
+</sqlMap>
+
+

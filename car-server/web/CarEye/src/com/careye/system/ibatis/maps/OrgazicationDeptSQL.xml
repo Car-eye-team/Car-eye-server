@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-OrgazicationDeptSQL">
+
+	<typeAlias alias="bloc" type="com.careye.system.domain.Bloc" />
+	
+		<!-- 根据当前级别ID获取上一级别ID -->
+	<select id="getNextHigherLevel" resultClass="bloc" parameterClass="Integer">
+		SELECT * FROM TO_BLOC a START WITH a.id = #id# CONNECT BY PRIOR a.parent_id = a.id
+	</select>
+	
+		<!-- 根据当前级别ID获取下一级别ID -->
+	<select id="getNextDowmLevel" resultClass="int" parameterClass="Integer">
+		SELECT id FROM TO_BLOC  START WITH id = #id# CONNECT BY PRIOR  id = parent_id 
+	</select>
+	<!--根据部门id得到组织机构信息 -->
+	<select id="quertDeptById" resultClass="bloc" parameterClass="Integer">
+		<![CDATA[ 
+			select 	t.id,
+			       	t.PARENT_ID parentid,
+			       	t.BLOC_NAME bloc_name,
+			       	t.tel,
+					t.address,
+					t.remark,
+			       	t.leg_per,
+					t.leg_per_card,
+					t.ec_nature,
+					t.management,
+					t.reg_number,
+					t.reg_capital,
+					t.reg_person,
+					to_char(t.reg_date,'yyyy-mm-dd') reg_date,
+					t.fax,
+					t.reg_address,
+					t.res_per,
+					to_char(t.est_date,'yyyy-mm-dd') est_date,
+					to_char(t.ent_reg_date,'yyyy-mm-dd') ent_reg_date,
+					t.email,
+					t.com_homepage,
+					t.bu_li_number,
+					t.tax_reg_number,
+					to_char(t.issuing_date,'yyyy-mm-dd') issuing_date,
+					t.permit_person,
+					t.business_scope,
+					t.companyid
+
+			  from TO_BLOC t where id = #id#
+		]]>
+	
+	</select>
+	
+	<!--组织机构不分页列表 -->
+	<select id="selectOrgazicationDeptList" resultClass="bloc" parameterClass="bloc">
+			select t.id blocid,
+			       t.BLOC_NAME bloc_name
+			  from TO_BLOC t WHERE 1=1
+		    <isNotNull prepend="AND" property="userid" >
+			   t.id in (SELECT id FROM TO_BLOC  START WITH id = 
+				(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+   		    </isNotNull>
+		    <isNotNull prepend="AND" property="bloc_name" >
+			   t.BLOC_NAME like '%'||#bloc_name#||'%'
+   		    </isNotNull>
+   		  order by t.id desc
+	
+	</select>
+	
+	<!--组织机构分页列表 -->
+	<select id="findPageOrgazicationDeptList" resultClass="bloc" parameterClass="bloc">
+		<![CDATA[ 
+			select t.id,
+			       t.PARENT_ID parentid,
+			       t.BLOC_NAME bloc_name,
+			       t.contract,
+			       t.tel,
+			       t.address,
+			       t.USER_ID userid,
+			       t.remark,
+			       s.USER_NAME username,
+			       to_char(t.create_time,'yyyy-mm-dd hh24:mi:ss') createtime
+			  from TO_BLOC_USER s,TO_BLOC t
+			  where t.userid = s.userid(+)
+		]]>
+			<dynamic prepend="">
+		
+				<isNotEmpty prepend="AND" property="bloc_name">
+					t.BLOC_NAME like '%'||#bloc_name#||'%'
+	            </isNotEmpty>
+	            <isNotEmpty prepend="AND" property="deptid">
+					t.id = #deptid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.create_time >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.create_time <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+			
+		   </dynamic>
+		
+		 order by t.id desc
+	
+	</select>
+	
+	<!--组织机构分页列表数量 -->
+	<select id="findPageOrgazicationDeptListCount" resultClass="int" parameterClass="bloc">
+		<![CDATA[ 
+			select count(*) from TO_BLOC t where 1=1
+		]]>
+		
+		   <dynamic prepend="">
+		
+				<isNotEmpty prepend="AND" property="bloc_name">
+					t.BLOC_NAME like '%'||#bloc_name#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="deptid">
+					t.id = #deptid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.create_time >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.create_time <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+			
+		   </dynamic>
+		
+	</select>
+	
+	<!-- 添加组织机构 -->
+	<insert id="addOrgazicationDept" parameterClass="bloc">
+		<![CDATA[ 
+		insert into TO_BLOC
+		  (
+		    BLOC_NAME,
+			PARENT_ID,
+			TEL,
+			ADDRESS,
+			REMARK,
+			USER_ID,
+		    CREATE_TIME,
+		    leg_per,
+			leg_per_card,
+			ec_nature,
+			management,
+			reg_number,
+			reg_capital,
+			reg_person,
+			reg_date,
+			fax,
+			reg_address,
+			res_per,
+			est_date,
+			ent_reg_date,
+			email,
+			com_homepage,
+			bu_li_number,
+			tax_reg_number,
+			issuing_date,
+			permit_person,
+			business_scope,
+		    companyid
+		   )
+		values
+		  (
+		   #bloc_name#,
+		   #parentid#,
+		   #tel#,
+		   #address#,
+		   #remark#,
+		   #userid#,
+		   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+		   #leg_per#,
+			#leg_per_card#,
+			#ec_nature#,
+			#management#,
+			#reg_number#,
+			#reg_capital#,
+			#reg_person#,
+			to_date(#reg_date#,'yyyy-mm-dd'),
+			#fax#,
+			#reg_address#,
+			#res_per#,
+			to_date(#est_date#,'yyyy-mm-dd'),
+			to_date(#ent_reg_date#,'yyyy-mm-dd'),
+			#email#,
+			#com_homepage#,
+			#bu_li_number#,
+			#tax_reg_number#,
+			to_date(#issuing_date#,'yyyy-mm-dd'),
+			#permit_person#,
+			#business_scope#,
+			#companyid#
+		  )
+		]]>
+		
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_BLOC_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 更新组织机构信息 -->
+	<update id="updateOrgazicationDept" parameterClass="bloc">
+		<![CDATA[
+			update TO_BLOC set 
+			BLOC_NAME = #bloc_name#,
+			remark = #remark#,
+			address = #address#,
+			tel = #tel#,
+			leg_per = #leg_per#,
+			leg_per_card = #leg_per_card#,
+			ec_nature = #ec_nature#,
+			management = #management#,
+			reg_number = #reg_number#,
+			reg_capital = #reg_capital#,
+			reg_person = #reg_person#,
+			reg_date = to_date(#reg_date#,'yyyy-mm-dd'),
+			fax = #fax#,
+			reg_address = #reg_address#,
+			res_per = #res_per#,
+			est_date = to_date(#est_date#,'yyyy-mm-dd'),
+			ent_reg_date = to_date(#ent_reg_date#,'yyyy-mm-dd'),
+			email = #email#,
+			com_homepage = #com_homepage#,
+			bu_li_number = #bu_li_number#,
+			tax_reg_number = #tax_reg_number#,
+			issuing_date = to_date(#issuing_date#,'yyyy-mm-dd'),
+			permit_person = #permit_person#,
+			business_scope = #business_scope#,
+			companyid = #companyid#
+		]]>
+			<isNotEmpty prepend="," property="parentid">
+				PARENT_ID = #parentid#
+			</isNotEmpty>
+		where id=#id#
+	</update>
+	<update id="updateOrgazicationDeptByMove" parameterClass="bloc">
+		<![CDATA[
+			update TO_BLOC set 
+			PARENT_ID = #parentid#
+		]]>
+		where id=#id#
+	</update>
+	
+	<!-- 删除组织机构信息 -->
+	<delete id="deleteOrgazicationDept" parameterClass="int">
+		<![CDATA[
+		    delete from  TO_BLOC  WHERE id = #id#
+		]]>
+		
+	</delete>
+	
+	<!-- 检测组织机构下面数量 -->
+	<select id="queryDeptCount" parameterClass="int" resultClass="int">
+		   select count(*) from  TO_BLOC  WHERE PARENT_ID = #id#
+	</select>
+	
+	<!-- 检测组织机构下用户组数量 -->
+	<select id="containUserGroupNum" parameterClass="int" resultClass="int">
+		    select count(*) from  TO_BLOC_USER  WHERE BLOC_ID = #id# 
+	</select>
+	
+	<!-- 检测组织机构下车辆 -->
+	<select id="containCarNum" parameterClass="int" resultClass="int">
+		   select count(*) from  CAR_INFO  WHERE bloc_id = #id# 
+	</select>
+	
+
+	<!-- 查看组织机构名是否存在 -->
+	<select id="deptNameIsExist" parameterClass="bloc" resultClass="int">
+		select	count(*)
+		from TO_BLOC where bloc_name =rtrim(ltrim(#bloc_name#))
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 更新机构表中的车辆总数、离线数、长离数 -->
+	<update id="updateDeptCarNum" parameterClass="java.util.HashMap">
+		update TO_BLOC set caroffline = #caroffline#,longoffline = #longoffline#,total = #total# where id = #deptid#
+	</update>
+	
+	
+	<select id="getDeptIdByDeptName" parameterClass="String" resultClass="Integer">
+		select id from TO_BLOC where bloc_name = #blocname#
+	</select>
+
+</sqlMap>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+	<bean id="baseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+
+	<!-- 车辆管理 -->
+	<bean id="carServiceImpl" class="com.careye.car.service.CarService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+
+	<bean id="carService" class="com.careye.car.service.impl.CarServiceImpl"
+		parent="carServiceImpl">
+	</bean>
+	
+	<!-- 车辆信息统计 -->
+	<bean id="carConditionServiceImpl" class="com.careye.car.service.CarConditionService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+
+	<bean id="carConditionService" class="com.careye.car.service.impl.CarConditionServiceImpl"
+		parent="carConditionServiceImpl">
+	</bean>
+
+
+</beans>

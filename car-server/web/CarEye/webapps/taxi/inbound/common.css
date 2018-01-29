@@ -1,0 +1,57 @@
+body{
+	margin:0px;
+	padding:0px;
+	font-size:12px;
+}
+
+div {
+	margin:0 auto;
+}
+
+#searchFuzzy span {
+	text-align:left;
+}
+
+
+a:link {
+	text-decoration:none;
+}
+a:hover {
+	text-decoration:underline;
+}
+
+.main_wrapper{
+	width:960px;
+	overflow:hidden;
+	margin-top:10px;
+	margin-bottom:20px;
+}
+
+td.align_right{
+	text-align:right;
+	padding-right:20px;
+}
+
+input, select, textarea{
+	margin-right:5px;
+	height:23px;
+	line-height:23px;
+	border:1px solid #D1D1D1;
+}
+
+td.press_button_1{
+	padding-left:36em;
+}
+td.press_button_2{
+	padding-left:34em;
+}
+.buttons{
+	cursor:pointer;
+}
+
+
+
+
+
+
+

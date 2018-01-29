@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-carConditionSQL">
+
+	<typeAlias alias="carCondition" type="com.careye.car.domain.CarCondition" />
+	
+	
+	<!-- 车辆统计信息 -->
+	<select id="getCarConditionList" resultClass="carCondition" parameterClass="carCondition">
+		select  t.id,
+				tc.blocid,
+		        tc.userid,
+		        tc.terminal,
+		        tc.carnumber,
+		        tb.bloc_name blocname,
+		        to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+				t.inlinetime onlinetimes
+				from TO_OVERHEADS_STATISTIC t ,to_car_info tc ,to_bloc tb
+		where t.carid = tc.id(+) and tc.blocid = tb.id(+) 
+		<dynamic>
+			<isNotEmpty prepend="and" property="userid" >
+				t.carid in (select id from TO_CAR_INFO c where  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+		   	</isNotEmpty>
+		   	<isNotEmpty prepend="and" property="blocid" >
+				t.carid in (select id from TO_CAR_INFO c where  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						#blocid# CONNECT BY PRIOR  id = parent_id ))
+		   	</isNotEmpty>
+		   	<isNotEmpty prepend="and" property="carnumber">
+				t.carid in (select id from TO_CAR_INFO c where  c.carnumber = #carnumber#)
+			</isNotEmpty>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		order by createtime 
+	</select>
+	
+	<!-- 车辆统计信息总条数 -->
+	<select id="getCarConditionListCount" resultClass="int" parameterClass="carCondition">
+		select  count(*)
+				from TO_OVERHEADS_STATISTIC t 
+		where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="userid" >
+				t.carid in (select id from TO_CAR_INFO c where  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+		   	</isNotEmpty>
+		   	<isNotEmpty prepend="and" property="blocid" >
+				t.carid in (select id from TO_CAR_INFO c where  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						#blocid# CONNECT BY PRIOR  id = parent_id ))
+		   	</isNotEmpty>
+		   	<isNotEmpty prepend="and" property="carnumber">
+				t.carid in (select id from TO_CAR_INFO c where  c.carnumber = #carnumber#)
+			</isNotEmpty>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+	
+	<!-- 车辆统计信息 -->
+	<select id="getWordList" resultClass="carCondition" parameterClass="carCondition">
+		select  
+		        tc.terminal,
+		        tc.carnumber,
+		        tb.bloc_name blocname,
+		        to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+				t.inlinetime onlinetimes
+				from TO_OVERHEADS_STATISTIC t ,to_car_info tc ,to_bloc tb
+		where t.carid = tc.id(+) and tc.blocid = tb.id(+) 
+		<dynamic>
+			<isNotNull prepend="and" property="userid" >
+				t.carid in (select id from TO_CAR_INFO c where  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+		   	</isNotNull>
+		   	<isNotEmpty prepend="and" property="blocid" >
+				t.carid in (select id from TO_CAR_INFO c where  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						#blocid# CONNECT BY PRIOR  id = parent_id ))
+		   	</isNotEmpty>
+		   	<isNotEmpty prepend="and" property="carnumber">
+				t.carid in (select id from TO_CAR_INFO c where  c.carnumber = #carnumber#)
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+				to_char(t.createtime, 'yyyy-mm') = #stime#
+			</isNotEmpty>
+		</dynamic>
+		order by createtime 
+	</select>
+	
+</sqlMap>
+
+
+
+
+
+
+

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sqlMap namespace="oracle-KeySQL">
+	<typeAlias alias="key" type="com.careye.sysset.domain.Key" />
+	<!-- 查询密钥列表 -->
+	<select id="findPageKeyList" resultClass="key" parameterClass="key">
+		select t.id ,
+		t.userid,
+		u.LOGIN_NAME creater,
+		t.typeid,
+		y.typename,
+		t.key,
+		t.descs,
+		t.status,
+		t.requestcount,
+		to_char(t.createtime,'yyyy-mm-dd
+		hh24:mi:ss') createtime
+		from API_KEYS t,TO_BLOC_USER u ,VERSION_TYPE y
+		where t.userid=u.id(+)
+		and t.typeid=y.id(+)
+		<dynamic>
+			<isNotEmpty prepend="AND" property="key">
+				t.key like
+				'%'||#key#||'%'
+				</isNotEmpty>
+			<isNotEmpty prepend="AND" property="descs">
+				t.descs like
+				'%'||#descs#||'%'
+				</isNotEmpty>
+			<isNotEmpty prepend="AND" property="typeid">
+				t.typeid = #typeid#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="status">
+				t.status = #status#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+					t.createtime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.createtime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.id
+	</select>
+	<!-- 获取密钥数量 -->
+	<select id="findPageKeyListCount" resultClass="int"
+		parameterClass="key">
+
+		select count(*)
+		from API_KEYS t
+		<dynamic prepend="WHERE">
+				<isNotEmpty prepend="AND" property="key">
+				t.key like
+				'%'||#key#||'%'
+				</isNotEmpty>
+			<isNotEmpty prepend="AND" property="descs">
+				t.descs like
+				'%'||#descs#||'%'
+				</isNotEmpty>
+			<isNotEmpty prepend="AND" property="typeid">
+				t.typeid = #typeid#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="status">
+				t.status = #status#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+					t.createtime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.createtime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 版本类型下拉列表-->
+	<select id="selAppTypeList" resultClass="key">
+		select id,typename from
+		VERSION_TYPE order by id
+     </select>
+	<!-- 查询密钥名是否重复-->
+	<select id="keyIsExist" parameterClass="key" resultClass="int">
+		select count(*)from API_KEYS where key = #key#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 添加密钥信息 -->
+	<insert id="saveKey" parameterClass="key">
+		insert into API_KEYS(
+		userid,
+		typeid,
+		key,
+		descs,
+		status,
+
+		createtime
+		)
+		values(
+		#userid#,
+		#typeid#,
+		#key#,
+		#descs#,
+		#status#,
+
+		to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		)
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT API_KEYS_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	<!-- 修改密钥信息 -->
+	<update id="updateKey" parameterClass="key">
+		update API_KEYS
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="typeid">
+				typeid = #typeid#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="status">
+				status = #status#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="descs">
+				descs = #descs#
+			</isNotEmpty>
+
+		</dynamic>
+		WHERE id = #id#
+	</update>
+	<!--删除密钥信息 -->
+	<delete id="deleteKey">
+		delete from API_KEYS where id=#id#
+     </delete>
+
+	<!-- 激活密钥信息 -->
+	<update id="activeKey">
+		update API_KEYS set status=1 WHERE id =
+		#id#
+	</update>
+	<!--停用密钥信息 -->
+	<update id="inactiveKey">
+		update API_KEYS set status=0 WHERE id =
+		#id#
+	</update>
+</sqlMap>

@@ -1,0 +1,108 @@
+{
+	"text" : "远程控制设置",
+	"children" : [{
+				"text" : "车辆控制",
+				"children" : [{
+							"text" : "锁车",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "sc",
+							"parentId" : "1"
+						},{
+							"text" : "熄火",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "xh",
+							"parentId" : "1"
+						},{
+							"text" : "断油",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "dy",
+							"parentId" : "1"
+						},{
+							"text" : "断电",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "dd",
+							"parentId" : "1"
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "1",
+				"parentId" : "0"
+			}, {
+				"text" : "终端控制",
+				"children" : [{
+							"text" : "发送防伪码",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "fsfwm",
+							"parentId" : "2"
+						},{
+							"text" : "终端关机",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "zdgj",
+							"parentId" : "2"
+						},{
+							"text" : "终端复位",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "zdfw",
+							"parentId" : "2"
+						},{
+							"text" : "终端恢复出厂设置",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "zdhfccsz",
+							"parentId" : "2"
+						},{
+							"text" : "关闭数据通信",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "gbsjtx",
+							"parentId" : "2"
+						},{
+							"text" : "关闭所有无线通信",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "gbsywxtx",
+							"parentId" : "2"
+						},{
+							"text" : "WIFI热点控制",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "rdkz",
+							"parentId" : "2"
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "2",
+				"parentId" : "0"
+			},{
+				"text" : "电召",
+				"children" : [{
+							
+							"text" : "发送电召",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "fsdz",
+							"parentId" : "3"
+						},{
+							"text" : "中标发送",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "zbfs",
+							"parentId" : "3"
+					
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "3",
+				"parentId" : "0"
+			}],
+	"leaf" : false,
+	"expanded" : true,
+	"id" : "0"
+}

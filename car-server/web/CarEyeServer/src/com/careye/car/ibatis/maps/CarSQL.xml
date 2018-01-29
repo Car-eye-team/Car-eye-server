@@ -1,0 +1,733 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-carInfoSQL">
+
+	<typeAlias alias="carInfo" type="com.careye.car.domain.CarInfo" />
+	<typeAlias alias="serEva" type="com.careye.car.domain.SerEva" />
+	<typeAlias alias="terminalFunCount" type="com.careye.car.domain.TerminalFunCount" />
+	<typeAlias alias="terminalDayUpload" type="com.careye.car.domain.TerminalDayUpload" />
+	<typeAlias alias="carDriver" type="com.careye.car.domain.CarDriver" />
+	<typeAlias alias="terminalParameter" type="com.careye.mq.domain.TerminalParameter" />
+
+	<!-- 根据车牌号查询设备号 -->
+	<select id="getCarInfoByCarNumber" resultClass="String"
+		parameterClass="String">
+		select t.terminal from to_car_info t where t.carnumber = #carnumber#
+	</select>
+	
+	<!-- 获取司机代码 -->
+	<select id="getDriverCodeByCarid" resultClass="String" parameterClass="Integer">
+		select t.drivercode from to_car_info t where t.id = #id#
+	</select>
+
+	<!-- 根据设备号查询车牌号 -->
+	<select id="getCarInfoByTerminal" resultClass="String"
+		parameterClass="String">
+		select t.carnumber from to_car_info t where t.terminal = #terminal#
+	</select>
+
+	<!-- 获取车辆信息 -->
+	<select id="getCarInfo" resultClass="carInfo" parameterClass="java.util.HashMap">
+		select t.id,
+				t.blocid,
+				t.userid,
+				t.terminal,
+				t.carnumber,
+				tas.carstatus,
+				tas.dispaterstatus,
+				dt.usertype devicetype,
+				tb.bloc_name blocname
+				from to_car_info t, to_car_state tas, to_car_device_type dt, to_bloc tb
+		where t.id = tas.carid(+)
+			and t.devicetype = dt.typeid(+)
+			and t.blocid = tb.id(+)
+			and t.terminal = #terminal#
+			and dt.usertype = #devicetype#		
+	</select>
+	
+	<!-- 获取全部车辆信息 -->
+	<select id="getCarInfoAll" resultClass="carInfo">
+		select t.id,
+				t.blocid,
+				t.userid,
+				t.terminal,
+				t.carnumber,
+				tas.carstatus,
+				tas.dispaterstatus,
+				dt.usertype devicetype,
+				tb.bloc_name blocname
+				from to_car_info t, to_car_state tas, to_car_device_type dt, to_bloc tb
+		where t.id = tas.carid(+)
+			and t.devicetype = dt.typeid(+)
+			and t.blocid = tb.id(+)
+			and t.flag = 1
+	</select>
+	
+	<!-- 通过设备号获取车辆信息 -->
+	<select id="getCarInfoByTer" resultClass="carInfo" parameterClass="java.util.HashMap">
+		select t.id,
+				t.terminal,
+				t.carnumber,
+				tas.carstatus
+				from to_car_info t, to_car_state tas
+		where t.id = tas.carid(+)
+			and t.terminal = #terminal#
+	</select>
+	
+	<!-- 获取车辆详细信息 -->
+	<select id="getCarInfoDetail" resultClass="carInfo" parameterClass="carInfo">
+		select t.id,
+				t.blocid,
+				t.userid,
+				t.terminal,
+				t.carnumber,
+				tas.carstatus,
+				dt.usertype devicetype,
+				tb.bloc_name blocname
+				from to_car_info t, to_car_state tas, to_car_device_type dt, to_bloc tb
+		where t.id = tas.carid(+)
+			and t.devicetype = dt.typeid(+)
+			and t.blocid = tb.id(+)
+			and t.terminal = #terminal#
+			and dt.usertype = #devicetype#		
+	</select>
+
+	<!-- 根据车辆ID获取车辆当前状态 -->
+	<select id="getCarStatus" resultClass="int" parameterClass="int">
+		<![CDATA[
+			select t.carstatus from to_car_state t where t.carid  = #carid#
+	   ]]>
+	</select>
+
+	<!-- 根据车辆ID更新车辆状态 -->
+	<update id="updateCarState" parameterClass="HashMap">
+		<![CDATA[
+			UPDATE to_car_state SET carstatus = #carstatus#,kzstate = #kzstate#
+		 ]]>
+		where carid = #carid#
+	</update>
+	<!-- 根据车辆ID更新车辆ACC状态 -->
+	<update id="updateCarAcc" parameterClass="HashMap">
+		<![CDATA[
+			UPDATE TO_CAR_POSITION_INFO SET ACC = #acc#
+		 ]]>
+		where carid = #carid#
+	</update>
+
+	<!-- 更新组织机构数量信息(存储过程) -->
+	<procedure  id="updateOneDeptTotal" parameterClass="int">
+		{call update_dept_offline_procedure(#blocid#)}
+	</procedure >
+	
+	<!-- 根据报警key获取报警声音路径 -->
+	<select id="getMusicaddrByAlarmtype" resultClass="String" parameterClass="String">
+		<![CDATA[
+			select t.musicaddr from to_alarm_type t where t.alarmkey = #alarmkey#
+	   ]]>
+	</select>
+	
+	
+	<!-- 根据服务监督卡号获取司机ID -->
+	<select id="getDriverId" resultClass="int" parameterClass="String">
+		<![CDATA[
+			select t.id from to_car_driver_info t where t.sscno = #driverno#
+	   ]]>
+	</select>
+	
+	
+	<!-- 根据车辆ID更新车辆状态 -->
+	<update id="updateShiftdriverId" parameterClass="HashMap">
+		<![CDATA[
+			UPDATE to_car_info SET shiftdriverid = #shiftdriverid#
+		 ]]>
+		where id = #carid#
+	</update>
+	
+	
+	<!-- 插入位置信息车辆位置表中 -->
+	<insert id="insertSerEva" parameterClass="serEva">
+		<![CDATA[
+			insert into to_car_ser_eva
+		      (
+		       carid,
+		       shiftdriverid,
+		       result,
+		       reason,
+		       createtime,
+		       remark
+		       )
+		    values
+		      (
+		       #carid#,
+		       #shiftdriverid#,
+		       #result#,
+		       #reason#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss'),
+		       #remark#
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_CAR_SER_EVA_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	 <!-- 根据机构ID获取上级机构ID -->
+	<select id="getUpDeptlist" resultClass="Integer"  parameterClass="Integer">
+		   SELECT id
+              FROM TO_BLOC
+             START WITH id = #blocid#
+            CONNECT BY PRIOR  parent_id = id
+            order by id desc
+	</select>
+	
+	
+	 <!-- 根据车辆ID获取是否存在记录 -->
+	<select id="getTerminalFunCount" resultClass="Integer"  parameterClass="Integer">
+		   select count(t.id) from to_terminal_fun_count t where t.carid = #carid#
+	</select>
+	
+	<!-- 插入功能使用次数 -->
+	<insert id="insertTerminalFunCount" parameterClass="terminalFunCount">
+		<![CDATA[
+			insert into to_terminal_fun_count
+		      (
+		       carid,
+		       terminal,
+		       carnumber,
+		       count1,
+		       count2,
+		       count3,
+		       count4,
+		       count5,
+		       count6,
+		       count7,
+		       count8,
+		       count9,
+		       count10,
+		       count11,
+		       count12,
+		       count13,
+		       count14,
+		       count15,
+		       count16,
+		       count17,
+		       count18,
+		       createtime
+		       )
+		    values
+		      (
+		       #carid#,
+		       #terminal#,
+		       #carnumber#,
+		       #count1#,
+		       #count2#,
+		       #count3#,
+		       #count4#,
+		       #count5#,
+		       #count6#,
+		       #count7#,
+		       #count8#,
+		       #count9#,
+		       #count10#,
+		       #count11#,
+		       #count12#,
+		       #count13#,
+		       #count14#,
+		       #count15#,
+		       #count16#,
+		       #count17#,
+		       #count18#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_TERMINAL_FUN_COUNT_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+		<!-- 更新次数 -->
+	<update id="updateTerminalFunCount" parameterClass="terminalFunCount">
+		<![CDATA[
+			UPDATE to_terminal_fun_count
+			   SET count1  = count1 + #count1#,
+			       count2  = count2 + #count2#,
+			       count3  = count3 + #count3#,
+			       count4  = count4 + #count4#,
+			       count5  = count5 + #count5#,
+			       count6  = count6 + #count6#,
+			       count7  = count7 + #count7#,
+			       count8  = count8 + #count8#,
+			       count9  = count9 + #count9#,
+			       count10 = count10 + #count10#,
+			       count11 = count11 + #count11#,
+			       count12 = count12 + #count12#,
+			       count13 = count13 + #count13#,
+			       count14 = count14 + #count14#,
+			       count15 = count15 + #count15#,
+			       count16 = count16 + #count16#,
+			       count17 = count17 + #count17#,
+			       count18 = count18 + #count18#,
+			       createtime = to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		 ]]>
+		where carid = #carid#
+	</update>
+	
+	<!-- 插入功能使用次数 -->
+	<insert id="insertTerminalDayUploadCount" parameterClass="terminalDayUpload">
+		<![CDATA[
+			insert into TO_TERMINAL_DAYUPLOAD_COUNT
+		      (
+		       carid,
+		       terminal,
+		       carnumber,
+		       time,
+			   type,
+			   numbercount,
+			   usinglen,
+			   flow,
+		       createtime
+		       )
+		    values
+		      (
+		       #carid#,
+		       #terminal#,
+		       #carnumber#,
+		       #time#,
+			   #type#,
+			   #number#,
+			   #usinglen#,
+			   #flow#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_TERMINAL_DAYUPLOAD_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 根据设备号获取车辆设备类型 -->
+	<select id="getTypeidByTer" resultClass="Integer" parameterClass="String">
+		  select dt.typeid 
+				  from to_car_info t, to_car_device_type dt
+				 where t.devicetype = dt.typeid
+				   and t.terminal = #terminal#
+	</select>
+	
+	<!-- 获取车辆总数 -->
+	<select id="getCarInfoSum" resultClass="int" parameterClass="int">
+		<![CDATA[
+			select count(*) from to_car_info t,to_car_state cs
+			 where t.id = cs.carid(+)
+			 and t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+            #deptid# CONNECT BY PRIOR  id = parent_id )
+            and t.flag = 1
+	   ]]>
+	</select>
+	
+	<!-- 获取长离线数量 -->
+	<select id="getLongOffLineCarInfoSum" resultClass="int" parameterClass="int">
+		<![CDATA[
+            select count(*) from to_car_info t,to_car_state cs
+			 where t.id = cs.carid(+)
+			 and t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+            #deptid# CONNECT BY PRIOR  id = parent_id )
+            and cs.carstatus = 1
+            and t.flag = 1
+	   ]]>
+	</select>
+	
+	<!-- 获取离线数量 -->
+	<select id="getOffLineCarInfoSum" resultClass="int" parameterClass="int">
+		<![CDATA[
+            select count(*) from to_car_info t,to_car_state cs
+			 where t.id = cs.carid(+)
+			 and t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+            #deptid# CONNECT BY PRIOR  id = parent_id )
+            and cs.carstatus = 2
+            and t.flag = 1
+	   ]]>
+	</select>
+	
+	<!--所有组织机构不分页列表 -->
+	<select id="selectAllDeptidList" resultClass="Integer">
+			select id from TO_BLOC order by id desc
+	</select>
+	
+	<!-- 更新机构表中的车辆总数、离线数、长离数 -->
+	<update id="updateDeptCarNum" parameterClass="java.util.HashMap">
+		update TO_BLOC set caroffline = #caroffline#,longoffline = #longoffline#,total = #total# where id = #deptid#
+	</update>
+	
+	<!-- 获取雅讯车辆信息 -->
+	<select id="getYxCarInfo" resultClass="carInfo" parameterClass="java.util.HashMap">
+		select t.id,
+				t.blocid,
+				t.userid,
+				t.terminal,
+				t.carnumber,
+				tas.carstatus,
+				tb.bloc_name blocname
+				from TO_YX_DEVICE t, TO_YX_CAR_STATE tas,to_bloc tb
+		where t.carnumber = tas.carnumber(+)
+			and t.blocid = tb.id(+)
+			and t.terminal = #terminal#
+				
+	</select>
+	
+	<!-- 根据设备号更新雅讯车辆状态 -->
+	<update id="updateYxCarState" parameterClass="HashMap">
+		<![CDATA[
+			UPDATE TO_YX_CAR_STATE SET carstatus = #carstatus#,kzstate = #kzstate#
+		 ]]>
+		where terminal = #terminal#
+	</update>
+	
+	<!--通过雅讯设备号得到当班司机信息-->
+	<select id="getCarDriverByYxTerminal" resultClass="carDriver" parameterClass="String">
+		 select tcd.drivecrednum,
+	        tcd.drivername,
+	        t.carnumber
+	        from TO_YX_DEVICE t, to_car_info tci,TO_CAR_DRIVER_INFO tcd
+	    where  tci.carnumber =t.carnumber
+	      and tcd.id = tci.shiftdriverid(+)
+			and t.terminal = #terminal#
+				
+	</select>
+	
+	<!-- 获取所有车辆信息 -->
+	<select id="findCarInfo" resultClass="carInfo" >
+		select t.id,
+				t.blocid,
+				t.userid,
+				t.terminal,
+				t.carnumber,
+				tas.carstatus,
+				dt.usertype devicetype,
+				tb.bloc_name blocname
+				from to_car_info t, to_car_state tas, to_car_device_type dt, to_bloc tb
+		where t.id = tas.carid(+)
+			and t.devicetype = dt.typeid(+)
+			and t.blocid = tb.id(+)
+	</select>
+	
+	<!-- 根据终端号码获取车辆信息id -->
+	<select id="getCaridByTerminal" resultClass="Integer"  parameterClass="String">
+		   select max(t.id) from TO_CAR_INFO t where t.terminal = #terminal#
+	</select>
+	
+	 <!-- 根据车辆ID获取是否存在终端参数记录 -->
+	<select id="getTerminalParameterCount" resultClass="Integer"  parameterClass="terminalParameter">
+		   select count(t.id) from TO_TERMINAL_PARAM t where t.carid = #carid#
+	</select>
+	
+	<!-- 插入终端参数 -->
+	<insert id="addTerminalParameter" parameterClass="terminalParameter">
+		<![CDATA[
+			insert into TO_TERMINAL_PARAM
+		      (
+		       carid,
+		        terminalHeatTime,
+				tcpResend,
+				udpResend,
+				apnParam,
+				mainPwd,
+				backApnParam,
+				backPwd,
+				pointUp,
+				sleepUp,
+				defaultSecondUp,
+				unLoginTime,
+				unLoginSecond,
+				emerMileSecond,
+				platMonitorPhone,
+				recovePhone,
+				smsPhone,
+				longSecond,
+				monitorPhone,
+				tcpTimeOut,
+				udpTimeOut,
+				smsRecount,
+				mainLogin,
+				mainAddr,
+				backLogin,
+				backAddr,
+				pointUpScheme,
+				emerSecond,
+				defaultUpMile,
+				sleepUpMile,
+				inflection,
+				resetPhone,
+				platformSmsPhone,
+				terminalPick,
+				monthSecond,
+				platformAdminSmsPhone,
+				highSpeed,
+				continuTimeTop,
+				smallSleepTime,
+				superSpeedSecood,
+				totalDriverTime,
+				longunDriverSecond,
+				carMile,
+				carCityId,
+				carColor,
+				carProvinteId,
+				carCard,
+				qtcarMile,
+				qtcarCityId,
+				qtcarColor,
+				qtcarProvinteId,
+				qtcarCard,
+		       createtime
+		       )
+		    values
+		      (
+		       #carid#,
+		       #terminalHeatTime#,
+				#tcpResend#,
+				#udpResend#,
+				#apnParam#,
+				#mainPwd#,
+				#backApnParam#,
+				#backPwd#,
+				#pointUp#,
+				#sleepUp#,
+				#defaultSecondUp#,
+				#unLoginTime#,
+				#unLoginSecond#,
+				#emerMileSecond#,
+				#platMonitorPhone#,
+				#recovePhone#,
+				#smsPhone#,
+				#longSecond#,
+				#monitorPhone#,
+				#tcpTimeOut#,
+				#udpTimeOut#,
+				#smsRecount#,
+				#mainLogin#,
+				#mainAddr#,
+				#backLogin#,
+				#backAddr#,
+				#pointUpScheme#,
+				#emerSecond#,
+				#defaultUpMile#,
+				#sleepUpMile#,
+				#inflection#,
+				#resetPhone#,
+				#platformSmsPhone#,
+				#terminalPick#,
+				#monthSecond#,
+				#platformAdminSmsPhone#,
+				#highSpeed#,
+				#continuTimeTop#,
+				#smallSleepTime#,
+				#superSpeedSecood#,
+				#totalDriverTime#,
+				#longunDriverSecond#,
+				#carMile#,
+				#carCityId#,
+				#carColor#,
+				#carProvinteId#,
+				#carCard#,
+				#qtcarMile#,
+				#qtcarCityId#,
+				#qtcarColor#,
+				#qtcarProvinteId#,
+				#qtcarCard#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_TERMINAL_PARAM_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 根据carid更新终端参数 -->
+	<update id="updateTerminalParameter" parameterClass="terminalParameter">
+		UPDATE TO_TERMINAL_PARAM SET 
+			createtime = to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')  
+		<dynamic>
+			<isNotEmpty property="terminalHeatTime" prepend=",">
+				terminalHeatTime = #terminalHeatTime#   
+			</isNotEmpty>
+			<isNotEmpty property="tcpResend" prepend=",">
+				tcpResend = #tcpResend#   
+			</isNotEmpty>
+			<isNotEmpty property="udpResend" prepend=",">
+				udpResend = #udpResend#   
+			</isNotEmpty>
+			<isNotEmpty property="apnParam" prepend=",">
+				apnParam = #apnParam#   
+			</isNotEmpty>
+			<isNotEmpty property="mainPwd" prepend=",">
+				mainPwd = #mainPwd#   
+			</isNotEmpty>
+			<isNotEmpty property="backApnParam" prepend=",">
+				backApnParam = #backApnParam#   
+			</isNotEmpty>
+			<isNotEmpty property="backPwd" prepend=",">
+				backPwd = #backPwd#   
+			</isNotEmpty>
+			<isNotEmpty property="pointUp" prepend=",">
+				pointUp = #pointUp#   
+			</isNotEmpty>
+			<isNotEmpty property="sleepUp" prepend=",">
+				sleepUp = #sleepUp#   
+			</isNotEmpty>
+			<isNotEmpty property="defaultSecondUp" prepend=",">
+				defaultSecondUp = #defaultSecondUp#   
+			</isNotEmpty>
+			<isNotEmpty property="unLoginTime" prepend=",">
+				unLoginTime = #unLoginTime#   
+			</isNotEmpty>
+			<isNotEmpty property="unLoginSecond" prepend=",">
+				unLoginSecond = #unLoginSecond#   
+			</isNotEmpty>
+			<isNotEmpty property="emerMileSecond" prepend=",">
+				emerMileSecond = #emerMileSecond#   
+			</isNotEmpty>
+			<isNotEmpty property="platMonitorPhone" prepend=",">
+				platMonitorPhone = #platMonitorPhone#   
+			</isNotEmpty>
+			<isNotEmpty property="recovePhone" prepend=",">
+				recovePhone = #recovePhone#   
+			</isNotEmpty>
+			<isNotEmpty property="smsPhone" prepend=",">
+				smsPhone = #smsPhone#   
+			</isNotEmpty>
+			<isNotEmpty property="longSecond" prepend=",">
+				longSecond = #longSecond#   
+			</isNotEmpty>
+			<isNotEmpty property="monitorPhone" prepend=",">
+				monitorPhone = #monitorPhone#   
+			</isNotEmpty>
+			<isNotEmpty property="tcpTimeOut" prepend=",">
+				tcpTimeOut = #tcpTimeOut#   
+			</isNotEmpty>
+			<isNotEmpty property="udpTimeOut" prepend=",">
+				udpTimeOut = #udpTimeOut#   
+			</isNotEmpty>
+			<isNotEmpty property="smsRecount" prepend=",">
+				smsRecount = #smsRecount#   
+			</isNotEmpty>
+			<isNotEmpty property="mainLogin" prepend=",">
+				mainLogin = #mainLogin#   
+			</isNotEmpty>
+			<isNotEmpty property="mainAddr" prepend=",">
+				mainAddr = #mainAddr#   
+			</isNotEmpty>
+			<isNotEmpty property="backLogin" prepend=",">
+				backLogin = #backLogin#   
+			</isNotEmpty>
+			<isNotEmpty property="backAddr" prepend=",">
+				backAddr = #backAddr#   
+			</isNotEmpty>
+			<isNotEmpty property="pointUpScheme" prepend=",">
+				pointUpScheme = #pointUpScheme#   
+			</isNotEmpty>
+			<isNotEmpty property="emerSecond" prepend=",">
+				emerSecond = #emerSecond#   
+			</isNotEmpty>
+			<isNotEmpty property="defaultUpMile" prepend=",">
+				defaultUpMile = #defaultUpMile#   
+			</isNotEmpty>
+			<isNotEmpty property="sleepUpMile" prepend=",">
+				sleepUpMile = #sleepUpMile#   
+			</isNotEmpty>
+			<isNotEmpty property="inflection" prepend=",">
+				inflection = #inflection#   
+			</isNotEmpty>
+			<isNotEmpty property="resetPhone" prepend=",">
+				resetPhone = #resetPhone#   
+			</isNotEmpty>
+			<isNotEmpty property="platformSmsPhone" prepend=",">
+				platformSmsPhone = #platformSmsPhone#   
+			</isNotEmpty>
+			<isNotEmpty property="terminalPick" prepend=",">
+				terminalPick = #terminalPick#   
+			</isNotEmpty>
+			<isNotEmpty property="monthSecond" prepend=",">
+				monthSecond = #monthSecond#   
+			</isNotEmpty>
+			<isNotEmpty property="platformAdminSmsPhone" prepend=",">
+				platformAdminSmsPhone = #platformAdminSmsPhone#   
+			</isNotEmpty>
+			<isNotEmpty property="highSpeed" prepend=",">
+				highSpeed = #highSpeed#   
+			</isNotEmpty>
+			<isNotEmpty property="continuTimeTop" prepend=",">
+				continuTimeTop = #continuTimeTop#   
+			</isNotEmpty>
+			<isNotEmpty property="smallSleepTime" prepend=",">
+				smallSleepTime = #smallSleepTime#   
+			</isNotEmpty>
+			<isNotEmpty property="superSpeedSecood" prepend=",">
+				superSpeedSecood = #superSpeedSecood#   
+			</isNotEmpty>
+			<isNotEmpty property="totalDriverTime" prepend=",">
+				totalDriverTime = #totalDriverTime#   
+			</isNotEmpty>
+			<isNotEmpty property="longunDriverSecond" prepend=",">
+				longunDriverSecond = #longunDriverSecond#   
+			</isNotEmpty>
+			<isNotEmpty property="carMile" prepend=",">
+				carMile = #carMile#   
+			</isNotEmpty>
+			<isNotEmpty property="carCityId" prepend=",">
+				carCityId = #carCityId#   
+			</isNotEmpty>
+			<isNotEmpty property="carColor" prepend=",">
+				carColor = #carColor#   
+			</isNotEmpty>
+			<isNotEmpty property="carProvinteId" prepend=",">
+				carProvinteId = #carProvinteId#   
+			</isNotEmpty>
+			<isNotEmpty property="carCard" prepend=",">
+				carCard = #carCard#   
+			</isNotEmpty>
+			<isNotEmpty property="qtcarMile" prepend=",">
+				qtcarMile = #qtcarMile#   
+			</isNotEmpty>
+			<isNotEmpty property="qtcarCityId" prepend=",">
+				qtcarCityId = #qtcarCityId#   
+			</isNotEmpty>
+			<isNotEmpty property="qtcarColor" prepend=",">
+				qtcarColor = #qtcarColor#   
+			</isNotEmpty>
+			<isNotEmpty property="qtcarProvinteId" prepend=",">
+				qtcarProvinteId = #qtcarProvinteId#   
+			</isNotEmpty>
+			<isNotEmpty property="qtcarCard" prepend=",">
+				qtcarCard = #qtcarCard#   
+			</isNotEmpty>
+		</dynamic>
+		where carid = #carid#
+	</update>
+	
+	<!-- 根据车辆ID更新司机代码 -->
+	<update id="updateDrivercode" parameterClass="carInfo">
+		<![CDATA[
+			UPDATE to_car_info SET drivercode = #drivercode#
+		 ]]>
+		where id = #id#
+	</update>
+	
+	
+	
+</sqlMap>
+
+
+
+
+
+
+

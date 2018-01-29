@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- JSON -->
+		<package name="commonjson" namespace="/commonjson" extends="qhtaxijson">
+		<!-- 获取省、市、县信息 -->
+		<action name="*" method="{1}" class="com.careye.common.action.CityInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+		</action>
+		
+		<action name="*" method="{1}" class="com.careye.common.action.UserRegisterAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+		</action>
+		
+	</package>
+	
+	<package name="common" namespace="/common" extends="qhtaxi">
+		<action name="register" method="register"
+			class="com.careye.common.action.UserRegisterAction">
+			<result name="success">
+				/userregister/index.jsp
+			</result>
+			<result name="input">
+				/userregister/index.jsp
+			</result>
+		</action>
+	</package>
+</struts>

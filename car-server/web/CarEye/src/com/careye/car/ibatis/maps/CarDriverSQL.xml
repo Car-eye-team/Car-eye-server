@@ -1,0 +1,724 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-carDriverQL">
+
+	<typeAlias alias="carDriver" type="com.careye.car.domain.CarDriver" />
+	<typeAlias alias="taxiMeter" type="com.careye.car.domain.TaxiMeter" />
+	<typeAlias alias="preJobExam" type="com.careye.car.domain.PreJobExam" />
+	<typeAlias alias="serviceLicense" type="com.careye.car.domain.ServiceLicense" />
+	
+	<!--查询最新插入的id -->
+	<select id="getNewId"  resultClass="int" >
+	 select 
+          max(id)
+		  from TO_CAR_DRIVER_INFO 
+	</select>
+	
+	 <!-- 更新司机代码 -->
+     <update id="updateDrivercode" parameterClass="carDriver">
+         update TO_CAR_DRIVER_INFO set 
+				drivercode = #drivercode#
+		      WHERE id = #id#
+     </update>
+	
+	 <!--查询服务监督卡号是否存在 -->
+	<select id="getDrivercodeIsExist"  resultClass="int" parameterClass="carDriver">
+	 select 
+          count(id)
+		  from TO_CAR_DRIVER_INFO 
+             where drivercode = #drivercode#
+		  <isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+		 </isNotEmpty>
+	</select>
+
+	<!-- 司机名是否已存在-->
+	<select id="queryDriverNameIsExist" resultClass="Integer" parameterClass="carDriver">
+		select count(*) from TO_CAR_DRIVER_INFO  where drivername=ltrim(rtrim(#drivername#))
+		  <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+	
+	
+	<!-- 查询司机信息数量 -->
+	<select id="selectCarDriver" resultClass="int" parameterClass="carDriver">
+       
+           select count(*) 
+            from TO_CAR_DRIVER_INFO t,TO_BLOC r, TO_DRIVING_LICENSE d, TO_CAR_INFO c
+          where t.blocid=r.id(+) and t.id = d.driverid(+) and t.carid = c.id(+)
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="id">
+					 		t.id=#id#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="drivername">
+					 		t.drivername like '%'||#drivername#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="phone">
+					 		t.phone like '%'||#phone#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+		        </dynamic>
+        
+     </select>
+     
+	<!-- 查询司机信息列表-->
+	<select id="selectCheckCarDriver" resultClass="carDriver" parameterClass="carDriver">
+        select t.id,
+               t.blocid,
+               r.bloc_name blocname,
+               t.userid,
+               t.drivername,
+               t.tel,
+               t.phone,
+               t.sex,
+               t.addr,
+               t.idnumber,
+               to_char(t.birthday,'yyyy-mm-dd') birthday,
+               t.qualificationcertificate,
+               t.certifyingauthority,
+               t.drivecrednum,
+               t.sscno,
+               t.nation,
+               t.education,
+               t.political,
+               t.nowstatus,
+               to_char(t.driverannualdate,'yyyy-mm-dd') driverannualdate,
+               to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+               t.carid,
+               c.carnumber,
+               t.drivercode,
+               
+               t.id driverid,
+               d.drivingnumber,
+               d.zjcartype,
+               d.validity,
+               d.remark,
+               to_char(d.firstlztime,'yyyy-mm-dd') firstlztime,
+               to_char(d.fztime,'yyyy-mm-dd') fztime
+          from TO_CAR_DRIVER_INFO t,TO_BLOC r, TO_DRIVING_LICENSE d, TO_CAR_INFO c
+          where t.blocid=r.id(+) and t.id = d.driverid(+) and t.carid = c.id(+)
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="id">
+					 		t.id=#id#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="drivername">
+					 		t.drivername like '%'||#drivername#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="phone">
+					 		t.phone like '%'||#phone#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="sscno">
+					 		t.sscno like '%'||#sscno#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     <!-- 删除司机信息 -->
+     <delete id="deleteCarDriver" parameterClass="java.util.List">
+		DELETE FROM TO_CAR_DRIVER_INFO where
+		<iterate property="" conjunction="," open="id in (" close=")">#list[]#
+		</iterate>
+	</delete>
+     
+      <!-- 增加司机信息 -->
+     <insert id="insertCarDriver" parameterClass="carDriver">
+        insert into TO_CAR_DRIVER_INFO(
+	        blocid,
+		    userid,
+		    drivername,
+	        tel,
+	        phone,
+	        sex,
+	        addr,
+	        idnumber,
+	        qualificationcertificate,
+	        certifyingauthority,
+	        drivecrednum,
+	        <isNotEmpty prepend="" property="birthday">
+				birthday,
+			</isNotEmpty>
+			<isNotEmpty prepend="" property="driverannualdate">
+				driverannualdate,
+			</isNotEmpty>
+	        createtime,
+	        sscno,
+	        nation,
+	        education,
+	        political,
+	        nowstatus,
+	        carid
+	        <isNotEmpty prepend="," property="drivercode">
+				drivercode
+			</isNotEmpty>
+        )values(
+	        #blocid#,
+	        #userid#,
+	        #drivername#,
+	        #tel#,
+	        #phone#,
+	        #sex#,
+	        #addr#,
+	        #idnumber#,
+	        #qualificationcertificate#,
+	        #certifyingauthority#,
+	        #drivecrednum#,
+	        <isNotEmpty prepend="" property="birthday">
+				to_date(#birthday#,'yyyy-mm-dd hh24:mi:ss'),
+			</isNotEmpty>
+			<isNotEmpty prepend="" property="driverannualdate">
+				to_date(#driverannualdate#,'yyyy-mm-dd hh24:mi:ss'),
+			</isNotEmpty>
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+	        #sscno#,
+	        #nation#,
+	        #education#,
+	        #political#,
+	        #nowstatus#,
+	        #carid#
+	        <isNotEmpty prepend="," property="drivercode">
+				#drivercode#
+			</isNotEmpty>
+        )
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_DRIVER_INFO_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新司机信息 -->
+     <update id="updateCarDriver" parameterClass="carDriver">
+         update TO_CAR_DRIVER_INFO set 
+		           blocid = #blocid#,
+		           drivername = #drivername#,
+		           tel = #tel#,
+		           phone = #phone#,
+		           sex = #sex#,
+			       addr = #addr#,
+			       idnumber = #idnumber#,
+			       qualificationcertificate = #qualificationcertificate#,
+			       certifyingauthority = #certifyingauthority#,
+			       drivecrednum = #drivecrednum#,
+			       <isNotEmpty prepend="" property="birthday">
+						birthday =to_date(#birthday#,'yyyy-mm-dd hh24:mi:ss'),
+					</isNotEmpty>
+				   <isEmpty prepend="" property="birthday">
+						birthday = null,
+					</isEmpty>
+					<isNotEmpty prepend="" property="driverannualdate">
+						driverannualdate = to_date(#driverannualdate#,'yyyy-mm-dd hh24:mi:ss'),
+					</isNotEmpty>
+				   <isNotEmpty prepend="" property="driverannualdate">
+						driverannualdate = null,
+					</isNotEmpty>
+			       sscno = #sscno#,
+			       nation = #nation#,
+			       education = #education#,
+			       political = #political#,
+			       nowstatus = #nowstatus#,
+			       carid = #carid#
+			       <isNotEmpty prepend="," property="drivercode">
+						drivercode = #drivercode#
+				   </isNotEmpty>
+		      WHERE id = #id#
+     </update>
+	
+	<!-- 根据司机姓名获取驾驶员ID -->
+	<select id="getCarDriverId" resultClass="Integer" parameterClass="String">
+		select id from TO_CAR_DRIVER_INFO  where drivername=#drivername#
+	</select>
+	
+	<!-- 根据id得到对象 -->
+	<select id="getCarDriverById" resultClass="carDriver" parameterClass="int">
+		        select t.id,
+				       t.blocid,
+				       t.userid,
+				       t.drivername,
+				       t.tel,
+				       t.phone,
+				       t.sex,
+				       t.addr,
+				       t.idnumber,
+				       to_char(t.birthday,'yyyy-mm-dd') birthday,
+				       t.qualificationcertificate,
+				       t.certifyingauthority,
+				       t.drivecrednum,
+				       t.sscno,
+				       to_char(t.driverannualdate,'yyyy-mm-dd') driverannualdate,
+				       to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+				       nation,
+				       education,
+				       political,
+				       nowstatus
+				       from TO_CAR_DRIVER_INFO t where t.id=#id#
+	</select>
+	
+	<!--车辆使用的司机 是否存在  -->
+	<select id="isExitsCarByCarDriverUse" resultClass="int" parameterClass="java.util.List">
+		select count(id) from to_car_info  where 
+		<iterate property="" conjunction="," open="ONEDRIVERID in (" close=")">#list[]#
+		</iterate>
+		or
+		<iterate property="" conjunction="," open="TWODRIVERID in (" close=")">#list[]#
+		</iterate>
+	</select>
+	
+	
+	<!-- 查询当班司机信息数量 -->
+	<select id="selectDutyCarDriverCount" resultClass="int" parameterClass="carDriver">
+       
+           select count(*) 
+             from TO_CAR_DRIVER_INFO t,TO_BLOC r,to_car_info ci
+          where 1=1 
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="id">
+					 		t.id=#id#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="drivername">
+					 		t.drivername like '%'||#drivername#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="phone">
+					 		t.phone like '%'||#phone#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="sscno">
+					 		t.sscno like '%'||#sscno#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 	    ci.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					 	  t.blocid in (SELECT m.id FROM TO_BLOC m 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					 <isNotEmpty prepend="and" property="carids">
+					    ci.id in
+		               <iterate property="carids"  conjunction="," open="(" close=")">#carids[]#</iterate>
+					</isNotEmpty>
+		        </dynamic>
+		 and t.blocid=r.id(+)
+         and  ci.SHIFTDRIVERID=t.id
+     </select>
+     
+	<!-- 查询当班司机信息列表-->
+	<select id="selectDutyCarDriver" resultClass="carDriver" parameterClass="carDriver">
+        select t.id,
+               t.blocid,
+               r.bloc_name blocname,
+               t.userid,
+               t.drivername,
+               t.tel,
+               t.phone,
+               t.sex,
+               t.addr,
+               t.idnumber,
+               to_char(t.birthday,'yyyy-mm-dd') birthday,
+               t.qualificationcertificate,
+               t.certifyingauthority,
+               t.drivecrednum,
+               t.sscno,
+               ci.carnumber,
+               to_char(t.driverannualdate,'yyyy-mm-dd') driverannualdate,
+               to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+               nation,
+			   education,
+			   political,
+			   nowstatus
+          from TO_CAR_DRIVER_INFO t,TO_BLOC r,to_car_info ci
+          where 1=1 
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="id">
+					 		t.id=#id#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="drivername">
+					 		t.drivername like '%'||#drivername#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="phone">
+					 		t.phone like '%'||#phone#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="sscno">
+					 		t.sscno like '%'||#sscno#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 	    ci.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					 	  t.blocid in (SELECT m.id FROM TO_BLOC m 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					 <isNotEmpty prepend="and" property="carids">
+					    ci.id in
+		               <iterate property="carids"  conjunction="," open="(" close=")">#carids[]#</iterate>
+					</isNotEmpty>
+		        </dynamic>
+		 and t.blocid=r.id(+)
+         and  ci.SHIFTDRIVERID=t.id
+      order by t.id desc
+     </select>
+	
+		
+	<!-- 查询计价器信息数量 -->
+	<select id="selectTaxiMeterCount" resultClass="int" parameterClass="taxiMeter">
+     </select>
+     
+	<!-- 查询计价器信息列表-->
+	<select id="selectTaxiMeter" resultClass="taxiMeter" parameterClass="taxiMeter">
+     </select>
+	
+	<!-- 获取最新的插入驾驶员信息表的id-->
+	<select id="getNewDriverid" resultClass="int">
+		select max(t.id) id from TO_CAR_DRIVER_INFO t
+     </select>
+     
+      <!-- 增加驾驶证信息 -->
+     <insert id="insertDriverLicense" parameterClass="carDriver">
+        insert into TO_DRIVING_LICENSE(
+	        driverid,
+		    drivingnumber,
+		    zjcartype,
+	        validity,
+	        remark,
+	        createtime
+	        <isNotEmpty prepend="," property="firstlztime">
+				firstlztime
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="fztime">
+				fztime
+			</isNotEmpty>
+        )values(
+	        #driverid#,
+	        #drivingnumber#,
+	        #zjcartype#,
+	        #validity#,
+	        #remark#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+	        <isNotEmpty prepend="," property="firstlztime">
+				to_date(#firstlztime#,'yyyy-mm-dd')
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="fztime">
+				to_date(#fztime#,'yyyy-mm-dd')
+			</isNotEmpty>
+        )
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_DRIVING_LICENSE_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     <!-- 更新驾驶证信息 -->
+     <update id="updateDriverLicense" parameterClass="carDriver">
+         update TO_DRIVING_LICENSE set 
+		           driverid = #driverid#,
+		           drivingnumber = #drivingnumber#,
+		           zjcartype = #zjcartype#,
+		           <isNotEmpty prepend="" property="firstlztime">
+						firstlztime = to_date(#firstlztime#,'yyyy-mm-dd'),
+				   </isNotEmpty>
+				   <isEmpty prepend="" property="firstlztime">
+						firstlztime = null,
+				   </isEmpty>
+				   <isNotEmpty prepend="" property="fztime">
+						fztime = to_date(#fztime#,'yyyy-mm-dd'),
+				   </isNotEmpty>
+				   <isEmpty prepend="" property="fztime">
+						fztime = null,
+				   </isEmpty>
+			       validity = #validity#,
+			       remark = #remark#
+		      WHERE driverid = #driverid#
+     </update>
+     
+     <!-- 删除驾驶证信息 -->
+     <delete id="deleteDriverLicense" parameterClass="java.util.List">
+		DELETE FROM TO_DRIVING_LICENSE where
+		<iterate property="" conjunction="," open="driverid in (" close=")">#list[]#
+		</iterate>
+	</delete>
+	
+	<!-- 根据驾驶员id查询岗前考试信息 -->
+	<select id="findPreJobExamByDriverid" resultClass="preJobExam" parameterClass="string">
+		select 
+				id,
+				driverid,
+				qualifiednumber,
+				to_char(closetime,'yyyy-mm-dd') closetime,
+				trainexpect,
+				trainnumber,
+				examnumber,
+				to_char(gaintime,'yyyy-mm-dd') gaintime,
+				completestatus,
+				examstatus,
+				to_char(createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		from TO_PREJOB_EXAM  where driverid = #driverid#
+     </select>
+     
+     <!-- 增加岗前考试信息 -->
+     <insert id="insertPreJobExam" parameterClass="preJobExam">
+        insert into TO_PREJOB_EXAM(
+	        driverid,
+		    qualifiednumber,
+		    <isNotEmpty prepend="" property="closetime">
+				closetime,
+			</isNotEmpty>
+	        trainexpect,
+	        trainnumber,
+	        examnumber,
+	        <isNotEmpty prepend="" property="gaintime">
+				gaintime,
+			</isNotEmpty>
+			completestatus,
+			examstatus,
+	        createtime
+        )values(
+	        #driverid#,
+	        #qualifiednumber#,
+	         <isNotEmpty prepend="" property="closetime">
+				to_date(#closetime#,'yyyy-mm-dd'),
+			</isNotEmpty>
+	        #trainexpect#,
+	        #trainnumber#,
+	        #examnumber#,
+	        <isNotEmpty prepend="" property="gaintime">
+				to_date(#gaintime#,'yyyy-mm-dd'),
+			</isNotEmpty>
+	        #completestatus#,
+	        #examstatus#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_PREJOB_EXAM_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     <!-- 更新岗前考试信息 -->
+     <update id="updatePreJobExam" parameterClass="preJobExam">
+         update TO_PREJOB_EXAM set 
+		           driverid = #driverid#,
+		           qualifiednumber = #qualifiednumber#,
+		           <isNotEmpty prepend="" property="closetime">
+						closetime = to_date(#closetime#,'yyyy-mm-dd'),
+					</isNotEmpty>
+				   <isEmpty prepend="" property="closetime">
+						closetime = null,
+					</isEmpty>
+		           trainexpect = #trainexpect#,
+		           trainnumber = #trainnumber#,
+		           examnumber = #examnumber#,
+		           <isNotEmpty prepend="" property="gaintime">
+						gaintime = to_date(#gaintime#,'yyyy-mm-dd'),
+				   </isNotEmpty>
+				   <isEmpty prepend="" property="gaintime">
+						gaintime = null,
+				   </isEmpty>
+			       completestatus = #completestatus#,
+			       examstatus = #examstatus#
+		      WHERE id = #id#
+     </update>
+     
+     <!-- 删除岗前考试信息 -->
+     <delete id="deletePreJobExam" parameterClass="java.util.List">
+		DELETE FROM TO_PREJOB_EXAM where
+		<iterate property="" conjunction="," open="driverid in (" close=")">#list[]#
+		</iterate>
+	</delete>
+	
+	<!-- 根据驾驶员id查询服务证信息 -->
+	<select id="findServiceLicenseByDriverid" resultClass="serviceLicense" parameterClass="string">
+		select 
+				t.id,
+				t.driverid,
+				t.name,
+				to_char(t.registtime,'yyyy-mm-dd') registtime,
+				t.picturepath,
+				t.servicenumber,
+				c.carnumber,
+				to_char(t.fztime,'yyyy-mm-dd') fztime,
+				t.zjstatus,
+				t.starlevel,
+				t.version,
+				t.validity,
+				t.carid,
+				to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		from TO_SERVICE_LICENSE t, to_car_info c  
+		where t.carid = c.id(+) and  t.driverid = #driverid#
+     </select>
+     
+     <!-- 增加服务证信息 -->
+     <insert id="insertServiceLicense" parameterClass="serviceLicense">
+        insert into TO_SERVICE_LICENSE(
+	        driverid,
+		    name,
+		    <isNotEmpty prepend="" property="registtime">
+				registtime,
+			</isNotEmpty>
+	        picturepath,
+	        servicenumber,
+	        carnumber,
+	        <isNotEmpty prepend="" property="fztime">
+				fztime,
+			</isNotEmpty>
+			zjstatus,
+			starlevel,
+			version,
+			validity,
+			carid,
+	        createtime
+        )values(
+	        #driverid#,
+	        #name#,
+	         <isNotEmpty prepend="" property="registtime">
+				to_date(#registtime#,'yyyy-mm-dd'),
+			</isNotEmpty>
+	        #picturepath#,
+	        #servicenumber#,
+	        #carnumber#,
+	        <isNotEmpty prepend="" property="fztime">
+				to_date(#fztime#,'yyyy-mm-dd'),
+			</isNotEmpty>
+	        #zjstatus#,
+	        #starlevel#,
+	        #version#,
+			#validity#,
+			#carid#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_SERVICE_LICENSE_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     <!-- 更新服务证信息 -->
+     <update id="updateServiceLicense" parameterClass="serviceLicense">
+         update TO_SERVICE_LICENSE set 
+		           driverid = #driverid#,
+		           name = #name#,
+		           <isNotEmpty prepend="" property="registtime">
+						registtime = to_date(#registtime#,'yyyy-mm-dd'),
+					</isNotEmpty>
+				   <isEmpty prepend="" property="registtime">
+						registtime = null,
+					</isEmpty>
+		           picturepath = #picturepath#,
+		           servicenumber = #servicenumber#,
+		           carnumber = #carnumber#,
+		           <isNotEmpty prepend="" property="fztime">
+						fztime = to_date(#fztime#,'yyyy-mm-dd'),
+				   </isNotEmpty>
+				   <isEmpty prepend="" property="fztime">
+						fztime = null,
+				   </isEmpty>
+			       zjstatus = #zjstatus#,
+			       starlevel = #starlevel#,
+			       version = #version#,
+			       validity = #validity#,
+			       carid = #carid#
+		      WHERE id = #id#
+     </update>
+     
+     <!-- 删除服务证信息 -->
+     <delete id="deleteServiceLicense" parameterClass="java.util.List">
+		DELETE FROM TO_SERVICE_LICENSE where
+		<iterate property="" conjunction="," open="driverid in (" close=")">#list[]#
+		</iterate>
+	</delete>
+	
+	<!-- 查询司机服务证列表数量 -->
+	<select id="queryServicePhotoListCount" resultClass="int" parameterClass="serviceLicense">
+       
+           select count(d.id) 
+           from TO_CAR_DRIVER_INFO t,TO_BLOC r, TO_SERVICE_LICENSE d, TO_CAR_INFO c
+          where t.blocid=r.id(+) and t.id = d.driverid(+) and t.carid = c.id(+)
+				<dynamic>
+					 <isNotNull prepend="and" property="userid" >
+						  t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="id">
+					 		t.id=#id#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="drivername">
+					 		t.drivername like '%'||#drivername#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+						 	c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					 	c.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+		        </dynamic>
+        
+     </select>
+     
+	<!-- 查询司机服务证列表列表-->
+	<select id="queryServicePhotoList" resultClass="serviceLicense" parameterClass="serviceLicense">
+        select d.id,
+               t.blocid,
+               r.bloc_name blocname,
+               t.drivername,
+               t.phone,
+               t.carid,
+               c.carnumber,
+               c.terminal,
+               d.driverid,
+			    d.name,
+				d.picturepath,
+				d.servicenumber,
+				d.zjstatus,
+				d.starlevel,
+				d.version,
+				d.validity
+          from TO_CAR_DRIVER_INFO t,TO_BLOC r, TO_SERVICE_LICENSE d, TO_CAR_INFO c
+          where t.blocid=r.id(+) and t.id = d.driverid(+) and t.carid = c.id(+)
+				<dynamic>
+					 <isNotNull prepend="and" property="userid" >
+						  t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="id">
+					 		t.id=#id#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="drivername">
+					 		t.drivername like '%'||#drivername#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+						 	c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					 	c.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+	
+</sqlMap>
+
+
+

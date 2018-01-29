@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:properties/jdbc.properties" />
+	</bean>
+
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<!-- 连接池中可同时连接的最大的连接数，为0则表示没有限制，默认为8 -->
+		<property name="maxActive" value="50" />
+		<!-- 连接池启动时创建的初始化连接数量（默认值为0） -->
+		<property name="initialSize" value="10" />
+		<!--
+			超过时间会丟出错误信息 最大等待时间(单位为 ms) <property name="maxWait" value="60000" />
+		-->
+		<!-- 连接池中最大的空闲的连接数（默认为8,设 0 为没有限制）,超过的空闲连接将被释放，如果设置为负数表示不限制 -->
+		<property name="maxIdle" value="10" />
+		<!--
+			连接池中最小的空闲的连接数（默认为0，一般可调整5），低于这个数量会被创建新的连接（该参数越接近maxIdle，性能越好，因为连接的创建和销毁，都是需要消耗资源的；但是不能太大，因为在机器很空闲的时候，也会创建低于minidle个数的连接
+		-->
+		<property name="minIdle" value="5" />
+		<!-- 超过removeAbandonedTimeout时间后，是否进行没用连接的回收（默认为false) -->
+		<property name="removeAbandoned" value="true" />
+		<!-- 超过时间限制，回收五用的连接（默认为 300秒），removeAbandoned 必须为 true -->
+		<property name="removeAbandonedTimeout" value="180" />
+		<property name="testOnBorrow" value="true" />
+		<property name="testWhileIdle" value="true" />
+		<property name="validationQuery" value="select 1 from dual" />
+	</bean>
+
+	<bean id="dataSource1" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName1}" />
+		<property name="url" value="${jdbc.url1}" />
+		<property name="username" value="${jdbc.username1}" />
+		<property name="password" value="${jdbc.password1}" />
+		<!-- 连接池中可同时连接的最大的连接数，为0则表示没有限制，默认为8 -->
+		<property name="maxActive" value="50" />
+		<!-- 连接池启动时创建的初始化连接数量（默认值为0） -->
+		<property name="initialSize" value="10" />
+		<!--
+			超过时间会丟出错误信息 最大等待时间(单位为 ms) <property name="maxWait" value="60000" />
+		-->
+		<!-- 连接池中最大的空闲的连接数（默认为8,设 0 为没有限制）,超过的空闲连接将被释放，如果设置为负数表示不限制 -->
+		<property name="maxIdle" value="10" />
+		<!--
+			连接池中最小的空闲的连接数（默认为0，一般可调整5），低于这个数量会被创建新的连接（该参数越接近maxIdle，性能越好，因为连接的创建和销毁，都是需要消耗资源的；但是不能太大，因为在机器很空闲的时候，也会创建低于minidle个数的连接
+		-->
+		<property name="minIdle" value="5" />
+		<!-- 超过removeAbandonedTimeout时间后，是否进行没用连接的回收（默认为false) -->
+		<property name="removeAbandoned" value="true" />
+		<!-- 超过时间限制，回收五用的连接（默认为 300秒），removeAbandoned 必须为 true -->
+		<property name="removeAbandonedTimeout" value="180" />
+		<property name="testOnBorrow" value="true" />
+		<property name="testWhileIdle" value="true" />
+		<property name="validationQuery" value="select 1 from dual" />
+	</bean>
+	
+	<bean id="dataSource2" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName2}" />
+		<property name="url" value="${jdbc.url2}" />
+		<property name="username" value="${jdbc.username2}" />
+		<property name="password" value="${jdbc.password2}" />
+		<property name="removeAbandonedTimeout" value="180" />
+		<property name="testOnBorrow" value="true" />
+		<property name="testWhileIdle" value="true" />
+		<property name="validationQuery" value="select 1 from dual" />
+	</bean>
+	
+	<bean id="dataSource3" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName3}" />
+		<property name="url" value="${jdbc.url3}" />
+		<property name="username" value="${jdbc.username3}" />
+		<property name="password" value="${jdbc.password3}" />
+		<property name="removeAbandonedTimeout" value="180" />
+		<property name="testOnBorrow" value="true" />
+		<property name="testWhileIdle" value="true" />
+		<property name="validationQuery" value="select 1 from dual" />
+	</bean>
+
+	<!-- 配置ibatis的配置文件 -->
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation" value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="sqlMapClient1" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation" value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource1" />
+	</bean>
+	
+	<bean id="sqlMapClient2" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation" value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource2" />
+	</bean>
+
+	<bean id="sqlMapClient3" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation" value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource3" />
+	</bean>
+
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="txManager1"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource1" />
+	</bean>
+	
+	<bean id="txManager3"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource3" />
+	</bean>
+	
+
+	<!-- 配置事务属性 -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+
+	<tx:advice id="txAdvice1" transaction-manager="txManager1">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<tx:advice id="txAdvice3" transaction-manager="txManager3">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	
+
+	<aop:config>
+		<aop:advisor pointcut="execution(* com.careye.*.*(..))"
+			advice-ref="txAdvice" />
+		<aop:advisor pointcut="execution(* com.careye.*.*(..))"
+			advice-ref="txAdvice1" />
+			
+		<aop:advisor pointcut="execution(* com.careye.*.*(..))"
+			advice-ref="txAdvice3" />	
+	</aop:config>
+
+	<!-- 子系统配置文件 -->
+	<!-- api接口 -->
+	<import resource="classpath:spring/applicationContext-common.xml" />
+
+	<!-- car-eye车辆管理平台平台相关  -->
+	<import resource="classpath:spring_taxi/applicationContext-taxi.xml" />
+	<!-- 微信相关  -->
+	<import resource="classpath:spring_wx/applicationContext-wx.xml" />
+	
+	<!-- 对讲api接口 -->
+	<import resource="classpath:spring_taxi/applicationContext-group.xml" />
+
+</beans>
+
+

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<package name="authorityjson" extends="qhtaxijson" namespace="/system/authorityjson">
+
+		<!-- 分配权限 -->
+		<action name="assignAuthority" method="assignAuthority"
+			class="com.careye.system.action.AuthorityAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+		</action>
+		
+		<!-- 得到用户按钮菜单列表-->
+		<action name="getMenuidList" method="getMenuidList"
+			class="com.careye.system.action.AuthorityAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+		</action>
+		
+	</package>
+
+</struts>

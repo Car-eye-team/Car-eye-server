@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-photoSQL">
+
+	<typeAlias alias="photo" type="com.careye.monitor.domain.Photo" />
+
+	<!-- 添加摄像头立即拍摄记录表 -->
+	<insert id="addPhotoRecord" parameterClass="photo">
+		<![CDATA[
+			insert into TO_PHOTOGRAPH_SEND_RECORD 
+			(
+		        blocid,
+				userid,
+				channel,
+				command,
+				pstime,
+				saveflag,
+				resolutionratio,
+				picturequality,
+				lighteness,
+				contrast,
+				saturation,
+				chroma,
+				carid,
+				createtime,
+				seq,
+				result,
+				data
+		       )
+		    values
+		      (
+		       #blocid#,
+		       #userid#,
+		       #channel#,
+		       #command#,
+		       #pstime#,
+		       #saveflag#,
+		       #resolutionratio#,
+		       #picturequality#,
+		       #lighteness#,
+		       #contrast#,
+		       #saturation#,
+		       #chroma#,
+		       #carid#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss'),
+		       #seq#,
+		       #result#,
+		       #data#
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_PHOTO_SEND_RECORD_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	<!-- 摄像头立即拍摄记录列表-->
+	<select id="queryPhotoRecordList" resultClass="photo"
+		parameterClass="photo">
+		select t.id,
+		t.blocid,
+		t.userid,
+		c.terminal,
+		c.carnumber,
+		t.command,
+		t.pstime,
+		t.saveflag,
+		t.resolutionratio,
+		t.picturequality,
+		t.lighteness,
+		t.contrast,
+		t.saturation,
+		t.chroma,
+		t.result,
+		e.bloc_name as blocname,
+		to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+		from TO_PHOTOGRAPH_SEND_RECORD t, TO_BLOC e,TO_CAR_INFO c
+		where t.blocid = e.id(+) and t.carid = c.id
+		<dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id )
+			   	    </isNotNull>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="carnumber">
+				c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+			<isNotEmpty prepend="and" property="command">
+				t.command = #command#
+					</isNotEmpty>
+			<isNotEmpty prepend="and" property="saveflag">
+				t.saveflag = #saveflag#
+					</isNotEmpty>
+			<isGreaterThan property="command" compareValue="1"
+				prepend="">
+				<isLessThan property="command" compareValue="65535"
+					prepend="and">
+								<![CDATA[ 
+									1<t.command <65535
+								]]>
+				</isLessThan>
+			</isGreaterThan>
+		</dynamic>
+		order by t.createtime desc
+	</select>
+	<!-- 摄像头列表总数 -->
+	<select id="queryPhotoRecordListCount" resultClass="int"
+		parameterClass="photo">
+		select count(*)
+		from TO_PHOTOGRAPH_SEND_RECORD t, TO_BLOC e,TO_CAR_INFO c
+		where t.blocid = e.id(+) and t.carid = c.id
+		<dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id )
+			   	    </isNotNull>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="carnumber">
+				c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+			<isNotEmpty prepend="and" property="command">
+				t.command = #command#
+					</isNotEmpty>
+			<isNotEmpty prepend="and" property="saveflag">
+				t.saveflag = #saveflag#
+					</isNotEmpty>
+		</dynamic>
+	</select>
+	
+
+</sqlMap>

@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+<link rel="stylesheet" href="style.css">
+
+
+<head>
+<meta charset="utf-8">
+<title>无标题文档</title>
+</head>
+
+
+
+<body >
+<script type="text/javascript" src="../../app/js/jquery-1.4.4.min.js"></script>
+<script type="text/javascript">
+	 $.post("http://localhost:8080/DSTAXI/workplacejson/loadMyData.action",
+		  function(data){
+		  	var d = data.data;
+		  	document.getElementById('bloccount').innerHTML=d.bloccount;
+		  	document.getElementById('carcount').innerHTML=d.carcount;
+		  	document.getElementById('drivercount').innerHTML=d.drivercount;
+		  	
+		  	document.getElementById('onlinecar').innerHTML=d.onlinecar;
+		  	document.getElementById('unonlinecar').innerHTML=d.unonlinecar;
+		  	document.getElementById('onlinecount').innerHTML=d.onlinecount;	
+		  	document.getElementById('zhongcar').innerHTML=d.zhongcar;
+		  	document.getElementById('kongcar').innerHTML=d.kongcar;
+		  	document.getElementById('kzcount').innerHTML=d.kzcount;	
+		  	
+		  	
+		  	document.getElementById('dialordercount').innerHTML=d.dialordercount;
+		  	document.getElementById('custelcount').innerHTML=d.custelcount;
+		  	document.getElementById('operaincome').innerHTML=d.operaincome;	
+		  	document.getElementById('alipaymoney').innerHTML=d.alipaymoney;
+		  	document.getElementById('alipaycount').innerHTML=d.alipaycount;
+		  	document.getElementById('weixinmoney').innerHTML=d.weixinmoney;	
+		  	document.getElementById('weixincount').innerHTML=d.weixincount;
+		  	
+		  	
+		  	document.getElementById('complaintcount').innerHTML=d.complaintcount;
+		  	document.getElementById('cusgoodcount').innerHTML=d.cusgoodcount;
+		  	document.getElementById('cussecondarycount').innerHTML=d.cussecondarycount;
+		  	document.getElementById('cuspoorcount').innerHTML=d.cuspoorcount;	
+		  	
+		  });
+</script>
+
+<div class="bigbj">
+
+<!--红色-->
+  <div class="redkk redkk01">
+   <div class="onebox">
+      <div class="redbox cpl"><P>基础</P><P>数据</P></div>
+      
+      <div class="qiyq qiyq02">
+         <p>企业总数(个)</p>
+         <p class="p2" id="bloccount">137</p>
+      </div>
+      
+            <div class="qiyq">
+         <p>车辆总数(辆)</p>
+         <p class="p2" id="carcount">453</p>
+      </div>
+      
+            <div class="qiyq">
+         <p>驾驶员总数(人)</p>
+         <p class="p2" id="drivercount">601</p>
+      </div>
+   </div>
+   
+   <div class="xian"></div>
+ </div>
+ 
+ <!--绿色-->
+   <div class="redkk">
+   <div class="onebox">
+      <div class="greenbox cpl"><P>在线</P><P>统计</P></div>
+      
+      <div class="zxcl">
+        <p class="p1">在线车辆 <br>数量</p>
+        <p class="p2"><span id="onlinecar">137</span>辆</p>
+      </div>
+      
+      
+      <div class="zxcl zxcl02">
+        <p class="p1">离线车辆 <br>数量</p>
+        <p class="p2"><span id="unonlinecar">137</span>辆</p>
+      </div>
+      
+      
+      <div class="qq">
+         <div class="zxl" >在线率<br><span id="onlinecount">80</span>%</div>
+         <div class="zxl zcl" >重车率<br><span id="kzcount">80</span>%</div>
+      </div>
+      
+     <div class="zcsl">
+        <p class="p1">重车<br>数量</p>
+        <p class="p2" ><span id="zhongcar">88</span> 辆</p>
+     
+     </div>
+     
+     
+          <div class="zcsl zcsl02">
+        <p class="p1">空车<br>数量</p>
+        <p class="p2"><span id="kongcar">21</span> 辆</p>
+     
+     </div>
+     
+     
+     </div>
+     
+     
+     
+     
+     
+   
+   <div class="xian"></div>
+ </div>
+ 
+ 
+  <!--蓝色-->
+   <div class="redkk">
+   <div class="onebox">
+      <div class="bluebox cpl"><P>运营</P><P>统计</P></div>
+      
+    <div class="dzdd dzdd01">
+       <p class="p1">电召订单数</p>  
+       <p class="p2" ><span id="dialordercount">137</span> 个</p>
+    </div>
+    
+    <div class="dzdd">
+       <p class="p1">客户来电数</p>  
+       <p class="p2" ><span id="custelcount">125</span> 个</p>
+    </div>
+    
+    <div class="dzdd">
+       <p class="p1">运营总收入</p>  
+       <p class="p2" ><span id="operaincome">13725</span> 元</p>
+    </div>
+
+
+
+    <div class="zhif zhif02">
+       <p class="p1" >支付<br>笔数(笔) <br><span id="alipaycount">622</span></p>
+       <div></div>
+       <p class="p2" >支付宝<br>支付金额(元)<br>￥<span id="alipaymoney">122451</span></p>
+    
+    </div>
+    
+    <div class="zhif zhif03">
+       <p class="p1" >支付<br>笔数(笔) <br><span id="weixincount">622</span></p>
+       <div></div>
+       <p class="p2" >微信<br>支付金额(元)<br>￥<span id="weixinmoney">122451</span></p>
+    
+    </div>
+    
+    
+    <div class="zhif  zhif04">
+       <p class="p1">支付<br>笔数(笔) <br><span>622</span></p>
+       <div></div>
+       <p class="p2">现金<br>支付金额(元)<br><span>￥122451</span></p>
+    
+    </div>
+ </div>
+   
+   <div class="xian"></div>
+   
+ </div>
+ 
+ 
+  
+  <!--紫色-->
+ 
+   <div class="redkk">
+   <div class="onebox">
+      <div class="purbox cpl"><P>服务</P><P>质量</P></div>
+      
+      <div class="pingj">
+        <p class="p1" id="cusgoodcount">2605</p>
+        <p>客户好评数</p>
+      </div>
+      
+      <div class="pingj pingj02">
+        <p class="p1" id="cussecondarycount">352</p>
+        <p>客户中评数</p>
+      </div>
+      
+      <div class="pingj  pingj03">
+        <p class="p1" id="cuspoorcount">34</p>
+        <p>客户差评数</p>
+      </div>
+      
+      
+      <div class="pingj  pingj04">
+        <p class="p1" id="complaintcount">11</p>
+        <p>投诉数量</p>
+      </div>
+      
+      
+      
+ 
+   </div>
+   
+
+ </div>
+
+
+</div>
+
+</body>
+
+</html>
+

@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Fri Jan 19 10:39:39 CST 2018
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=dsbusiness_1.0.jar
+manifest.mergeall=true
+manifest.mainclass=com.careye.dsbusiness.server.StartDsBusinessServer
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=
+includes=

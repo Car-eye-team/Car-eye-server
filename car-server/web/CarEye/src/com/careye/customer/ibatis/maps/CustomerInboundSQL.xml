@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-customerInboundSQL">
+
+	<typeAlias alias="customerInbound" type="com.careye.customer.domain.CustomerInbound"/>
+
+	<!--  添加客户来电记录信息 -->
+	<insert id="addCustomerInbound" parameterClass="customerInbound">
+		<![CDATA[ 
+		INSERT INTO TO_CUSTOMER_INBOUND(
+			cid,
+			agentid,
+			callnumber,
+			inboundcalltime,
+			hangupcalltime,
+			userid,
+			recordfile,
+			uniqueid, 
+			createtime
+         ) VALUES (
+			#cid#,
+			#agentid#,
+			#callnumber#,
+			to_date(#inboundcalltime#,'yyyy-mm-dd hh24:mi:ss'),
+			to_date(#hangupcalltime#,'yyyy-mm-dd hh24:mi:ss'),
+			#userid#, 
+			#recordfile#,
+			#uniqueid#,
+			to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+		]]>
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CUSTOMER_INBOUND_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+
+	<!-- 根据条件得到所有的客户信息-->
+	<select id="getAllCustomerInbound" resultClass="customerInbound"
+		parameterClass="customerInbound">
+		SELECT
+           a.id, 
+           a.cid, 
+           a.agentid, 
+           a.callnumber, 
+           to_char(a.inboundcalltime,'yyyy-mm-dd hh24:mi:ss') inboundcalltime,
+           to_char(a.hangupcalltime,'yyyy-mm-dd hh24:mi:ss') hangupcalltime,
+           a.userid, 
+           ci.cname,
+           ci.tel,
+           ci.phone,
+           ct.typename,
+           a.recordfile,
+           a.uniqueid,
+      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name  username
+      from TO_CUSTOMER_INBOUND a,to_bloc_user u,to_customer_info ci,to_customer_type ct
+      where 1=1
+      <dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="cname">
+				ci.cname like  '%$cname$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="callnumber">
+				a.callnumber like  '%$callnumber$%'
+			</isNotEmpty>
+		</dynamic>
+      and a.userid=u.id(+)
+      and a.cid=ci.id(+)
+      and ci.typeid=ct.id(+)
+      order by a.createtime
+      desc 
+	</select>
+
+	<!--  根据条件得到所有的客户信息 数量-->
+	<select id="getAllCustomerInboundCount" resultClass="int"
+		parameterClass="customerInbound">
+	  SELECT
+      count(a.id) 
+       from TO_CUSTOMER_INBOUND a,to_bloc_user u,to_customer_info ci,to_customer_type ct
+      where 1=1
+      <dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="cname">
+				ci.cname like  '%$cname$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="callnumber">
+				a.callnumber like  '%$callnumber$%'
+			</isNotEmpty>
+		</dynamic>
+      and a.userid=u.id(+)
+      and a.cid=ci.id(+)
+      and ci.typeid=ct.id(+)
+	</select>
+
+	<!--  添加客户信息 
+	<insert id="addCustomerInbound" parameterClass="customerInbound">
+		<![CDATA[ 
+		INSERT INTO TO_CUSTOMER_INFO(
+			typeid, 
+			cname, 
+			sex, 
+			tel, 
+			phone, 
+			postaddr, 
+			postalcode, 
+			flag, 
+			remark, 
+			source, 
+			userid, 
+			createtime
+         ) VALUES (
+			#typeid#, 
+			#cname#, 
+			#sex#, 
+			#tel#, 
+			#phone#, 
+			#postaddr#, 
+			#postalcode#, 
+			#flag#, 
+			#remark#, 
+			#source#, 
+			#userid#, 
+			to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+		]]>
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CUSTOMER_INFO_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	-->
+
+	<!--  删除客户信息 -->
+	<delete id="delCustomerInbound" parameterClass="java.util.List">
+     DELETE FROM TO_CUSTOMER_INBOUND where
+    <iterate property=""  conjunction="," open="id in (" close=")">#list[]#</iterate>
+    </delete> 
+    
+    
+	<!-- 修改客户信息 
+	<update id="updateCustomerInbound" parameterClass="customerInbound">
+		UPDATE TO_CUSTOMER_INBOUND set
+				   cid=#cid#, 
+		           agentid=#agentid#, 
+		           callnumber=#callnumber#, 
+		           inboundcalltime=#inboundcalltime#, 
+		           hangupcalltime=#hangupcalltime#, 
+			WHERE id = #id#
+	</update>
+-->
+
+    <!-- 根据id得到客户对象 -->
+	<select id="getCustomerInboundById" resultClass="customerInbound"
+			parameterClass="int">
+		     SELECT
+           a.id, 
+           a.cid, 
+           a.agentid, 
+           a.callnumber, 
+           to_char(a.inboundcalltime,'yyyy-mm-dd hh24:mi:ss') inboundcalltime,
+           to_char(a.hangupcalltime,'yyyy-mm-dd hh24:mi:ss') hangupcalltime,
+           a.userid, 
+           ci.cname,
+           ci.tel,
+           ci.phone,
+           ct.typename,
+           a.recordfile,
+           a.uniqueid,
+      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name  username
+      from TO_CUSTOMER_INBOUND a,to_bloc_user u,to_customer_info ci,to_customer_type ct
+      where 1=1
+	  and  a.id=#id#
+      and a.userid=u.id(+)
+      and a.cid=ci.id(+)
+      and ci.typeid=ct.id(+)
+  </select>
+  
+  <!-- 更新坐席最后一条记录挂机时间-->
+	<update id="updateHangupcalltime" parameterClass="java.util.HashMap">
+		UPDATE TO_CUSTOMER_INBOUND set
+				hangupcalltime=to_date(#hangupcalltime#,'yyyy-mm-dd hh24:mi:ss')
+			WHERE agentid=#agentid#
+			and inboundcalltime = (select max(inboundcalltime) from TO_CUSTOMER_INBOUND where agentid=#agentid#) 
+	</update>
+  
+		
+</sqlMap>

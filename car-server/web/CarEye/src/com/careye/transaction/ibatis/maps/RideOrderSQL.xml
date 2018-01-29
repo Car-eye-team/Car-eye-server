@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-rideOrderSQL">
+
+	<typeAlias alias="rideOrder" type="com.careye.transaction.domain.RideOrder"/>
+	<typeAlias alias="ridePassenger" type="com.careye.transaction.domain.RidePassenger"/>
+	<!-- 顺风车订单列表 -->
+	<select id="selRideOrderList" resultClass="rideOrder" parameterClass="rideOrder">
+		 select a.id,
+				a.carid,
+				a.remark,
+				a.orderid,
+				a.saddress,
+				a.slat,
+				a.slng,
+				a.eaddress,
+				a.elat,
+				a.elng,
+				to_char(a.stime,'yyyy-mm-dd hh24:mi:ss') stime,
+				to_char(a.etime,'yyyy-mm-dd hh24:mi:ss') etime,
+				a.summile,
+				a.totalfee,
+				a.ordersatus,
+				to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+				b.carnumber,
+				b.blocid,
+				b.terminal,
+				c.bloc_name
+		 from TO_SHUNFENG_ORDER a,TO_CAR_INFO b,TO_BLOC c
+		 where a.carid = b.id and b.blocid = c.id
+		 
+		<dynamic>
+			<isNotEmpty prepend="AND" property="blocid">
+				b.blocid = #blocid#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carnumber">
+				b.carnumber like '%'||#carnumber#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="terminal">
+				b.terminal like '%'||#terminal#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+				<![CDATA[
+					 a.stime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+				<![CDATA[
+					 a.etime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userid">
+				c.id = (select bloc_id from to_bloc_user where id = #userid#)
+			</isNotEmpty>
+		</dynamic>
+		
+		order by a.id desc
+		
+	</select>
+
+	<!-- 顺风车订单数量 -->
+	<select id="selRideOrderListCount" resultClass="int" parameterClass="rideOrder">
+		select count(*) from TO_SHUNFENG_ORDER a,TO_CAR_INFO b,TO_BLOC c
+		 where a.carid = b.id and b.blocid = c.id
+		
+		<dynamic>
+			<isNotEmpty prepend="AND" property="blocid">
+				b.blocid = #blocid#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carnumber">
+				b.carnumber like '%'||#carnumber#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="terminal">
+				b.terminal like '%'||#terminal#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+				<![CDATA[
+					 a.stime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+				<![CDATA[
+					 a.etime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userid">
+				c.id = (select bloc_id from to_bloc_user where id = #userid#)
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+		<!-- 删除顺丰车订单以及 订单号下的乘客信息-->
+     <delete id="deleteRideOrder">
+         delete from TO_SHUNFENG_ORDER where orderid=#id#
+     </delete>
+     
+     <delete id="deleteRO">
+         delete from TO_SHUNFENG_PASSENGERS where orderid=#id#
+     </delete>
+
+
+
+
+
+    
+    <!-- 乘客列表 -->
+	<select id="selRidePassengerList" resultClass="ridePassenger" parameterClass="ridePassenger">
+		select 
+					 a.id,
+					a.seq,
+					a.remark,
+					a.orderid,
+					a.saddress,
+					a.slat,
+					a.slng,
+					a.eaddress,
+					a.elat,
+					a.elng,
+					a.summile,
+					a.totalfee,
+					a.ordersatus,
+					a.passagename,
+					a.phone,
+				to_char(a.stime,'yyyy-mm-dd hh24:mi:ss') stime,
+				to_char(a.etime,'yyyy-mm-dd hh24:mi:ss') etime,
+				to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+				b.carid,
+				c.carnumber
+		 from TO_SHUNFENG_PASSENGERS a,TO_SHUNFENG_ORDER b,TO_CAR_INFO c,TO_BLOC bloc
+		 where a.orderid = b.orderid and b.carid=c.id and c.blocid = bloc.id
+		 
+		<dynamic>
+			<isNotEmpty prepend="and" property="stime">
+				<![CDATA[
+					 a.stime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+				<![CDATA[
+					 a.etime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="ids">
+				  	a.orderid in
+	             <iterate property="ids"  conjunction="," open="(" close=")">#ids[]#</iterate>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userid">
+				bloc.id = (select bloc_id from to_bloc_user where id = #userid#)
+			</isNotEmpty>
+		</dynamic>
+		
+		order by a.id desc
+		
+	</select>
+
+	<!-- 乘客数量 -->
+	<select id="selRidePassengerListCount" resultClass="int" parameterClass="ridePassenger">
+		select count(*)  
+		from TO_SHUNFENG_PASSENGERS a,TO_SHUNFENG_ORDER b,TO_CAR_INFO c,TO_BLOC bloc
+		 where a.orderid = b.orderid and b.carid=c.id and c.blocid = bloc.id
+		 
+		<dynamic>
+			<isNotEmpty prepend="and" property="stime">
+				<![CDATA[
+					 a.stime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+				<![CDATA[
+					a.etime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="ids">
+				  	a.orderid in
+	             <iterate property="ids"  conjunction="," open="(" close=")">#ids[]#</iterate>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userid">
+				bloc.id = (select bloc_id from to_bloc_user where id = #userid#)
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+	<!-- 删除乘客-->
+     <delete id="deleteRidePassenger">
+         delete from TO_SHUNFENG_PASSENGERS where id=#id#
+     </delete>
+     
+     <!-- 乘客详情 -->
+     <select id="findPassengerTrip" resultClass="ridePassenger" parameterClass="ridePassenger">
+		 select 
+					 a.id,
+					a.seq,
+					a.remark,
+					a.orderid,
+					a.saddress,
+					a.slat,
+					a.slng,
+					a.eaddress,
+					a.elat,
+					a.elng,
+					a.summile,
+					a.totalfee,
+					a.ordersatus,
+					a.passagename,
+					a.phone,
+				to_char(a.stime,'yyyy-mm-dd hh24:mi:ss') stime,
+				to_char(a.etime,'yyyy-mm-dd hh24:mi:ss') etime,
+				to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+				b.carid,
+				c.carnumber
+		 from TO_SHUNFENG_PASSENGERS a,TO_SHUNFENG_ORDER b,TO_CAR_INFO c
+		 where a.orderid = b.orderid and b.carid=c.id  and a.id=#id# and a.orderid = #orderid#
+	</select>
+	
+    
+</sqlMap>
+
+
+

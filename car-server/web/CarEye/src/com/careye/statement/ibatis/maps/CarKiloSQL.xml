@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-carkiloSQL">
+
+	<typeAlias alias="drivingState" type="com.careye.statement.domain.DrivingState" />
+	
+     
+       <!-- 通过时间查询列表-->
+	<select id="selectCarKiloList" resultClass="drivingState" parameterClass="drivingState">
+		<![CDATA[
+			select sum(t.mileage) mileage
+			  from $positiontable$ t
+			 where  t.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')
+			   and t.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')
+			    order by t.createtime desc
+		]]> 
+     </select>
+     
+    <!-- 通过时间查询列表-->
+	<select id="selectCheckCarInfo" resultClass="drivingState" parameterClass="int">
+		<![CDATA[
+			select t.id,t.carnumber,t.terminal,b.bloc_name blocname
+			  from  TO_CAR_INFO t ,TO_BLOC b
+			 where t.blocid = b.id and t.id = #id#
+		]]> 
+     </select>
+     
+</sqlMap>

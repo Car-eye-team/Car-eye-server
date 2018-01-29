@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sqlMap namespace="oracle-AppTypeSQL">
+    <typeAlias alias="appType" type="com.careye.sysset.domain.AppType"/>
+    <typeAlias alias="appVersion" type="com.careye.sysset.domain.AppVersion"/>
+	  <!-- 版本类型列表 -->
+     <select id="findPageAppTypeList" resultClass="appType" parameterClass="appType">
+           select t.id ,
+                  t.typename,
+                  t.remark,
+                  u.LOGIN_NAME creater,
+                  to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+                  from VERSION_TYPE t,TO_BLOC_USER u  where t.userid=u.id(+)
+         <dynamic>
+				<isNotEmpty prepend="AND" property="typename">
+					t.typename like '%'||#typename#||'%'
+				</isNotEmpty>
+		  </dynamic>
+           order by  t.id 
+     </select>
+     
+   <!-- 获取版本类型数量 -->
+     <select id="findPageAppTypeListCount" resultClass="int" parameterClass="appType">
+       
+           select count(*) 
+           from VERSION_TYPE
+			<dynamic prepend="WHERE">
+				<isNotEmpty prepend="AND" property="typename">
+					typename like '%'||#typename#||'%'
+			</isNotEmpty>			
+		  </dynamic>    
+     </select>
+     
+       <!-- 添加版本类型 -->
+     <insert id="saveAppType" parameterClass="appType">
+         insert into VERSION_TYPE(
+	              typename,
+                  remark,
+                  createtime,
+                  userid
+               )
+          values(
+         	   #typename#,
+         	   #remark#,
+         	   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+         	   #userid#
+             )
+           <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT VERSION_TYPE_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+      <!-- 查看版本类型是否存在 -->
+	<select id="appTypeIsExist" parameterClass="appType" resultClass="int">
+		select count(*) from VERSION_TYPE  where typename = #typename# 
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 修改版本类型-->
+     <update id="updateAppType" parameterClass="appType">
+         update VERSION_TYPE SET
+		        typename = #typename#,
+		        remark = #remark#
+         WHERE id = #id#
+     </update>
+     
+      <!-- 删除版本类型 -->
+     <delete id="deleteAppType">
+         delete from VERSION_TYPE where id=#id#
+     </delete>
+     <!--                   以下是版本类型                              -->  	
+   
+  <!-- 版本型号列表 -->
+     <select id="findPageAppVersionList" resultClass="appVersion" parameterClass="appVersion">
+           select t.id ,
+                  t.version,
+                  t.versionname,
+                  t.typeid,
+                  i.typename ,
+                  t.downloadaddr,
+                  u.LOGIN_NAME creater,
+                  t.upgradecontent,
+                  to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+                  from VERSION_CONTROL t,TO_BLOC_USER u, VERSION_TYPE i where t.userid=u.id(+) and t.typeid=i.id(+)
+         <dynamic>
+				<isNotEmpty prepend="AND" property="versionname">
+					t.versionname like '%'||#versionname#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.createtime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.createtime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="typeid">
+					typeid = #typeid#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="ids">
+			  t.typeid in
+               <iterate property="ids"  conjunction="," open="(" close=")">#ids[]#</iterate>
+			</isNotEmpty>
+				
+		  </dynamic>
+           order by  t.id desc
+     </select>
+	 <!-- 获取版本型号数量 -->
+     <select id="findPageAppVersionListCount" resultClass="int" parameterClass="appVersion">
+       
+           select count(*) 
+           from VERSION_CONTROL
+			<dynamic prepend="WHERE">
+				<isNotEmpty prepend="AND" property="versionname">
+					versionname like '%'||#versionname#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					createtime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					createtime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="typeid">
+					typeid = #typeid#
+			</isNotEmpty>		
+					<isNotEmpty prepend="and" property="ids">
+			  typeid in
+               <iterate property="ids"  conjunction="," open="(" close=")">#ids[]#</iterate>
+			</isNotEmpty>
+		  </dynamic>    
+     </select>
+     <!-- 版本型号选择列表 -->
+     <select id="selAppVersionList" resultClass="appVersion" >
+       
+           select id,typename from VERSION_TYPE order by id
+
+     </select>
+        <!-- 查看版本型号是否存在 -->
+	<select id="appVersionIsExist" parameterClass="appVersion" resultClass="int">
+		select count(*) from VERSION_CONTROL  where versionname = #versionname# and typeid = #typeid#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+ <!-- 添加版本型号 -->
+     <insert id="saveAppVersion" parameterClass="appVersion">
+         insert into VERSION_CONTROL(
+	              version,
+	              typeid,
+	              versionname,
+	              downloadaddr,
+	              upgradecontent,
+                  createtime,
+                  userid
+               )
+          values(
+         	   #version#,
+         	   #typeid#,
+         	   #versionname#,     	   
+         	   #downloadaddr#,
+         	   #upgradecontent#,
+         	   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+         	   #userid#
+             )
+           <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT VERSION_CONTROL_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     <!-- 修改版本型号-->
+     <update id="updateAppVersion" parameterClass="appVersion">
+         update VERSION_CONTROL
+         <dynamic prepend="set" >
+		      <isNotEmpty prepend="," property="version" >
+		        version = #version#
+		      </isNotEmpty>
+		      <isNotEmpty prepend="," property="versionname" >
+		        versionname = #versionname#
+		      </isNotEmpty>
+		      <isNotEmpty prepend="," property="downloadaddr" >
+		        downloadaddr = #downloadaddr#
+		      </isNotEmpty>
+		      <isNotEmpty prepend="," property="typeid" >
+		        typeid = #typeid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="upgradecontent" >
+		        upgradecontent = #upgradecontent#
+		      </isNotEmpty>	    
+         </dynamic>
+         WHERE id = #id#
+     </update>
+     <!-- 删除版本型号 -->
+     <delete id="deleteAppVersion">
+         delete from VERSION_CONTROL where id=#id#
+     </delete>
+     
+      <!-- 查询该版本类型下是否存在版本型号 -->
+      <select id="queryGorupVersion" resultClass="int"  parameterClass="int">
+		select count(*) from VERSION_CONTROL  where typeid = #id#
+	</select>
+</sqlMap>

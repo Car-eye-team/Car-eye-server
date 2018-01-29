@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="mysql-cmssSQL">
+
+	<typeAlias alias="account" type="com.careye.common.domain.Account" />
+	<typeAlias alias="devInfo" type="com.careye.common.domain.DevInfo" />
+	<typeAlias alias="devStatus" type="com.careye.common.domain.DevStatus" />
+	<typeAlias alias="userInfo" type="com.careye.common.domain.UserInfo" />
+	
+	<!-- account是否存在 -->
+	<select id="accountIsExist" parameterClass="account" resultClass="int">
+		select count(*) from ACCOUNT  where  account = #account#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 查询Acount表id -->
+	<select id="getIdByAccount" parameterClass="account" resultClass="int">
+		select id from ACCOUNT  where  account = #account#
+	</select>
+	
+	<!-- 修改account-->
+     <update id="updateAccount" parameterClass="account">
+         update ACCOUNT SET
+		        name = #name#,
+		        account = #account#,
+		        password = #password#,
+		        type = #type#,
+		        validity = #validity#,
+		        updateTime = now()
+         WHERE account = #account#
+     </update>
+	
+	<!-- 添加account-->
+     <insert id="saveAccount" parameterClass="account">
+         insert into ACCOUNT(
+	              name,
+	              account,
+	              password,
+	              type,
+	              validity,
+                  updateTime
+               )
+          values(
+         	   #name#,
+         	   #account#,
+         	   #password#,
+         	   #type#,
+         	   #validity#,
+         	   now()
+             )
+     </insert>
+     
+     <!-- 删除account -->
+     <delete id="deleteAccount" parameterClass="String">
+         delete from ACCOUNT where account=#account#
+     </delete>
+     
+     
+     <!-- devinfo是否存在 -->
+	<select id="devinfoIsExist" parameterClass="devInfo" resultClass="int">
+		select count(*) from DEV_INFO  where  idno = #idno#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 修改devinfo-->
+     <update id="updateDevinfo" parameterClass="devInfo">
+         update DEV_INFO SET
+		         accountid = #accountid#,
+	             idno = #idno#,
+	             simcard = #simcard#,
+	             dateproduct = #dateproduct#,
+	             paybegin = #paybegin#,
+	             devtype = #devtype#,
+	             devgroupid = #devgroupid#,
+	             icon = #icon#,
+	             chncount = #chncount#,
+	             chnname = #chnname#,
+	             ioincount = #ioincount#,
+	             ioinname = #ioinname#,
+	             tempcount = #tempcount#,
+	             userid = #userid#,
+	             usersex = #usersex#,
+	             userpost = #userpost#,
+	             userpost = #netaddrtype#,
+	             payenable = #payenable#,
+	             payperiod = #payperiod#,
+	             paymonth = #paymonth#,
+	             paydelayday = #paydelayday#,
+	             stoday = #stoday#,
+		        updateTime = now()
+         WHERE idno = #idno#
+     </update>
+	
+	<!-- 添加devinfo-->
+     <insert id="saveDevinfo" parameterClass="devInfo">
+         insert into DEV_INFO(
+	              accountid,
+	              idno,
+	              simcard,
+	              dateproduct,
+	              paybegin,
+	              devtype,
+	              devgroupid,
+	              icon,
+	              chncount,
+	              chnname,
+	              ioincount,
+	              ioinname,
+	              tempcount,
+	              userid,
+	              usersex,
+	              userpost,
+	              netaddrtype,
+	              payenable,
+	              payperiod,
+	              paymonth,
+	              paydelayday,
+	              stoday,
+                  updateTime
+               )
+          values(
+         	   	  #accountid#,
+	              #idno#,
+	              #simcard#,
+	              #dateproduct#,
+	              #paybegin#,
+	              #devtype#,
+	              #devgroupid#,
+	              #icon#,
+	              #chncount#,
+	              #chnname#,
+	              #ioincount#,
+	              #ioinname#,
+	              #tempcount#,
+	              #userid#,
+	              #usersex#,
+	              #userpost#,
+	              #netaddrtype#,
+	              #payenable#,
+	              #payperiod#,
+	              #paymonth#,
+	              #paydelayday#,
+	              #stoday#,
+         	   	  now()
+             )
+     </insert>
+     
+     <!-- 删除devinfo -->
+     <delete id="deleteDevinfo" parameterClass="String">
+         delete from DEV_INFO where idno=#idno#
+     </delete>
+     
+     
+     
+     
+     <!-- devstatus是否存在 -->
+	<select id="devstatusIsExist" parameterClass="devStatus" resultClass="int">
+		select count(*) from DEV_STATUS  where  devidno = #devidno#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 修改devstatus-->
+     <update id="updateDevstatus" parameterClass="devStatus">
+         update DEV_STATUS SET
+		        devidno = #devidno#,
+		        updateTime = now()
+         WHERE devidno = #devidno#
+     </update>
+	
+	<!-- 添加devstatus-->
+     <insert id="saveDevstatus" parameterClass="devStatus">
+         insert into DEV_STATUS(
+	              devidno,
+                  updateTime
+               )
+          values(
+         	   #devidno#,
+         	   now()
+             )
+     </insert>
+     
+     <!-- 删除devstatus -->
+     <delete id="deleteDevStatus" parameterClass="String">
+         delete from DEV_STATUS where devidno=#devidno#
+     </delete>
+     
+     
+     
+     <!-- userinfo是否存在 -->
+	<select id="userinfoIsExist" parameterClass="userInfo" resultClass="int">
+		select count(*) from USER_INFO  where  accountid = #accountid#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 修改userinfo-->
+     <update id="updateUserinfo" parameterClass="userInfo">
+         update USER_INFO SET
+		        accountid = #accountid#,
+		        parentid = #parentid#,
+		        isadmin = #isadmin#,
+		        roleid = #roleid#,
+		        updateTime = now()
+         WHERE accountid = #accountid#
+     </update>
+	
+	<!-- 添加userinfo-->
+     <insert id="saveUserinfo" parameterClass="userInfo">
+         insert into USER_INFO(
+	              accountid,
+	              parentid,
+	              isadmin,
+	              roleid,
+                  updateTime
+               )
+          values(
+         	   #accountid#,
+         	   #parentid#,
+	           #isadmin#,
+	           #roleid#,
+         	   now()
+             )
+     </insert>
+     
+     <!-- 删除userinfo -->
+     <delete id="deleteUserinfo" parameterClass="String">
+         delete from USER_INFO where accountid=#accountid#
+     </delete>
+    
+	
+</sqlMap>
+
+
+
+
+
+
+

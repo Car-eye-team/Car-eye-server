@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+
+	<!--cacheModelsEnabled全局性地启用或禁用SqlMapClient的所有缓存model。-->
+    <!--enhancementEnabled 全局性地启用或禁用运行时字节码增强  -->
+    <!--lazyLoadingEnabled全局性地启用或禁用SqlMapClient的所有延迟加载。调试程序时使用。  -->
+    <!-- useStatementNamespaces 可以使用命名规范 如 xx.id -->
+    <settings 
+	    cacheModelsEnabled="true"
+	    enhancementEnabled="true"
+	    lazyLoadingEnabled="true"     
+	    useStatementNamespaces="true" />
+	    
+	    
+	<!-- 写的sql语句的xml文件需要放到这里 -->
+	
+	<sqlMap resource="com/careye/api/ibatis/maps/ApiSQL.xml" />
+	<sqlMap resource="com/careye/api/ibatis/maps/CommonSQL.xml" />
+	
+	<!-- 操作car-eye车辆管理平台相关 -->
+	<sqlMap resource="com/careye/taxi/api/ibatis/maps/TaxiSQL.xml" />
+	<!-- 微信订单 -->
+	<sqlMap resource="com/careye/wx/api/ibatis/maps/WxSQL.xml" />
+	<!-- APP订单 -->
+	<sqlMap resource="com/careye/wx/api/ibatis/maps/AppOrderSQL.xml" />
+	
+	<!-- 对讲 -->
+	<sqlMap resource="com/careye/taxi/api/ibatis/maps/GroupSQL.xml" />
+	
+</sqlMapConfig>

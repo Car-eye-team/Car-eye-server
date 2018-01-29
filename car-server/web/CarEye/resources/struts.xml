@@ -1,0 +1,260 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- <include file="struts-default.xml"/>  -->
+	<constant name="struts.enable.DynamicMethodInvocation" value="true" />
+	<constant name="struts.devMode" value="true" />
+	<constant name="struts.multipart.parser" value="jakarta"/>
+    <constant name="struts.multipart.maxSize" value="50000000"/>
+    <constant name="struts.multipart.saveDir" value="d:/saveTempPath" />
+    <constant name="struts.objectFactory.spring.autoWire" value="type" />
+	<constant name="struts.i18n.reload" value="true" />
+	<constant name="struts.custom.i18n.resources" value="global" /> 
+	<constant name="struts.configuration.xml.reload" value="true" />
+	
+	<!-- ***********************************************-->
+	<!-- 以下是子系统配置，在开发阶段可以只include自己负责的子系统-->
+	<!-- 开发阶段：    include需要的子系统-->
+	<!-- 集成测试阶段：include所有子系统-->
+	<!-- ***********************************************-->
+	<package name="qhtaxi" extends="struts-default" namespace="/">
+	
+		<interceptors>
+			<!-- 权限验证拦截器 -->
+			<interceptor name="annotationInterceptor"
+				class="com.careye.interceptor.AuthorityIterceptor" />
+			
+			<!-- 异常拦截 -->
+			<interceptor name="exceptionInterceptor"
+				class="com.careye.interceptor.ExceptionInterceptor" />	
+			
+			<!-- 拦截器 组,按顺序执行-->
+			<interceptor-stack name="mydefault">
+				<interceptor-ref name="defaultStack" />
+                <interceptor-ref name="annotationInterceptor" />
+                <interceptor-ref name="exceptionInterceptor" />
+			</interceptor-stack>
+		
+		</interceptors>
+	
+		<!-- 将拦截栈设为默认，将作用于整个包中的所有Action -->
+		<default-interceptor-ref name="mydefault"/>
+		
+		<!-- 全局结果映射 -->
+		<global-results>
+			<result name="404">/index.jsp</result>
+		</global-results>
+		
+	</package>
+	
+	
+	<package name="qhtaxijson" extends="json-default" namespace="/">
+	 	<interceptors>
+			<!-- 权限验证拦截器 -->
+			<interceptor name="annotationInterceptor"
+				class="com.careye.interceptor.AuthorityJSONIterceptor" />
+	
+			<!-- 异常拦截 -->
+			<interceptor name="exceptionInterceptor"
+				class="com.careye.interceptor.ExceptionInterceptor" />
+	
+			<!-- 拦截器 组,按顺序执行-->
+			<interceptor-stack name="mydefaultJson">
+				<interceptor-ref name="defaultStack" />
+				<interceptor-ref name="annotationInterceptor" />
+				<interceptor-ref name="exceptionInterceptor" />
+			</interceptor-stack>
+	
+		</interceptors>
+		<default-interceptor-ref name="mydefaultJson" />
+		<!-- 全局结果映射 -->
+		<global-results>
+			<result name="index">/index.jsp</result>
+			<result name="error" type="json">
+				<param name="includeProperties">jsondata.*</param>
+			</result>
+			<result name="login" type="json">
+				<param name="includeProperties">login</param>
+			</result>
+			<result name="input" type="json">
+				<param name="includeProperties">jsondata.*</param>
+			</result>
+		</global-results>
+	</package>
+
+	<!--公共配置   -->
+	<!-- 省市县 -->
+    <include file="struts_common/struts-common.xml"></include>
+    
+    <!-- 终端管理 -->
+    <include file="struts_car/struts-terminal.xml"></include>
+    
+	<!--子系统配置   -->
+	<!-- 用户登陆 -->
+    <include file="struts/struts-userLogin.xml"></include>
+    
+	<!-- 系统管理 -->
+	 <!--系统功能菜单管理 -->
+    <include file="struts_system/struts-systemfunction.xml"></include>
+	 <!--用户管理  -->
+    <include file="struts_system/struts-user.xml"></include>
+	<!-- 用户组管理 -->
+    <include file="struts_system/struts-usergroup.xml"></include>
+   <!-- 权限管理  -->
+    <include file="struts_system/struts-authority.xml"></include>
+	<!--组织机构管理 -->
+    <include file="struts_system/struts-orgazicationdept.xml"></include>
+   	<!--日志记录 -->
+   	<include file="struts_common/struts-sysoperatelog.xml"></include>
+  
+  	<!-- 车辆管理 start -->
+    <!-- 车辆信息管理 -->
+    <include file="struts_car/struts-car.xml"></include>
+    <!-- 司机信息管理 -->
+    <include file="struts_car/struts-cardriver.xml"></include>
+    <!-- POI管理 -->
+    <include file="struts_car/struts-poiinfo.xml"></include>
+    <!-- 区域管理 -->
+    <include file="struts_car/struts-areaset.xml"></include>
+    <!-- 车辆信息统计-->
+    <include file="struts_car/struts-carcondition.xml"></include>
+    <!-- 考勤信息-->
+    <include file="struts_car/struts-clock.xml"></include>
+    <!-- 车辆管理 end -->
+    
+    
+    
+    <!-- 系统设置start -->
+    <!--车辆类型  -->
+    <include file="struts_sysset/struts-cartype.xml"></include>
+    <!--车辆用途  -->
+    <include file="struts_sysset/struts-caruse.xml"></include>
+    <!--类型设置  -->
+    <include file="struts_sysset/struts-set.xml"></include>
+    <!-- 服务区域开通设置 -->
+    <include file="struts_sysset/struts-servicearea.xml"></include>
+    <!-- 行政区划管理 -->
+    <include file="struts_sysset/struts-region.xml"></include>
+    
+    <!--电召费用设置  -->
+    <include file="struts_sysset/struts-dialfeeset.xml"></include>
+    <!--电召规则设置  -->
+    <include file="struts_sysset/struts-dialrule.xml"></include>
+    
+    <!--手机客户端设置  -->
+    <!-- 版本管理 -->
+    <include file="struts_sysset/struts-appmanage.xml"></include>
+    <!-- 密钥管理-->
+    <include file="struts_sysset/struts-key.xml"></include>
+    <!-- 意见反馈-->
+    <include file="struts_sysset/struts-feedbackadvice.xml"></include>
+    <!-- 视频参数设置-->
+    <include file="struts_sysset/struts-videoparamset.xml"></include>
+    
+    <!-- 系统设置end -->
+    
+    
+    <!-- 报警设置 -->
+    <include file="struts_reportforms/struts-reportforms.xml"></include>
+    
+    <!-- 信息管理 start -->
+	<!-- 一键导航 -->
+	<include file="struts_message/struts-textinfo.xml"></include>
+	<include file="struts_message/struts-event.xml"></include>
+	<include file="struts_message/struts-question.xml"></include>
+	
+	
+	<!-- 信息管理 start -->
+	
+	
+	<!-- 客户管理 start -->
+	<!-- 客户信息管理 -->
+	<include file="struts_customer/struts-customer.xml"></include>
+	<!-- 客户来电管理 -->
+	<include file="struts_customer/struts-customerinbound.xml"></include>
+	<!-- 投诉管理 -->
+	<include file="struts_customer/struts-complaint.xml"></include>
+	<!-- 客户管理 start -->
+	
+	<!-- 约车业务管理 start -->
+	<!-- 约车业务信息管理 -->
+	<include file="struts_transaction/struts-transaction.xml"></include>
+	<!-- 乘客人数统计 -->
+	<include file="struts_transaction/struts-passagestatistic.xml"></include>
+	<!-- 司机评价客户 -->
+	<include file="struts_transaction/struts-driverevaluation.xml"></include>
+	<!-- 客户评价 -->
+	<include file="struts_transaction/struts-customerevaluation.xml"></include>
+	
+	<!-- 统计评价 -->
+	<include file="struts_transaction/struts-evaluatecount.xml"></include>
+	
+	<!-- 约车业务管理 start -->
+	
+	<!-- 顺风车订单 -->
+	<include file="struts_transaction/struts-rideorder.xml"></include>
+	<!-- 对讲管理 -->
+    <include file="struts_transaction/struts-intercom.xml"></include>
+	
+	<!-- 报表管理 start -->
+	<!-- 报表管理 -->
+	<include file="struts_statement/struts-statement.xml"></include>
+	<!-- 多区域报表管理 -->
+	<include file="struts_statement/struts-areamore.xml"></include>
+	
+	<!-- 电召start -->
+	<!-- 电召业务统计管理 -->
+	<include file="struts_statement/struts-transtatement.xml"></include>
+	<!-- 电召所有数据统计 -->
+	<include file="struts_statement_oncalltransaction/struts-oncallcount.xml"></include>
+	<!-- 抢答数据统计 -->
+	<include file="struts_statement_oncalltransaction/struts-answercount.xml"></include>
+	<!-- 电召end -->
+	
+	<!-- 报表管理 start -->
+	
+	<!--监控调度 start -->
+	<!-- 远程控制记录 -->
+	<include file="struts_monitor/struts-remotecontrolrecord.xml"></include>
+	<!-- 多媒体管理 -->
+	<include file="struts_monitor/struts-multimedia.xml"></include>
+	<!-- 调度控制记录 -->
+	<include file="struts_monitor/struts-dispatcherrecord.xml"></include>
+	<!-- 下发日志列表 -->
+	<include file="struts_monitor/struts-commondlog.xml"></include>
+	<!-- 新车上线监控 -->
+	<include file="struts_monitor/struts-onlinereport.xml"></include>
+	<!-- 营运信息-->
+	<include file="struts_monitor/struts-operatedata.xml"></include>
+	<!-- 车辆在线率分析-->
+	<include file="struts_monitor/struts-onlinerate.xml"></include>
+	<!-- 监控调度 end -->
+	
+	<!-- 电话管理 -->
+    <!-- 电话回拨管理 -->
+    <include file="struts_tel/struts-telcall.xml"></include>
+    <!-- 设置电话本-->
+    <include file="struts_tel/struts-telbook.xml"></include>
+    
+    
+	<!-- 行业功能 -->
+    <!-- 广告类型管理 -->
+    <include file="struts_advert/struts-adverttype.xml"></include>
+    <!-- 后枕屏广告-->
+    <include file="struts_advert/struts-advertmanage.xml"></include>
+    <!-- 顶灯广告-->
+    <include file="struts_advert/struts-toplight.xml"></include>
+    <!-- 主机广告-->
+    <include file="struts_advert/struts-host.xml"></include>
+    
+    
+    
+    <!-- 工作台 -->
+    <include file="struts_common/struts-workplace.xml"></include>
+</struts>
+
+
+

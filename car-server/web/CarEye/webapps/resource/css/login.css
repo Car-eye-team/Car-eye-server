@@ -1,0 +1,19 @@
+body {
+	margin: 0 auto;
+	background-color: #F4FBFC;
+	text-align:center
+}
+.loginForm {
+	height: 205px;
+	width: 350px;
+	margin: 0 auto;
+	margin-top: 200px;
+}
+
+.appdiv {
+	height: 40px;
+	width: 350px;
+	margin: 0 auto;
+	font-size: 14px;
+	line-height: 40px;
+}

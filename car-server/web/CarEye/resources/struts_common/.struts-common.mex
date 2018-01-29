@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Struts2Diagram version="2.0">
+  <package name="commonjson" location="10,10" size="180,92">
+    <action name="*" location="15,23" size="150,62">
+      <result name="success" />
+      <result name="error" />
+    </action>
+    <action name="*" location="15,23" size="150,62">
+      <result name="success" />
+      <result name="error" />
+    </action>
+  </package>
+</Struts2Diagram>
+

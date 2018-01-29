@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-setSQL">
+
+    <typeAlias alias="alarmSet" type="com.careye.sysset.domain.AlarmtypeSet" />
+	<!--
+	<typeAlias alias="setParamSet" type="com.careye.set.domain.SetParamSet" />
+	<typeAlias alias="powerSet" type="com.careye.set.domain.PowerSet" />
+	<typeAlias alias="powerCarType" type="com.careye.set.domain.PowerCarType" />
+	<typeAlias alias="pageSet" type="com.careye.set.domain.PageSet" />
+	-->
+	<typeAlias alias="pageSet" type="com.careye.sysset.domain.PageSet" />
+	<typeAlias alias="deviceType" type="com.careye.sysset.domain.DeviceType" />
+	
+	<typeAlias alias="paymentParamSet" type="com.careye.sysset.domain.PaymentParamSet" />
+	
+	
+      
+     <!--*********************************报警提醒类型设置********************************** -->
+     
+	 <!--更新报警类型信息  -->
+	<update	id="updateAlarmmusicSet" parameterClass="alarmSet">
+				update TO_ALARM_TYPE set
+			        musicaddr = #musicaddr#,
+			        ALARMNAME = #alarmname#,
+			        ALARMKEY = #alarmkey#,
+			        remark = #remark#
+			    where ID = #id#
+	
+	</update>
+	
+	
+
+	<!-- 获取报警类型分页列表  -->
+	<select id="findPageAlarmmusicSetList"  resultClass="alarmSet" parameterClass="alarmSet">
+			  select 	t.id,
+			  			t.ALARMkey alarmkey,
+			  			t.alarmname,
+						t.musicaddr,
+						t.musicaddr oldmusicaddr,
+						t.remark,
+				       to_char(t.createtime, 'yyyy-MM-dd HH24:mi:ss') createtime
+				  from TO_ALARM_TYPE t 
+				  where  1=1
+		 <dynamic>
+				<isNotEmpty prepend="and" property="alarmkey">
+					t.ALARMkey = #alarmkey#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="alarmname">
+					t.alarmname like '%'||#alarmname#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.CREATETIME >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.CREATETIME <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				
+		  </dynamic>
+				 order by t.id desc
+	</select>
+	
+	  <!--获取报警类型分页列表数量  -->
+	<select id="findPageAlarmmusicSetListCount"  resultClass="int" parameterClass="alarmSet">
+			select count(*)  
+	         from TO_ALARM_TYPE t 
+				  where  1=1
+		 <dynamic>
+				<isNotEmpty prepend="and" property="alarmkey">
+					t.ALARMkey = #alarmkey#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="alarmname">
+					t.alarmname like '%'||#alarmname#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="stime">
+					<![CDATA[
+					t.CREATETIME >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.CREATETIME <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+				</isNotEmpty>
+				
+		  </dynamic>
+	</select>
+	
+	
+	<!-- 通过报警类型id得到声音路径  -->
+	<select id="getMusicaddr" parameterClass="int" resultClass="String">
+		select musicaddr from TO_ALARM_TYPE t where t.id = #id#
+	</select>
+     
+	<!-- 通过报警类型得到声音路径  -->
+	<select id="getMusicaddrByAlarmtype" parameterClass="String" resultClass="String">
+		select musicaddr from TO_ALARM_TYPE t where t.ALARMkey = #alarmkey#
+	</select>
+     
+     
+	<!-- 查看报警类型简称缩写是否存在 -->
+	<select id="alarmNameKeyIsExist" parameterClass="alarmSet" resultClass="int">
+		select	count(*)
+		from TO_ALARM_TYPE where ALARMKEY=rtrim(ltrim(#alarmkey#))
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[id <> #id#]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 查看报警类型是否存在 -->
+	<select id="alarmNameIsExist" parameterClass="alarmSet" resultClass="int">
+		select	count(*)
+		from TO_ALARM_TYPE where ALARMNAME=rtrim(ltrim(#alarmname#))
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[id <> #id#]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+     
+     <!-- 获取最大报警类型id+1 -->
+     <select id="selectAlarmTypeMaxId" resultClass="int">
+			select nvl(max(c.id),0)+1 from TO_ALARM_TYPE c
+     </select>
+     
+      <!-- 添加报警类型设置 -->
+     <insert id="addAlarmType" parameterClass="alarmSet">
+         insert into TO_ALARM_TYPE(
+	           id,
+	           alarmname,
+			   alarmkey,
+			   musicaddr,
+			   remark,
+			   createtime
+          )
+          values(
+         	   #id#,
+         	   #alarmname#,
+         	   #alarmkey#,
+         	   #musicaddr#,
+         	   #remark#,
+         	   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+          )
+           <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_ALARM_TYPE_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     
+     <!-- 删除报警类型设置 -->
+     <delete id="deleteAlarmType" >
+     	delete from TO_ALARM_TYPE where id = #id#
+     </delete>
+     
+     
+     
+     <!-- ===========================3.2.5	设备类型设置======================== -->
+     
+     
+      <!-- 是否存在设备类型设置-->
+     <select id="getDeviceTypeCount" resultClass="Integer" parameterClass="deviceType">
+     	select	count(*)
+		from TO_CAR_DEVICE_TYPE where  typename=ltrim(rtrim(#typename#))
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+     </select>
+     
+     <!--设备类型设置分页列表 -->
+	<select id="findPageDeviceTypeList" resultClass="deviceType" parameterClass="deviceType">
+		<![CDATA[ 
+			select t.id,
+			       t.typeid,
+			       t.typename,
+			       t.usertype,
+			       t.company,
+			       t.inteltype,
+			       t.userid,
+			       u.LOGIN_NAME username,
+			       to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+			from TO_CAR_DEVICE_TYPE t , TO_BLOC_USER u where t.userid = u.id(+)
+		]]>
+			<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="typename">
+					t.typename like '%'||#typename#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="usertype">
+					t.usertype like '%'||#usertype#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="company">
+					t.company like '%'||#company#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="inteltype">
+					t.inteltype like '%'||#inteltype#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="typeid">
+					t.typeid = #typeid#
+	            </isNotEmpty>
+		</dynamic>
+		 order by t.id desc
+	</select>
+	
+    <!--设备类型设置数量 -->
+	<select id="findPageDeviceType" resultClass="int" parameterClass="deviceType">
+		<![CDATA[ 
+			select count(*)
+			from TO_CAR_DEVICE_TYPE t , TO_BLOC_USER u where t.userid = u.id(+)
+		]]>
+			<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="typename">
+					t.typename like '%'||#typename#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="usertype">
+					t.usertype like '%'||#usertype#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="company">
+					t.company like '%'||#company#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="inteltype">
+					t.inteltype like '%'||#inteltype#||'%'
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="typeid">
+					t.typeid = #typeid#
+	            </isNotEmpty>
+		</dynamic>
+		 order by t.id desc
+	</select>
+     
+      <!-- 添加设备类型设置 -->
+     <insert id="addDeviceType" parameterClass="deviceType">
+         insert into TO_CAR_DEVICE_TYPE(
+	           id,
+	           userid,
+			   typeid,
+			   typename,
+			   company,
+			   inteltype,
+			   usertype,
+			   createtime
+          )
+          values(
+         	   #id#,
+         	   #userid#,
+         	   #typeid#,
+         	   #typename#,
+         	   #company#,
+         	   #inteltype#,
+         	   #usertype#,
+         	   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+          )
+           <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_DEVICE_TYPE_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     
+     <!-- 更新设备类型设置 -->
+     <update id="updateDeviceType"  parameterClass="deviceType">
+     	update TO_CAR_DEVICE_TYPE set  
+     		   typeid = #typeid#,
+     		   typename = #typename#,
+     		   usertype = #usertype#,
+     		   company = #company#,
+     		   inteltype = #inteltype#
+	    where  id = #id#
+     </update>
+     
+     
+     <!-- 删除设备类型设置 -->
+     <delete id="deleteDeviceType" >
+     	delete from TO_CAR_DEVICE_TYPE where id = #id#
+     </delete>
+     
+     <!-- 删除设备类型设置之前查看车辆中是否已使用 -->
+     <select id="selectDeviceTypeByCar" resultClass="int" parameterClass="int">
+     	select (select count(c.id) from TO_CAR_INFO c where c.flag =1 and c.DEVICETYPE = t.typeid) id
+    from TO_CAR_DEVICE_TYPE t where t.id = #id#
+     </select>
+     
+     
+     <!-- 获取最大设备类型id -->
+     <select id="selectDeviceTypeMaxTypeId" resultClass="int">
+		select t.typeid from TO_CAR_DEVICE_TYPE t where t.typeid=(select max(c.typeid) from TO_CAR_DEVICE_TYPE c)
+     </select>
+     
+    <!-- ===========================3.1.14	界面展开关闭设置  start======================== -->
+      <!-- 根据用户得到是否存在设置记录-->
+     <select id="getPageSetCount" resultClass="Integer" parameterClass="Integer">
+     	select count(*) from TO_INTERFACE_SWITCH where userid = #userid#
+     </select>
+     
+      <!-- 添加界面展开关闭设置 -->
+     <insert id="addPageSet" parameterClass="pageSet">
+         insert into TO_INTERFACE_SWITCH(
+	           userid,
+			   leftpage,
+			   bottompage,
+	           createtime
+          )
+          values(
+         	   #userid#,
+         	   #leftpage#,
+         	   #bottompage#,
+         	   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+          )
+           <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_INTERFACE_SWITCH_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     <!-- 更新界面展开关闭设置 -->
+     <update id="updatePageSet"  parameterClass="pageSet">
+     	update TO_INTERFACE_SWITCH set  
+     		   leftpage = #leftpage#,
+     		   bottompage = #bottompage#
+	    where  userid = #userid#
+     </update>
+     <!-- ===========================3.1.14	界面展开关闭设置  end======================== -->
+     
+     <!-- ====================支付参数设置start============================ -->
+     
+     <!-- 收款公司是否已存在-->
+     <select id="companyIsExist" resultClass="Integer" parameterClass="paymentParamSet">
+     	select	count(*)
+		from PAYMENT_PARAM_SET where  company=ltrim(rtrim(#company#))
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+     </select>
+     
+     <!-- 编号是否已存在-->
+     <select id="typeIsExist" resultClass="Integer" parameterClass="paymentParamSet">
+     	select	count(*)
+		from PAYMENT_PARAM_SET where  type=#type#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+     </select>
+     
+     <!-- 添加收款公司===支付参数设置 -->
+     <insert id="addCompany" parameterClass="paymentParamSet">
+         insert into PAYMENT_PARAM_SET(
+         	   type,
+	           company,
+	           createtime
+          )
+          values(
+               #type#,
+         	   #company#,
+         	   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+          )
+           <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT PAYMENT_PARAM_SET_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     <!-- 更新收款公司===支付参数设置 -->
+     <update id="updateCompany"  parameterClass="paymentParamSet">
+     	update PAYMENT_PARAM_SET set 
+     	       type = #type#, 
+     		   company = #company#
+	    where  id = #id#
+     </update>
+     
+     <!-- 更新支付参数设置 -->
+     <update id="updatePaymentParamSet"  parameterClass="paymentParamSet">
+     	update PAYMENT_PARAM_SET set  
+     		   appsecret = #appsecret#,
+     		   appid = #appid#,
+     		   mchid = #mchid#,
+     		   key = #key#,
+     		   token = #token#,
+     		   encodingaeskey = #encodingaeskey#,
+     		   apiclientpath = #apiclientpath#,
+     		   app_appid = #app_appid#,
+     		   app_mchid = #app_mchid#,
+     		   app_key = #app_key#,
+     		   seller_email = #seller_email#,
+     		   partner = #partner#,
+     		   seller_id = #seller_id#,
+     		   seller_key = #seller_key#,
+     		   subject = #subject#,
+     		   alipay_config_path = #alipay_config_path#
+	    where  id = #id#
+     </update>
+     
+     <!-- 删除收款公司===支付参数设置-->
+     <delete id="deleteCompany" >
+     	delete from PAYMENT_PARAM_SET where id = #id#
+     </delete>
+     
+     <!-- 获取收款公司分页列表  -->
+	<select id="findCompanyList"  resultClass="paymentParamSet" parameterClass="paymentParamSet">
+			  select   t.id,
+			           t.type,
+			  		   t.company,
+				       to_char(t.createtime, 'yyyy-MM-dd HH24:mi:ss') createtime
+				  from PAYMENT_PARAM_SET t 
+				  where  1=1
+		 <dynamic>
+				<isNotEmpty prepend="and" property="company">
+					t.company like '%'||#company#||'%'
+				</isNotEmpty>
+		  </dynamic>
+				 order by t.id desc
+	</select>
+	
+	  <!--获取收款公司分页列表数量  -->
+	<select id="findCompanyListCount"  resultClass="int" parameterClass="paymentParamSet">
+			select count(*)  
+	         from PAYMENT_PARAM_SET t 
+				  where  1=1
+		 <dynamic>
+				<isNotEmpty prepend="and" property="company">
+					t.company like '%'||#company#||'%'
+				</isNotEmpty>
+		  </dynamic>
+	</select>
+	
+	<!-- 根据ID获取付款参数信息  -->
+	<select id="findPaymentParamById"  resultClass="paymentParamSet" parameterClass="String">
+			  select   t.id,
+			           t.type,
+			  		   t.company,
+			  		   t.appsecret,
+			  		   t.appid,
+			  		   t.mchid,
+			  		   t.key,
+			  		   t.token,
+			  		   t.encodingaeskey,
+			  		   t.apiclientpath,
+			  		   t.app_appid,
+			  		   t.app_mchid,
+			  		   t.app_key,
+			  		   t.seller_email,
+			  		   t.partner,
+			  		   t.seller_id,
+			  		   t.seller_key,
+				       to_char(t.createtime, 'yyyy-MM-dd HH24:mi:ss') createtime,
+				       t.subject,
+				       t.alipay_config_path
+				  from PAYMENT_PARAM_SET t 
+				  where  id = #id#
+	</select>
+	
+	<!-- ====================支付参数设置end============================ -->
+     
+</sqlMap>
+
+

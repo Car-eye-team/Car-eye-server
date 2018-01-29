@@ -1,0 +1,1436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-terminalDeviceInfoSQL">
+
+	<typeAlias alias="terminalPositionInfo" type="com.careye.common.domain.TerminalPositionInfo" />
+	<typeAlias alias="terminalHisPosition" type="com.careye.common.domain.TerminalHisPosition" />
+	<typeAlias alias="positionInfo" type="com.careye.common.domain.PositionInfo" />
+	<typeAlias alias="mapInfo" type="com.careye.common.domain.MapInfo" />
+	<typeAlias alias="carInfo" type="com.careye.car.domain.CarInfo" />
+	<typeAlias alias="baseDomain" type="com.careye.base.action.TreeDomain" />
+	<typeAlias alias="terminalParameter" type="com.careye.common.domain.TerminalParameter" />
+	<typeAlias alias="carrealtime" type="com.careye.common.domain.Carrealtime" />
+	<typeAlias alias="ota" type="com.careye.common.domain.OperaTimeAnalysis" />
+
+	
+	<!-- word 车辆在线情况  获取离线车辆信息-->
+	<select id="getTpiList1" resultClass="terminalPositionInfo" parameterClass="terminalPositionInfo">
+            select 
+                 t.carnumber,
+	             t.terminal,
+	             to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+	             s.bloc_name blocname,
+	             tp.address,
+			     tcdt.typename,
+			     tcs.carstatus
+			from TO_CAR_INFO t, TO_BLOC s,TO_CAR_DEVICE_TYPE tcdt,TO_CAR_STATE tcs,TO_CAR_POSITION_INFO tp
+			where 
+			   t.blocid = s.id(+)
+			   and t.devicetype = tcdt.typeid(+)
+			   and t.id = tcs.carid(+)
+			   and t.carnumber = tp.carnumber(+)
+			   and tcs.carstatus in (1,2)
+			   <isNotEmpty prepend="and" property="blocid">
+					  t.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			   </isNotEmpty>
+		  order by t.id desc
+     </select>
+     <!-- word 车辆在线情况  获取在线车辆信息-->
+	<select id="getTpiList2" resultClass="terminalPositionInfo" parameterClass="terminalPositionInfo">
+              select 
+                 t.carnumber,
+	             t.terminal,
+	             to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+	             s.bloc_name blocname,
+	             tp.address,
+			     tcdt.typename,
+			     tcs.carstatus
+			from TO_CAR_INFO t, TO_BLOC s,TO_CAR_DEVICE_TYPE tcdt,TO_CAR_STATE tcs,TO_CAR_POSITION_INFO tp
+			where 
+			   t.blocid = s.id(+)
+			   and t.devicetype = tcdt.typeid(+)
+			   and t.id = tcs.carid(+)
+			   and t.carnumber = tp.carnumber(+)
+			   and tcs.carstatus in (3,4,5,6,7,8)
+			   <isNotEmpty prepend="and" property="blocid">
+					  t.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			   </isNotEmpty>
+		  order by t.id desc
+     </select>
+	
+	
+	<!--企业车辆在线情况  word  离线在线数量-->
+	<select id="getTpi" resultClass="terminalPositionInfo" parameterClass="terminalPositionInfo">
+		select 
+			(select count(*) from TO_CAR_Info t,TO_CAR_STATE tcs 
+				where t.id=tcs.carid(+) and tcs.carstatus in (1,2) 
+			<isNotNull prepend="and" property="userid">
+				t.blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id )
+			   	    </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			) count1,
+			(select count(*) from TO_CAR_Info t,TO_CAR_STATE tcs 
+				where t.id=tcs.carid(+) and tcs.carstatus in (3,4,5,6,7,8) 
+			<isNotNull prepend="and" property="userid">
+				t.blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id )
+			   	    </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			) count2
+		from to_car_info ci where rownum=1	
+	</select>
+
+
+	
+
+	<!-- 创建车辆位置信息表 -->
+	<update id="createCarPosTable" parameterClass="string">
+       create table $tName$
+				(
+				  TERMINAL   VARCHAR2(20),
+				  CARNUMBER  VARCHAR2(10),
+				  MSGID      NUMBER,
+				  SEQ        NUMBER,
+				  LNG        BINARY_DOUBLE,
+				  LAT        BINARY_DOUBLE,
+				  BLNG       BINARY_DOUBLE,
+				  BLAT       BINARY_DOUBLE,
+				  ADDRESS    VARCHAR2(512),
+				  GLNG       BINARY_DOUBLE,
+				  GLAT       BINARY_DOUBLE,
+				  GADDRESS   VARCHAR2(512),
+				  ALTITUDE   VARCHAR2(20),
+				  SPEED      VARCHAR2(20),
+				  DIRECTION  VARCHAR2(20),
+				  MILEAGE    BINARY_FLOAT,
+				  SUMMILEAGE BINARY_FLOAT,
+				  GPSTIME    DATE,
+				  GPSFLAG    NUMBER default 1,
+				  DATAPACKET VARCHAR2(4000),
+				  PROVINCE   VARCHAR2(50),
+				  CITY       VARCHAR2(50),
+				  DISTRICT   VARCHAR2(50),
+				  SN         VARCHAR2(10),
+				  SNVALUE    NUMBER,
+				  AN         VARCHAR2(10),
+				  ANVALUE    NUMBER,
+				  CARSTATUS  NUMBER,
+				  OIL        BINARY_FLOAT,
+				  OILSUM     BINARY_FLOAT,
+				  OILAVG     BINARY_FLOAT,
+				  OILAT      BINARY_FLOAT,
+				  ACC        NUMBER,
+				  ZKSTATE      NUMBER,
+				  CARDOORSTATE NUMBER,
+				  BRAKESTATE   NUMBER,
+				  RESERVE1     VARCHAR2(50),
+				  RESERVE2     VARCHAR2(50),
+				  RESERVE3     VARCHAR2(50),
+				  RESERVE4     VARCHAR2(50),
+				  RESERVE5     VARCHAR2(50),
+				  CREATETIME DATE,
+				  REMARK VARCHAR2(512)
+				)
+	</update>
+	
+	<!-- 车辆列表 -->
+	<select id="selectCarList"  resultClass="carInfo" parameterClass="carInfo">
+	select t.id carid, t.carnumber from to_car_info t where t.flag=1
+	  <isNotNull prepend="and" property="userid" >
+				 	t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+			(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )	   	    
+	  </isNotNull>
+		<isNotNull prepend="and" property="carnumber" >
+			  t.carnumber like '%'||#carnumber#||'%' 
+		</isNotNull>
+		<isNotEmpty prepend="and" property="blocid">
+		 	t.blocid in (SELECT id FROM TO_BLOC  
+		 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+		</isNotEmpty>
+	
+	</select>
+	<!-- 车辆列表 数量-->
+	<select id="selectCarListCount"  resultClass="Integer" parameterClass="carInfo">
+	select count(id) from to_car_info t where t.flag=1
+	  <isNotNull prepend="and" property="userid" >
+				 	t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+			(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )	   	    
+	  </isNotNull>
+		<isNotNull prepend="and" property="carnumber" >
+			  t.carnumber like '%'||#carnumber#||'%' 
+		</isNotNull>
+		<isNotEmpty prepend="and" property="blocid">
+		 	t.blocid in (SELECT id FROM TO_BLOC  
+		 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+		</isNotEmpty>
+	
+	</select>
+	
+	<!-- 创建车辆位置信息表索引 -->
+	<update id="createACCIndex" parameterClass="java.util.HashMap">
+		create index $ACC$ on $tableName$ (ACC)
+		  tablespace TAXI
+		  pctfree 10
+		  initrans 2
+		  maxtrans 255
+		  storage
+		  (
+		    initial 64K
+		    minextents 1
+		    maxextents unlimited
+		  )
+    </update>
+    <update id="createCARNUMBEIndex" parameterClass="java.util.HashMap">
+		create index $CARNUMBE$ on $tableName$ (CARNUMBER)
+		  tablespace TAXI
+		  pctfree 10
+		  initrans 2
+		  maxtrans 255
+		  storage
+		  (
+		    initial 64K
+		    minextents 1
+		    maxextents unlimited
+		  )
+    </update>
+    <update id="createCARSTATUSIndex" parameterClass="java.util.HashMap">
+		create index $CARSTATUS$ on $tableName$ (CARSTATUS)
+		  tablespace TAXI
+		  pctfree 10
+		  initrans 2
+		  maxtrans 255
+		  storage
+		  (
+		    initial 64K
+		    minextents 1
+		    maxextents unlimited
+		  )
+    </update>
+    <update id="createCREATETIMEIndex" parameterClass="java.util.HashMap">
+		create index $CREATETIME$ on $tableName$ (CREATETIME)
+		  tablespace TAXI
+		  pctfree 10
+		  initrans 2
+		  maxtrans 255
+		  storage
+		  (
+		    initial 64K
+		    minextents 1
+		    maxextents unlimited
+		  )
+   	</update>
+    <update id="createGPSFLAGIndex" parameterClass="java.util.HashMap">
+		create index $GPSFLAG$ on $tableName$ (GPSFLAG)
+		  tablespace TAXI
+		  pctfree 10
+		  initrans 2
+		  maxtrans 255
+		  storage
+		  (
+		    initial 64K
+		    minextents 1
+		    maxextents unlimited
+		  )
+	  </update>
+	 <update id="createTERMINALIndex" parameterClass="java.util.HashMap">
+		create index $TERMINAL$ on $tableName$ (TERMINAL)
+		  tablespace TAXI
+		  pctfree 10
+		  initrans 2
+		  maxtrans 255
+		  storage
+		  (
+		    initial 64K
+		    minextents 1
+		    maxextents unlimited
+		  )
+	</update>
+    <update id="createZKSTATEIndex" parameterClass="java.util.HashMap">
+		create index $ZKSTATE$ on $tableName$ (ZKSTATE)
+		  tablespace TAXI
+		  pctfree 10
+		  initrans 2
+		  maxtrans 255
+		  storage
+		  (
+		    initial 64K
+		    minextents 1
+		    maxextents unlimited
+		  )
+	</update>
+	
+	<!-- 根据终端号码查询位置信息表中是否存在记录 -->
+	<select id="getPositionCount" parameterClass="String" resultClass="Integer">
+		<![CDATA[
+			SELECT COUNT(*) from TO_CAR_POSITION_INFO where terminal = #terminal#
+		]]>
+	</select>
+	
+	<!-- 添加终端设备位置信息 -->
+	<insert id="addTerminalPositionInfo" parameterClass="terminalPositionInfo">
+		<![CDATA[
+			insert into TO_CAR_POSITION_INFO
+		      (
+		       CARID,
+				TERMINAL,
+				CARNUMBER,
+				MSGID,
+				ACC,
+				LNG,
+				LAT,
+				ALTITUDE,
+				SPEED,
+				DIRECTION,
+				GPSTIME,
+				GPSFLAG,
+				PROVINCE,
+				CITY,
+				DISTRICT,
+				BLNG,
+				BLAT,
+				ADDRESS,
+				GLNG,
+				GLAT,
+				GADDRESS,
+				MILEAGE,
+				DAYMILEAGE,
+		       remark,
+		       createtime
+		       )
+		    values
+		      (
+		       #carid#,
+				#terminal#,
+				#carnumber#,
+				#msgid#,
+				#acc#,
+				#lng#,
+				#lat#,
+				#altitude#,
+				#speed#,
+				#direction#,
+				#gpstime#,
+				#gpsflag#,
+				#province#,
+				#city#,
+				#district#,
+				#blng#,
+				#blat#,
+				#address#,
+				#glng#,
+				#glat#,
+				#gaddress#,
+				#mileage#,
+				#daymileage#,
+		       #remark#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_POSITION_INFO_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 更新终端位置信息 -->
+	<update id="updateTerminalPositionInfo" parameterClass="terminalPositionInfo">
+		<![CDATA[
+		UPDATE TO_CAR_POSITION_INFO
+		   
+		   SET msgid      = #msgid#,
+		       lng        = #lng#,
+		       lat        = #lat#,
+		       altitude   = #altitude#,
+		       speed      = #speed#,
+		       direction  = #direction#,
+		       gpstime    = #gpstime#,
+		       gpsflag    = #gpsflag#,
+		       remark     = #remark#,
+		       createtime = to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss') 
+		     ]]> 
+		     <isNotNull prepend="," property="sn" >
+		        sn = #sn#
+		      </isNotNull>
+		      
+		      <isNotNull prepend="," property="snvalue" >
+		        snvalue = #snvalue#
+		      </isNotNull>
+		      
+		      <isNotNull prepend="," property="an" >
+		        an = #an#
+		      </isNotNull>
+		      
+		      <isNotNull prepend="," property="anvalue" >
+		        anvalue = #anvalue#
+		      </isNotNull>
+		        
+		       <isNotNull prepend="," property="blng" >
+		        blng = #blng#
+		      </isNotNull>
+		      
+		      <isNotNull prepend="," property="blat" >
+		        blat = #blat#
+		      </isNotNull>
+		      
+		      <isNotNull prepend="," property="address" >
+		        address = #address#
+		      </isNotNull>
+		      
+		      <isNotNull prepend="," property="province" >
+		        province = #province#
+		      </isNotNull>
+		      
+		      <isNotNull prepend="," property="city" >
+		        city = #city#
+		      </isNotNull>
+		      
+		      <isNotNull prepend="," property="district" >
+		        district = #district#
+		      </isNotNull>
+		      
+		       WHERE terminal = #terminal#
+		    
+		     
+	</update>
+	
+	<!-- 插入位置信息至终端历史位置表中 -->
+	<insert id="insertTerminalHisPosition" parameterClass="terminalHisPosition">
+		<![CDATA[
+			insert into terminal_his_position
+		      (
+		       terminal,
+		       carnumber,
+		       msgid,
+		       seq,
+		       lng,
+		       lat,
+		       altitude,
+		       speed,
+		       direction,
+		       mileage,
+		       gpstime,
+		       gpsflag,
+		       datapacket,
+		       createtime,
+		       blng,
+		       blat,
+		       address,
+		       province,
+		       city,
+		       district,
+		       sn,
+		       snvalue,
+		       an,
+		       anvalue,
+		       carstatus,
+		       oil,
+		       oilsum,
+		       oilavg,
+		       oilat
+		       )
+		    values
+		      (
+		       #terminal#,
+		       #carnumber#,
+		       #msgid#,
+		       #seq#,
+		       #lng#,
+		       #lat#,
+		       #altitude#,
+		       #speed#,
+		       #direction#,
+		       #mileage#,
+		       #gpstime#,
+		       #gpsflag#,
+		       #datapacket#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss'),
+		       #blng#,
+		       #blat#,
+		       #address#,
+		       #province#,
+		       #city#,
+		       #district#,
+		       #sn#,
+		       #snvalue#,
+		       #an#,
+		       #anvalue#,
+		       #carstatus#,
+		       #oil#,
+		       #oilsum#,
+		       #oilavg#,
+		       #oilat#
+		       )
+	       ]]>
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TERMINAL_HIS_POSITION_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	<!-- 根据车牌号获取车辆最后位置信息 -->
+	<select id="getTerminalPositionInfo" parameterClass="terminalPositionInfo" resultClass="String">
+		<![CDATA[
+			select t.terminal,
+			       t.speed,
+			       t.direction,
+			       t.address,
+			       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+			       t.blng,
+			       t.blat
+			  from TO_CAR_POSITION_INFO t
+			 where t.carnumber = #carnumber#
+		]]>
+	</select>
+	
+	<!-- 终端位置信息列表 -->
+	<select id="terminalPositionList"  resultClass="terminalPositionInfo" parameterClass="terminalPositionInfo">
+		<![CDATA[
+		select c.id carid,c.phone,cs.kzstate,
+			(case cs.carstatus WHEN 7 THEN '在线' WHEN 1 THEN '长时间离线' WHEN 2 THEN '离线' WHEN 3 THEN '熄火' 
+       			 WHEN 4 THEN '停车' WHEN 5 THEN '行驶' WHEN 6 THEN '报警' WHEN 8 THEN '未定位' ELSE '' END) carstatus,
+			t.carnumber,t.speed,t.direction,t.altitude,t.lng,t.lat,t.blng,t.blat,
+			(case t.gpsflag WHEN 0 THEN '无效' WHEN 1 THEN '有效' WHEN 2 THEN '上次信号有效' ELSE '' END) gpsflagtext,
+			t.address,t.mileage,t.terminal,t.acc,
+			to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+		from TO_CAR_POSITION_INFO t,TO_CAR_INFO c,TO_CAR_STATE cs
+	    where t.carnumber = c.carnumber and c.id = cs.carid
+		]]>
+		<isNotEmpty prepend="and" property="carnumber" >
+			  c.carnumber like '%'||#carnumber#||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="carstatus" >
+			  cs.carstatus = #carstatus#
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="stime" >
+			  <![CDATA[ t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="blocid">
+		 	c.blocid in (SELECT t.id FROM TO_BLOC t 
+		 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="etime" >
+			  <![CDATA[ t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')	]]>
+		</isNotEmpty>
+   	    <isNotNull prepend="and" property="userid" >
+			 c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+				(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+   	    </isNotNull>
+		order by $sortcolumn$ $sortway$
+	</select>
+	
+	<!-- 批量获取车辆位置状态信息 -->
+	<select id="queryCarAllDetail" resultClass="positionInfo"  parameterClass="list">
+		<![CDATA[ 
+				select c.id carid,
+				   c.terminal,
+				   c.phone,
+			       cs.carstatus,
+			       cs.kzstate,
+			       c.carnumber,
+			       
+			       t.lng,
+			       t.blng,
+            	   t.blat,
+			       t.direction,
+			       t.speed,
+			       t.glng,
+		           t.glat,
+		           t.gaddress,
+			       t.lat,
+			       t.address,
+			       t.mileage,
+			       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+			       
+			  from TO_CAR_POSITION_INFO     t,
+			       TO_CAR_INFO                   c,
+			       TO_CAR_STATE                   cs,
+			       TO_BLOC dept,
+			       TO_CAR_TYPE ctn
+			 where  c.id = cs.carid
+			   and t.carnumber = c.carnumber
+			   and c.blocid = dept.id(+)
+			   and c.cartype = ctn.id(+)
+		       and c.id in
+		]]> 
+		 <iterate open="(" close=")" conjunction="," property="">
+            #idlist[]#
+         </iterate>
+	</select>
+	
+	<!--根据组织机构批量获取车辆位置状态信息 -->
+	<select id="loadCarPosByDept" resultClass="positionInfo"  parameterClass="baseDomain">
+		<![CDATA[ 
+				 select c.id carid,
+				   c.terminal,
+				   c.phone,
+			       cs.carstatus,
+			       cs.kzstate,
+			       c.carnumber,
+			       
+			       t.lng,
+			       t.blng,
+            	   t.blat,
+			       t.direction,
+			       t.speed,
+			       t.glng,
+		           t.glat,
+		           t.gaddress,
+			       t.lat,
+			       t.address,
+			       t.mileage,
+			       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+			       
+			  from TO_CAR_POSITION_INFO     t,
+			       TO_CAR_INFO                   c,
+			       TO_CAR_STATE                   cs,
+			       TO_BLOC dept,
+			       TO_CAR_TYPE ctn
+			 where  c.id = cs.carid
+			   and t.carnumber = c.carnumber
+			   and c.blocid = dept.id(+)
+			   and c.cartype = ctn.id(+)
+		      ]]> 
+		       <isNotNull prepend="and" property="blocid" >
+				 	c.blocid = #blocid#
+			   </isNotNull>
+	</select>
+	
+	
+	<!-- 获取车辆位置状态信息 -->
+	<select id="queryCarTerminalDetail" resultClass="positionInfo"  parameterClass="String">
+		<![CDATA[ 
+				 select c.id carid,
+				      s.carstatus,
+				       c.carnumber,
+				       c.phone,
+				       cu.usename,
+				       c.enginenumber,
+				       t.lng,
+		               t.lat,
+		               t.address,
+		               t.altitude,
+		               t.direction,
+		               t.speed,
+		               t.terminal,
+		               t.glng,
+		               t.glat,
+		               t.gaddress,
+		               t.mileage,
+		               to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime, 
+		               bloc.bloc_name blocname,
+		               ct.typename cartype,
+		               tcdi.drivername drivername
+		          from TO_CAR_POSITION_INFO t,
+		               TO_CAR_INFO          c,
+		               TO_CAR_STATE         s,
+		               TO_BLOC              bloc,
+		               TO_CAR_TYPE          ct,
+		               TO_CAR_USE           cu,
+		               TO_CAR_DRIVER_INFO   tcdi
+		         where t.carnumber = c.carnumber
+		           and c.id = s.carid(+)
+		           and c.blocid = bloc.id(+)
+		           and c.cartype = ct.id(+)
+		           and c.caruse = cu.id(+)
+		           and c.drivercode = tcdi.drivercode(+)
+		           and c.flag = 1
+					and c.carnumber = #carnumber#
+		]]>
+	</select>
+		
+	<!-- 获取车辆地图位置状态信息 -->
+	<select id="queryCarDetail" resultClass="mapInfo"  parameterClass="String">
+		<![CDATA[ 
+			select c.id carid,
+				   c.terminal,
+				   c.phone,
+			       cs.carstatus,
+			       cs.kzstate,
+			       c.carnumber,
+			       c.vediotype,
+			       c.vediono,
+			       
+			       t.lng,
+			       t.blng,
+            	   t.blat,
+			       t.direction,
+			       t.speed,
+			       t.glng,
+		           t.glat,
+		           t.gaddress,
+			       t.lat,
+			       t.address,
+			       t.mileage,
+			       t.acc,
+			       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+			       
+			  from TO_CAR_POSITION_INFO     t,
+			       TO_CAR_INFO                   c,
+			       TO_CAR_STATE                   cs,
+			       TO_BLOC dept,
+			       TO_CAR_TYPE ctn
+			 where  c.id = cs.carid
+			   and t.carid = c.id
+			   and c.blocid = dept.id(+)
+			   and c.cartype = ctn.id(+)
+			   and c.carnumber = #carnumber#
+		]]>
+	</select>	
+		
+     
+	<!-- 根据carid查询车辆状态位置信息 -->
+	<select id="queryCarDetailByCarid" resultClass="mapInfo"  parameterClass="Integer">
+		<![CDATA[ 
+			select c.id carid,
+				   c.terminal,
+				   c.phone,
+			       cs.carstatus,
+			       cs.kzstate,
+			       c.carnumber,
+			       c.vediotype,
+			       c.vediono,
+			       
+			       t.lng,
+			       t.blng,
+            	   t.blat,
+			       t.direction,
+			       t.speed,
+			       t.glng,
+		           t.glat,
+		           t.gaddress,
+			       t.lat,
+			       t.address,
+			       t.mileage,
+			       t.acc,
+			       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+			       
+			  from TO_CAR_POSITION_INFO     t,
+			       TO_CAR_INFO                   c,
+			       TO_CAR_STATE                   cs,
+			       TO_BLOC dept,
+			       TO_CAR_TYPE ctn
+			 where  c.id = cs.carid
+			   and t.carid = c.id
+			   and c.blocid = dept.id(+)
+			   and c.cartype = ctn.id(+)
+			   and c.id = #carid#
+		]]>
+	</select>	
+		
+     
+     <!-- 根据设备号删除最后位置标中的数据 -->
+     <delete id="deleteTerminalPosition" parameterClass="String">
+		<![CDATA[
+			delete from TO_CAR_POSITION_INFO t where  t.terminal = #terminal#
+		]]>
+	
+	</delete>
+	
+	<!-- 根据车牌号删除最后位置标中的数据 -->
+     <delete id="deleteTerminalPositionCarNumber" parameterClass="String">
+		<![CDATA[
+			delete from TO_CAR_POSITION_INFO t where  t.carnumber = #carnumber#
+		]]>
+	</delete>
+	
+	<delete id="deleteTerminalPositionCarId" parameterClass="Integer">
+		<![CDATA[
+			delete from TO_CAR_POSITION_INFO t where  t.carid = #carid#
+		]]>
+	</delete>
+	
+	
+	<!--  根据车辆ID更新车辆最后位置信息 -->
+	<update id="updateTerminalPosition" parameterClass="carInfo">
+		<![CDATA[
+		UPDATE TO_CAR_POSITION_INFO
+		   SET terminal      = #terminal#,
+		       carnumber    = #carnumber#
+		     ]]> 
+		      WHERE carid = #id#
+	</update>
+	
+	
+	
+	
+	
+	  <!-- 车辆分布列表总数 -->
+	<select id="getCarLocationListCount" resultClass="int" parameterClass="terminalPositionInfo">
+             select count(*)
+			  from TO_CAR_POSITION_INFO t,
+			       TO_CAR_INFO          ci,
+			       TO_BLOC              e,
+			       TO_CAR_DEVICE_TYPE   dt,
+			       TO_CAR_STATE         s,
+			       TO_CAR_TYPE          ct,
+			       to_car_use           cu
+			 where t.carnumber = ci.carnumber
+			   and ci.blocid = e.id(+)
+			   and ci.id = s.carid(+)
+			   and ci.devicetype = dt.typeid(+)
+			   and ci.cartype = ct.id(+)
+			   and ci.userid = cu.id(+)
+			   and ci.flag = 1
+				<dynamic>
+		   	    <isNotEmpty prepend="and" property="devicetype">
+				 		ci.devicetype=#devicetype#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carnumber">
+				 		ci.carnumber like '%'||#carnumber#||'%'
+				</isNotEmpty>
+		   	    <isNotEmpty prepend="and" property="usename">
+				 		cu.usename=#usename#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carstatus">
+				 		s.carstatus=#carstatus#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="terminal">
+				 		ci.terminal like '%'||#terminal#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="cartype">
+				 		ci.cartype=#cartype#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="blocid">
+				 		ci.blocid in (SELECT t.id FROM TO_BLOC t 
+				 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+				</isNotEmpty>
+				<isNotNull prepend="and" property="userid" >
+					 ci.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+				<isNotEmpty prepend="and" property="stime">
+				 	<![CDATA[
+				 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				 	]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="etime">
+				 	<![CDATA[
+				 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				 	 ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="province">
+				 		t.province like '%'||#province#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="city">
+				 		t.city like '%'||#city#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="district">
+				 		t.district like '%'||#district#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="lng">
+				 		<![CDATA[t.blng > #lng#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="lng1">
+				 		<![CDATA[t.blng < #lng1#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="lat">
+				 		<![CDATA[t.blat < #lat#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="lat1">
+				 		<![CDATA[t.blat > #lat1#]]>
+				</isNotEmpty>
+				
+				<isNotEmpty prepend="and" property="glng">
+				 		<![CDATA[t.glng > #glng#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="glng1">
+				 		<![CDATA[t.glng < #glng1#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="glat">
+				 		<![CDATA[t.glat < #glat#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="glat1">
+				 		<![CDATA[t.glat > #glat1#]]>
+				</isNotEmpty>
+		        </dynamic>
+     </select>
+     
+     <!-- 车辆分布列表-->
+	<select id="getCarLocationList" resultClass="terminalPositionInfo" parameterClass="terminalPositionInfo">
+             select t.id,
+			       e.BLOC_NAME blocname,
+			       t.terminal,
+			       t.carnumber,
+			       t.address,
+			       t.province,
+			       t.speed,
+			       t.city,
+			       t.district,
+			       s.carstatus,
+			       t.blng,
+			       t.blat,
+			       t.glng,
+			       t.glat,
+			       t.lng,
+			       t.lat,
+			       ci.color carnumbercolor,
+			       ci.color,
+			       dt.typename,
+			       dt.typeid,
+			       ct.typename cartypename,
+			       cu.usename,
+			       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+			  from TO_CAR_POSITION_INFO t,
+			       TO_CAR_INFO          ci,
+			       TO_BLOC              e,
+			       TO_CAR_DEVICE_TYPE   dt,
+			       TO_CAR_STATE         s,
+			       TO_CAR_TYPE          ct,
+			       to_car_use           cu
+			 where t.carnumber = ci.carnumber
+			   and ci.blocid = e.id(+)
+			   and ci.id = s.carid(+)
+			   and ci.devicetype = dt.typeid(+)
+			   and ci.cartype = ct.id(+)
+			   and ci.userid = cu.id(+)
+			   and ci.flag = 1
+
+				<dynamic>
+		   	    <isNotEmpty prepend="and" property="devicetype">
+				 		ci.devicetype=#devicetype#
+				</isNotEmpty>
+		   	    <isNotEmpty prepend="and" property="usename">
+				 		cu.usename = #usename#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carnumber">
+				 		ci.carnumber like '%'||#carnumber#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carstatus">
+				 		s.carstatus=#carstatus#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="terminal">
+				 		ci.terminal like '%'||#terminal#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="cartype">
+				 		ci.cartype=#cartype#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="blocid">
+				 		ci.blocid in (SELECT t.id FROM TO_BLOC t 
+				 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+				</isNotEmpty>
+				<isNotNull prepend="and" property="userid" >
+					 ci.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+				<isNotEmpty prepend="and" property="stime">
+				 	<![CDATA[
+				 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				 	]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="etime">
+				 	<![CDATA[
+				 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				 	 ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="province">
+				 		t.province like '%'||#province#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="city">
+				 		t.city like '%'||#city#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="district">
+				 		t.district like '%'||#district#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="lng">
+				 		<![CDATA[t.blng > #lng#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="lng1">
+				 		<![CDATA[t.blng < #lng1#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="lat">
+				 		<![CDATA[t.blat < #lat#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="lat1">
+				 		<![CDATA[t.blat > #lat1#]]>
+				</isNotEmpty>
+				
+				<isNotEmpty prepend="and" property="glng">
+				 		<![CDATA[t.glng > #glng#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="glng1">
+				 		<![CDATA[t.glng < #glng1#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="glat">
+				 		<![CDATA[t.glat < #glat#]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="glat1">
+				 		<![CDATA[t.glat > #glat1#]]>
+				</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>	
+	
+	<!--根据组织机构批量获取车辆位置状态信息 -->
+	<select id="getTerminalParam" resultClass="terminalParameter"  parameterClass="Integer">
+			select t.* from TO_TERMINAL_PARAM t where  t.carid = #carid#
+	</select>
+	
+	
+	
+	 <!-- 车辆实时信息列表-->
+	<select id="getCarrealtimeList" resultClass="carrealtime" parameterClass="carrealtime">
+             select		t.id,
+						t.carid,
+						t.terminal,
+						t.carnumber,
+						t.msgid,
+						t.acc,
+						t.lng,
+						t.lat,
+						t.altitude,
+						t.speed,
+						t.direction,
+						to_char(t.gpstime, 'yyyy-mm-dd hh24:mi:ss') gpstime,
+						t.gpsflag,
+						t.province,
+						t.city,
+						t.district,
+						t.blng,
+						t.blat,
+						t.address,
+						t.glng,
+						t.glat,
+						t.gaddress,
+						t.mileage,
+						t.daymileage,
+						to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+						t.remark,
+						tc.BLOCID blocid,
+			       		tb.BLOC_NAME blocname,
+			       		td.carstatus carstatus
+			  from TO_CAR_POSITION_INFO t,TO_CAR_INFO tc, TO_BLOC tb,TO_CAR_STATE td
+			 where t.carid=tc.id and tc.BLOCID = tb.id and t.carid=td.carid 
+
+				<dynamic>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.terminal like '%'||#terminal#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					 		tc.BLOCID in (SELECT tb.id FROM TO_BLOC tb 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carstatus">
+					 		td.carstatus = #carstatus#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="gpsflag">
+					 		t.gpsflag = #gpsflag#
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+	
+	
+	<!-- 车辆实时信息列表总数 -->
+	<select id="getCarrealtimeListCount" resultClass="int" parameterClass="carrealtime">
+             select count(*) from TO_CAR_POSITION_INFO t,TO_CAR_INFO tc, TO_BLOC tb,TO_CAR_STATE td
+			 where t.carid=tc.id and tc.BLOCID = tb.id and t.carid=td.carid 
+
+				<dynamic>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.terminal like '%'||#terminal#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					 		tc.BLOCID in (SELECT tb.id FROM TO_BLOC tb 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carstatus">
+					 		td.carstatus = #carstatus#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="gpsflag">
+					 		t.gpsflag = #gpsflag#
+					</isNotEmpty>
+		        </dynamic>
+			
+     </select>
+     
+     <!-- 营运时长分析图表数据获取数据-->
+	<select id="queryOta" resultClass="ota" parameterClass="java.util.HashMap">
+		select nvl(sum(nvl(drivertime,0)),0) as drivertime,
+		       nvl(sum(nvl(offlinetime,0)),0) as offlinetime,
+		       nvl(sum(nvl(passengertime,0)),0) as passengertime
+		from TO_OVERHEADS_STATISTIC t, TO_CAR_INFO tc, TO_BLOC tb
+		where t.carid = tc.id
+	 	and tc.BLOCID = tb.id
+		and to_char(t.createtime, 'yyyy-mm-dd') = to_char(to_date(#time#, 'yyyy-mm-dd') + (#i#), 'yyyy-mm-dd')
+					<dynamic>
+						<isNotEmpty prepend="and" property="carnumber">
+						 		tc.carnumber like '%'||#carnumber#||'%'
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="blocid">
+						 		tc.BLOCID in (SELECT tb.id FROM TO_BLOC tb 
+						 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+						</isNotEmpty>
+			        </dynamic>
+		
+	</select>
+	
+	<!-- 营运里程统计列表-->
+	<select id="getOperaMileStatiList" resultClass="ota" parameterClass="ota">
+             select		
+             			avg(nvl(t.drivermile,0)) drivermile,
+             			avg(nvl(t.passengermile,0)) passengermile,
+             			avg(nvl(t.drivermile1,0)) drivermile1,
+             			avg(nvl(t.passengermile1,0)) passengermile1,
+						to_char(t.createtime, 'yyyy-mm-dd') createtime
+			  from TO_OVERHEADS_STATISTIC t
+			 where 1=1
+
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="blocid">
+					 	 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT tb.id FROM TO_BLOC tb 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carid in (select id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  group by t.createtime order by t.createtime
+     </select>
+	
+	
+	<!-- 营运里程统计列表总数 -->
+	<select id="getOperaMileStatiListCount" resultClass="int" parameterClass="ota">
+            select count(a.createtime) from 
+             (select		
+						to_char(t.createtime, 'yyyy-mm-dd') createtime
+			  from TO_OVERHEADS_STATISTIC t
+			 where 1=1
+
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="blocid">
+					 	 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT tb.id FROM TO_BLOC tb 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carid in (select id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  group by t.createtime ) a
+			
+     </select>
+     
+     <!-- 营运时长统计列表-->
+	<select id="getOperaTimeStatiList" resultClass="ota" parameterClass="ota">
+             select		
+             			round(avg(nvl(t.inlinetime,0)),2) inlinetime,
+             			round(avg(nvl(t.passengertime,0)),2) passengertime,
+             			round(avg(nvl(t.drivertime1,0)),2) drivertime1,
+             			round(avg(nvl(t.passengertime1,0)),2) passengertime1,
+						to_char(t.createtime, 'yyyy-mm-dd') createtime
+			  from TO_OVERHEADS_STATISTIC t
+			 where 1=1
+
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="blocid">
+					 	 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT tb.id FROM TO_BLOC tb 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carid in (select id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  group by t.createtime order by t.createtime
+     </select>
+	
+	
+	<!-- 营运时长统计列表总数 -->
+	<select id="getOperaTimeStatiListCount" resultClass="int" parameterClass="ota">
+            select count(a.createtime) from 
+             (select		
+						to_char(t.createtime, 'yyyy-mm-dd') createtime
+			  from TO_OVERHEADS_STATISTIC t
+			 where 1=1
+
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="blocid">
+					 	 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT tb.id FROM TO_BLOC tb 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carid in (select id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  group by t.createtime ) a
+			
+     </select>
+     
+     <!-- 营运里程分析图表数据获取数据-->
+	<select id="queryOma" resultClass="ota" parameterClass="java.util.HashMap">
+		select nvl(sum(nvl(drivermile,0)),0) as drivermile,
+		       nvl(sum(nvl(emptymile,0)),0) as emptymile,
+		       nvl(sum(nvl(passengermile,0)),0) as passengermile
+		from TO_OVERHEADS_STATISTIC t, TO_CAR_INFO tc, TO_BLOC tb
+		where t.carid = tc.id
+	 	and tc.BLOCID = tb.id
+		and to_char(t.createtime, 'yyyy-mm-dd') = to_char(to_date(#time#, 'yyyy-mm-dd') + (#i#), 'yyyy-mm-dd')
+					<dynamic>
+						<isNotEmpty prepend="and" property="carnumber">
+						 		tc.carnumber like '%'||#carnumber#||'%'
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="blocid">
+						 		tc.BLOCID in (SELECT tb.id FROM TO_BLOC tb 
+						 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+						</isNotEmpty>
+			        </dynamic>
+		
+	</select>
+     
+    
+    
+    
+    <!-- exportOta导出 营运时长分析 数据以及图表 --> 
+    <select id="exportOta" resultClass="ota" parameterClass="ota">
+		select nvl(t.drivertime,0) as drivertime,
+		       nvl(t.offlinetime,0) as offlinetime,
+		       nvl(t.passengertime,0) as passengertime,
+		       tb.bloc_name blocname,
+		       tc.carnumber carnumber,
+		       to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		from TO_OVERHEADS_STATISTIC t, TO_CAR_INFO tc, TO_BLOC tb
+		where t.carid = tc.id
+	 	and tc.BLOCID = tb.id
+					<dynamic>
+						<isNotEmpty prepend="and" property="stime">
+						 	<![CDATA[
+						 		t.createtime >= to_date(#stime#,'yyyy-mm-dd')
+						 	]]>
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="etime">
+						 	<![CDATA[
+						 		t.createtime <= to_date(#etime#,'yyyy-mm-dd')
+						 	 ]]>
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="carnumber">
+						 		tc.carnumber like '%'||#carnumber#||'%'
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="blocid">
+						 		tc.BLOCID in (SELECT tb.id FROM TO_BLOC tb 
+						 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+						</isNotEmpty>
+			        </dynamic>
+		
+	</select>
+	
+	<!-- 日均营运统计列表-->
+	<select id="getOperaDayStatiList" resultClass="ota" parameterClass="ota">
+             select		
+             			round(avg(nvl(t.income,0)),2) income,
+             			round(avg(nvl(t.drivermile,0)),2) drivermile,
+             			round(avg(nvl(t.passengermile,0)),2) passengermile,
+             			round(avg(nvl(t.inlinetime,0)),2) inlinetime,
+             			round(avg(nvl(t.passengertime,0)),2) passengertime,
+             			round(avg(nvl(t.waittime,0)),2) waittime,
+             			round(avg(nvl(t.feetime,0)),2) feetime,
+             			round(avg(nvl(t.passengercount,0)),2) passengercount,
+						to_char(t.createtime, 'yyyy-mm-dd') createtime
+			  from TO_OVERHEADS_STATISTIC t
+			 where 1=1
+
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="blocid">
+					 	 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT tb.id FROM TO_BLOC tb 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carid in (select id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  group by t.createtime order by t.createtime
+     </select>
+	
+	
+	<!-- 日均营运统计列表总数 -->
+	<select id="getOperaDayStatiListCount" resultClass="int" parameterClass="ota">
+            select count(a.createtime) from 
+             (select		
+						to_char(t.createtime, 'yyyy-mm-dd') createtime
+			  from TO_OVERHEADS_STATISTIC t
+			 where 1=1
+
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="blocid">
+					 	 t.carid in (select id from TO_CAR_INFO where blocid in (SELECT tb.id FROM TO_BLOC tb 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carid in (select id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  group by t.createtime ) a
+			
+     </select>
+</sqlMap>
+
+
+
+
+
+
+

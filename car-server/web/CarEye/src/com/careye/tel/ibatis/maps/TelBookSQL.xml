@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-telbookSQL">
+
+	<typeAlias alias="telBookSystem" type="com.careye.tel.domain.TelBookSystem" />
+	<typeAlias alias="telBookCar" type="com.careye.tel.domain.TelBookCar" />
+	<typeAlias alias="telBookSend" type="com.careye.tel.domain.TelBookSend" />
+	
+	<!-- id查询系统电话本 -->
+	<select id="selectTelBookSystemById" resultClass="telBookSystem" parameterClass="int">
+           select * from tel_book_system t  where t.id = #id#
+     </select>
+	
+	<!-- 通过telbookid查询车辆电话本 -->
+	<select id="selectTelBookSystemByEventId" resultClass="telBookSystem" parameterClass="int">
+           select * from tel_book_car t  where t.telbookid = #telbookid#
+     </select>
+	
+	
+   <!-- 电话号码是否已存在-->
+	<select id="queryTelBookIsExist" resultClass="Integer" parameterClass="telBookSystem">
+		select count(*) from tel_book_system  where tel=#tel#
+		  <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+	
+	<!-- 通过id查询车辆电话本  -->
+	<select id="selectTelBookCarById" resultClass="telBookCar" parameterClass="int">
+                    select t.id,
+					       t.deptid,
+					       t.userid,
+					       t.carnumber,
+					       t.telbookid,
+					       t.result,
+					       e.tel,
+					       t.seq,
+					       e.contacts,
+					       e.calltype,
+					       e.remark,
+					       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+					  from tel_book_car t,tel_book_system e
+					 where  t.telbookid = e.id
+					 and t.id=#id#
+     </select>
+     
+	
+	<!-- 删除系统电话本时查看车辆电话本中是否已存在-->
+	<select id="queryTelBookCarIsExist" resultClass="Integer" parameterClass="int">
+		select count(*) from tel_book_car  where telbookid=#telbookid#
+	</select>
+	
+	 <!-- 查询件下发记录列表数量-->
+	<select id="selectTelBookSendCount" resultClass="int" parameterClass="telBookSend">
+                    select count(*)
+					  from tel_book_send_record t
+					 where 1=1
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+				   t.deptid in (SELECT id FROM TO_BLOC  START WITH id = 
+                     (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+	   		    </isNotNull>
+	   	    	<isNotEmpty prepend="and" property="contacts">
+				 		t.contacts like '%'||#contacts#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="tel">
+				 		t.tel like '%'||#tel#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="opertype">
+				 		 t.opertype=#opertype#
+				</isNotEmpty>
+					
+		        </dynamic>
+     </select>
+	 <!--  查询电话本下发记录列表-->
+	<select id="selectCheckTelBookSend" resultClass="telBookSend" parameterClass="telBookSend">
+                    select t.id,
+					       t.deptid,
+					       r.bloc_name deptname,
+					       t.userid,
+					       e.user_name username,
+					       t.contacts,
+					       t.carnumber,
+					       t.telbookid,
+					       t.tel,
+					       t.seq,
+					       t.result,
+					       t.opertype,
+					       t.data,
+					       t.calltype,
+					       t.remark,
+					       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+					  from tel_book_send_record       t,
+					       to_bloc r,
+					       to_bloc_user              e
+					 where t.deptid = r.id
+					   and t.userid = e.id
+
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					   t.deptid in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   		    </isNotNull>
+		   	    	<isNotEmpty prepend="and" property="contacts">
+					 		t.contacts like '%'||#contacts#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="tel">
+					 		t.tel like '%'||#tel#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="opertype">
+					 		 t.opertype=#opertype#
+					</isNotEmpty>
+		        </dynamic>
+		        order by id desc
+     </select>
+     
+      <!-- 通 过   车牌号   查询车辆电话本列表数量-->
+	<select id="selectTelBookCarByCarNumberCount" resultClass="int" parameterClass="telBookCar">
+                    select count(*)
+					  from tel_book_car t, to_car_info r ,tel_book_system e
+					 where t.carnumber = r.carnumber
+					 and   t.telbookid=e.id
+				<dynamic>
+				<isNotNull prepend="and" property="userid" >
+					   t.deptid in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   		    </isNotNull>
+		   	    	<isNotEmpty prepend="and" property="contacts">
+					 		e.contacts like '%'||#contacts#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="tel">
+					 		e.tel like '%'||#tel#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		 t.carnumber=#carnumber#
+					</isNotEmpty>
+		        </dynamic>
+     </select>
+     
+     
+     <!-- 通 过   车牌号   查询车辆电话本列表-->
+	<select id="selectChecktelBookCarByCarNumber" resultClass="telBookCar" parameterClass="telBookCar">
+                    select t.id,
+                    	   t.id as cartelbookid,
+					       t.deptid,
+					       t.userid,
+					       e.contacts,
+					       e.tel,
+					       e.calltype,
+					       t.carnumber,
+					       t.telbookid,
+					       t.seq,
+					       t.result,
+       					   e.remark,
+					       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+					  from tel_book_car t ,tel_book_system e
+					 where  t.telbookid=e.id
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					   t.deptid in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   		    </isNotNull>
+		   	    	<isNotEmpty prepend="and" property="contacts">
+					 		e.contacts like '%'||#contacts#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="tel">
+					 		e.tel like '%'||#tel#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		 t.carnumber=#carnumber#
+					</isNotEmpty>
+		        </dynamic>
+     </select>
+     
+     <!-- 查询系统电话本数量 -->
+	<select id="selectTelBookSystem" resultClass="int" parameterClass="telBookSystem">
+       
+           select count(*) from tel_book_system t 
+				 where 1=1
+           <dynamic>
+           		 <isNotNull prepend="and" property="userid" >
+					   t.deptid in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   		    </isNotNull>
+					<isNotEmpty prepend="and" property="contacts">
+					 		t.contacts like '%'||#contacts#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="tel">
+					 		t.tel like '%'||#tel#||'%'
+					</isNotEmpty>
+		  </dynamic>
+     </select>
+     
+	<!-- 查询系统电话本列表-->
+	<select id="selectCheckTelBookSystem" resultClass="telBookSystem" parameterClass="telBookSystem">
+                 select t.id,
+				        t.deptid,
+				        t.userid,
+				        t.calltype,
+				        t.contacts,
+				        t.tel,
+				        t.remark,
+				        to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				   from tel_book_system t
+				  where 1=1
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					   t.deptid in (SELECT id FROM TO_BLOC  START WITH id = 
+                      (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   		    </isNotNull>
+					<isNotEmpty prepend="and" property="contacts">
+					 		t.contacts like '%'||#contacts#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="tel">
+					 		t.tel like '%'||#tel#||'%'
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     
+     <!--   删除系统电话本 -->
+     <delete id="deleteTelBookSystem">
+        <![CDATA[
+		    delete from  tel_book_system  WHERE id = #id#
+		]]>	
+     </delete>
+      <!--  删除车辆电话本 -->
+     <delete id="deleteTelBookCar" parameterClass="telBookCar">
+		    delete from  tel_book_car  WHERE 1=1
+		    <isNotEmpty prepend="and" property="carnumber">
+					carnumber = #carnumber#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="telbookid">
+					telbookid = #telbookid#
+			</isNotEmpty>
+     </delete>
+     
+      <!-- 增加系统电话本 -->
+     <insert id="insertTelBookSystem" parameterClass="telBookSystem">
+     <![CDATA[ 
+        insert into tel_book_system(
+	        deptid,
+		    userid,
+	        calltype,
+	        contacts,
+	        tel,
+	        remark,
+	        createtime
+        )values(
+	        #deptid#,
+	        #userid#,
+	        #calltype#,
+	        #contacts#,
+	        #tel#,
+	        #remark#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TEL_BOOK_SYSTEM_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新系统电话本 -->
+     <update id="updateTelBookSystem" parameterClass="telBookSystem">
+         update tel_book_system
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="deptid" >
+		        deptid = #deptid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        id = #userid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="calltype" >
+		        calltype = #calltype#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="contacts" >
+		        contacts = #contacts#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="tel" >
+		        tel = #tel#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="remark" >
+		        remark = #remark#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+	
+	
+	  <!-- 增加车辆电话本 -->
+     <insert id="insertTelBookCar" parameterClass="telBookCar">
+     <![CDATA[ 
+        insert into tel_book_car(
+	        deptid,
+		    userid,
+		    carnumber,
+			telbookid,
+	        seq,
+	        result,
+	        createtime
+        )values(
+	        #deptid#,
+	        #userid#,
+	        #carnumber#,
+	        #telbookid#,
+	        #seq#,
+	        #result#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TEL_BOOK_CAR_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新增加车辆电话本 -->
+     <update id="updateTelBookCar" parameterClass="telBookCar">
+         update tel_book_car
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="deptid" >
+		        deptid = #deptid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        id = #userid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="carnumber" >
+		        carnumber = #carnumber#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="telbookid" >
+		        telbookid = #telbookid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="seq" >
+		        seq = #seq#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="result" >
+		        result = #result#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+	
+		
+	
+	  <!-- 增加电话本发送记录 -->
+     <insert id="insertTelBookSend" parameterClass="telBookCar">
+     <![CDATA[ 
+        insert into tel_book_send_record(
+	        deptid,
+		    userid,
+		    contacts,
+		    carnumber,
+			telbookid,
+			calltype,
+			tel,
+			remark,
+			opertype,
+	        seq,
+	        result,
+	        data,
+	        createtime
+        )values(
+	        #deptid#,
+	        #userid#,
+	        #contacts#,
+	        #carnumber#,
+	        #telbookid#,
+	        #calltype#,
+	        #tel#,
+	        #remark#,
+	        #opertype#,
+	        #seq#,
+	        #result#,
+	        #data#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TEL_BOOK_SEND_RECORD_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新电话本发送记录 -->
+     <update id="updateTelBookSend" parameterClass="telBookCar">
+         update tel_book_send_record
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="deptid" >
+		        deptid = #deptid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        id = #userid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="contacts" >
+		        contacts = #contacts#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="carnumber" >
+		        carnumber = #carnumber#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="telbookid" >
+		        telbookid = #telbookid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="opertype" >
+		        opertype = #opertype#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="seq" >
+		        seq = #seq#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="result" >
+		        result = #result#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="data" >
+		        data = #data#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+     
+     
+    <!-- 根据流水号修改电话本处理结果 -->
+	<update id="updateTelBookSendResult" parameterClass="telBookSend">
+		<![CDATA[
+			UPDATE tel_book_send_record SET result = #result#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber#
+	</update>
+	
+	 <!-- 根据流水号修改车辆处理结果 -->
+	<update id="updateTelBookCarResult" parameterClass="telBookCar">
+		<![CDATA[
+			UPDATE tel_book_car SET result = #result#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber#
+	</update>
+	
+</sqlMap>

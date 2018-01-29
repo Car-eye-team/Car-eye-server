@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Struts2Diagram version="2.0">
+  <package name="56gatefms" location="0,0" size="0,0" />
+  <package name="56gatefmsjson" location="0,0" size="0,0" />
+  <include file="struts-userLogin.xml" location="0,0" size="0,0" />
+  <include file="struts-orgazicationdept.xml" location="0,0" size="0,0" />
+  <include file="struts-usergroup.xml" location="0,0" size="0,0" />
+  <include file="struts-user.xml" location="0,0" size="0,0" />
+  <include file="struts-systemfunction.xml" location="0,0" size="0,0" />
+  <include file="struts-authority.xml" location="0,0" size="0,0" />
+  <include file="struts-car.xml" location="0,0" size="0,0" />
+  <include file="struts-cardriver.xml" location="0,0" size="0,0" />
+  <include file="struts-equipment.xml" location="0,0" size="0,0" />
+  <include file="struts-maintain.xml" location="0,0" size="0,0" />
+  <include file="struts-areaset.xml" location="0,0" size="0,0" />
+  <include file="struts-lineset.xml" location="0,0" size="0,0" />
+  <include file="struts-poiinfo.xml" location="0,0" size="0,0" />
+  <include file="struts-accident.xml" location="0,0" size="0,0" />
+  <include file="struts-terminal.xml" location="0,0" size="0,0" />
+  <include file="struts-common.xml" location="0,0" size="0,0" />
+  <include file="struts-vedio.xml" location="0,0" size="0,0" />
+  <include file="struts-ebl.xml" location="0,0" size="0,0" />
+  <include file="struts-multimedia.xml" location="0,0" size="0,0" />
+  <include file="struts-textinfo.xml" location="0,0" size="0,0" />
+  <include file="struts-event.xml" location="0,0" size="0,0" />
+  <include file="struts-question.xml" location="0,0" size="0,0" />
+  <include file="struts-menuservice.xml" location="0,0" size="0,0" />
+  <include file="struts-affiche.xml" location="0,0" size="0,0" />
+  <include file="struts-telcall.xml" location="0,0" size="0,0" />
+  <include file="struts-telbook.xml" location="0,0" size="0,0" />
+  <include file="struts-reportforms.xml" location="0,0" size="0,0" />
+  <include file="struts-statement.xml" location="0,0" size="0,0" />
+  <include file="struts-set.xml" location="0,0" size="0,0" />
+  <include file="struts-carparam.xml" location="0,0" size="0,0" />
+</Struts2Diagram>
+

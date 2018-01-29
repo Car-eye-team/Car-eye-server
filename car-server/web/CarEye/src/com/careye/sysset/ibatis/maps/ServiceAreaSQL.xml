@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-serviceAreaSQL">
+
+	<typeAlias alias="serviceArea" type="com.careye.sysset.domain.ServiceArea" />
+
+	<!-- 省列表  -->
+	<select id="findServiceProvince" resultClass="serviceArea"
+		parameterClass="serviceArea">
+		select c.cnname province,c.szcode pcode,
+			case when t.pcode is not null then 1 else 0 end isopen,
+			to_char(t.createtime, 'yyyy-MM-dd HH24:mi:ss') createtime
+		from (select pcode,MIN(createtime) createtime from TO_SERVICE_AREA group
+		by pcode) t,TB_CITY_INFO c
+		where c.szcode=t.pcode(+) and c.clevel=1 and c.isdelete=0
+		order by isopen desc
+	</select>
+	<!-- 市列表  (因为select areaid from TB_CITY_INFO where szcode=#pcode#值不唯一)-->
+	<select id="findServiceCity" resultClass="serviceArea"
+		parameterClass="serviceArea">
+		select c.cnname city,c.szcode ccode,
+			case when t.ccode is not null then 1 else 0 end isopen,
+			to_char(t.createtime, 'yyyy-MM-dd HH24:mi:ss') createtime
+		from (select ccode,MIN(createtime) createtime from TO_SERVICE_AREA where
+		pcode=#pcode# group by ccode) t,TB_CITY_INFO c
+		where c.szcode=t.ccode(+) and c.clevel=2 and c.isdelete=0 and
+		c.parentid in (select areaid from TB_CITY_INFO where szcode=#pcode#)
+		order by isopen desc
+	</select>
+	<!-- 县列表  -->
+	<select id="findServiceCounty" resultClass="serviceArea"
+		parameterClass="serviceArea">
+		select c.cnname county,c.szcode cycode,
+			case when t.cycode is not null then 1 else 0 end isopen,
+			to_char(t.createtime, 'yyyy-MM-dd HH24:mi:ss') createtime
+		from (select cycode,MIN(createtime) createtime from TO_SERVICE_AREA where
+		ccode=#ccode# group by cycode) t,TB_CITY_INFO c
+		where c.szcode=t.cycode(+) and c.clevel=3 and c.isdelete=0 and
+		c.parentid in (select areaid from TB_CITY_INFO where szcode=#ccode#)
+		order by isopen desc
+	</select>
+	<!-- 添加服务区域记录 -->
+	<insert id="openServiceArea" parameterClass="serviceArea">
+		insert into TO_SERVICE_AREA(
+		id,
+		province,
+		city,
+		county,
+		pcode,
+		ccode,
+		cycode,
+		userid,
+		
+		createtime
+		)values(
+			#id#,
+			#province#,
+			#city#,
+			#county#,
+			#pcode#,
+			#ccode#,
+			#cycode#,
+			#userid#,
+			
+			to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		)
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_SERVICE_AREA_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+
+	<!-- 删除省级服务区域记录-->
+	<delete id="closeServiceProvince" parameterClass="long">
+		delete from TO_SERVICE_AREA where  pcode= #pcode#
+     </delete>
+	<!-- 删除市级服务区域记录-->
+	<delete id="closeServiceCity" parameterClass="long">
+		delete from TO_SERVICE_AREA where  ccode= #ccode#
+     </delete>
+     <!-- 删除县级服务区域记录-->
+	<delete id="closeServiceCounty" parameterClass="long">
+		delete from TO_SERVICE_AREA where  cycode= #cycode#
+     </delete>
+</sqlMap>
+
+

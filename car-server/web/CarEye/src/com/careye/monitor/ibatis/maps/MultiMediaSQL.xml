@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-multiMediaSQL">
+
+	<typeAlias alias="multiMedia" type="com.careye.monitor.domain.MultiMedia" />
+	<typeAlias alias="photoSendRecord" type="com.careye.message.domain.PhotoSendRecord" />
+	<typeAlias alias="soundRecord" type="com.careye.message.domain.SoundRecord" />
+	<typeAlias alias="multimediaSearchRecord" type="com.careye.message.domain.MultimediaSearchRecord" />
+	
+	
+	
+	<!-- word导出   根据carid获取车牌和企业名称 -->
+	<select id="getCaridByBcarnumber" resultClass="string" parameterClass="int">
+                select t.carnumber 
+				  from TO_CAR_INFO t
+				 where t.id = #carid#
+     </select>
+     
+     <select id="getCaridByBname" resultClass="string" parameterClass="int">
+                select t.bloc_name
+				  from TO_BLOC t
+				 where t.id = ( select blocid from TO_CAR_INFO  where id = #carid#)
+		      
+     </select>
+	
+	
+	 <!-- 记录列表总数 -->
+	<select id="findMultiMediaListCount" resultClass="int" parameterClass="multiMedia">
+             select count(*)
+				  from TO_MEDIAEVENT_INFO t, TO_BLOC e, TO_CAR_INFO c
+				 where c.blocid = e.id(+) and t.carid = c.id
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="mediatype">
+					 		t.mediatype = #mediatype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="eventcode">
+					 		t.eventcode = #eventcode#
+					</isNotEmpty>
+		        </dynamic>
+     </select>
+     
+     <!-- 记录列表-->
+	<select id="findMultiMediaList" resultClass="multiMedia" parameterClass="multiMedia">
+                select t.id,
+                       c.blocid,
+				       c.terminal,
+				       c.carnumber,
+				       t.dataid,
+				       t.mediatype,
+				       t.format,
+				       t.eventcode,
+				       t.accessid,
+				       e.bloc_name blocname,
+				       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				       
+				  from TO_MEDIAEVENT_INFO t, TO_BLOC e, TO_CAR_INFO c
+				 where c.blocid = e.id(+) and t.carid = c.id
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="mediatype">
+					 		t.mediatype = #mediatype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="eventcode">
+					 		t.eventcode = #eventcode#
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     
+     <!-- 记录列表-->
+	<select id="findMultiMediaByMSId" resultClass="multiMedia" parameterClass="multiMedia">
+                select t.id,
+				       t.multimediapath,
+				       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				  from TO_MULTIMEDIA_INFO t
+				 where t.msid = #msid#
+		      order by t.id desc
+     </select>
+     
+	<!-- 更新多媒体数据检索记录结果 -->
+	<update id="updateMultimediaSearchRecordResult" parameterClass="multimediaSearchRecord">
+		<![CDATA[
+			UPDATE multimedia_search_record SET result = #result#
+		 ]]>	
+			where seq = #seq# and carid = #carid#
+	</update>
+	
+	<!-- 添加多媒体检索记录 -->
+	<insert id="addMultimediaSearchRecord" parameterClass="multimediaSearchRecord">
+		<![CDATA[
+			insert into TO_MULTIMEDIA_SEARCH_RECORD 
+			(
+				blocid,
+				userid,
+				accessid,
+				multimediatype,
+				eventcode,
+				stime,
+				etime,
+				carid,
+				seq,
+				result,
+				data,
+				type,
+				del,
+				createtime
+		       )
+		    values
+		      (
+		        #blocid#,
+				#userid#,
+				#accessid#,
+				#multimediatype#,
+				#eventcode#,
+				to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss'),
+				to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss'),
+				#carid#,
+				#seq#,
+				#result#,
+				#data#,
+				#type#,
+				#del#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_MULT_SEARCH_RECORD_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+  
+   <!-- 记录列表总数 -->
+	<select id="findMultimediaSearchRecordListCount" resultClass="int" parameterClass="multimediaSearchRecord">
+             select count(*)
+				  from TO_MULTIMEDIA_SEARCH_RECORD t, TO_BLOC e, TO_CAR_INFO c
+				 where t.blocid = e.id(+) and t.carid = c.id
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						  t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="multimediatype">
+					 		t.multimediatype = #multimediatype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="eventcode">
+					 		t.eventcode = #eventcode#
+					</isNotEmpty>
+		        </dynamic>
+     </select>
+     
+     <!-- 查询多媒体检索记录列表-->
+	<select id="findMultimediaSearchRecordList" resultClass="multimediaSearchRecord" parameterClass="multimediaSearchRecord">
+                select t.id,
+                       t.blocid,
+				       t.userid,
+				       c.terminal,
+				       c.carnumber,
+				       t.multimediatype,
+				       t.stime,
+				       t.etime,
+				       t.eventcode,
+				       t.accessid,
+				       t.data,
+				       t.type,
+				       t.del,
+				       t.result,
+				       t.seq,
+				       e.bloc_name blocname,
+				       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				       
+				  from TO_MULTIMEDIA_SEARCH_RECORD t, TO_BLOC e, TO_CAR_INFO c
+				 where t.blocid = e.id(+) and t.carid = c.id
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						  t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="multimediatype">
+					 		t.multimediatype = #multimediatype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="eventcode">
+					 		t.eventcode = #eventcode#
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+  
+  	<!-- 导出多媒体检索记录-->
+	<select id="exportMultimediaSearchRecordList" resultClass="multimediaSearchRecord" parameterClass="multimediaSearchRecord">
+                 select t.id,
+                       t.blocid,
+				       t.userid,
+				       c.terminal,
+				       c.carnumber,
+				       t.multimediatype,
+				       t.stime,
+				       t.etime,
+				       t.eventcode,
+				       t.accessid,
+				       t.data,
+				       t.type,
+				       t.del,
+				       t.result,
+				       t.seq,
+				       e.bloc_name blocname,
+				       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				       
+				  from TO_MULTIMEDIA_SEARCH_RECORD t, TO_BLOC e, TO_CAR_INFO c
+				 where t.blocid = e.id(+) and t.carid = c.id
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+						  t.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+							(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		c.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="multimediatype">
+					 		t.multimediatype = #multimediatype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="eventcode">
+					 		t.eventcode = #eventcode#
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+  
+    <!--多媒体照片列表-->
+	<select id="queryCarPhotos" resultClass="multiMedia" parameterClass="multiMedia">
+                select t.id,
+                	   t.eventcode,
+                	   t.dataid,
+				       t.multimediapath,
+				       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				  from TO_MULTIMEDIA_INFO t
+				 where t.carid = #carid#
+				 	<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="eventcode">
+					 	t.eventcode = #eventcode#
+					</isNotEmpty>
+		      order by t.createtime desc
+     </select>
+     
+  
+</sqlMap>
+
+

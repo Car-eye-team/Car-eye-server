@@ -1,0 +1,38 @@
+{
+	"text" : "终端参数设置",
+	"children" : [{
+				"text" : "终端参数设置",
+				"children" : [{
+							"text" : "基本参数设置",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "11",
+							"parentId" : "1"
+						},{
+							"text" : "行驶参数设置",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "12",
+							"parentId" : "1"
+						},{
+							"text" : "区域参数设置",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "13",
+							"parentId" : "1"
+						},{
+							"text" : "其它参数设置",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "14",
+							"parentId" : "1"
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "1",
+				"parentId" : "0"
+			}],
+	"leaf" : false,
+	"expanded" : true,
+	"id" : "0"
+}

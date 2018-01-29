@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="mysql-dssServiceSQL">
+
+	<typeAlias alias="terminalAuth" type="com.careye.domain.TerminalAuth" />
+
+	<!-- 插入终端鉴权 -->
+	<insert id="insertTerminalAuth" parameterClass="terminalAuth">
+		<![CDATA[
+		    INSERT INTO ECS_CAR_REGISTER_NOTIFY (
+		           CAR_TEL,
+		           DEPT_ID,
+		           MODIFY,
+		           USER_TYPE
+		        )
+		    VALUES (
+		            #carTel#,
+		            1,
+		            1,
+		            #userType#
+		        )
+		]]>
+		<selectKey resultClass="int" keyProperty="NOTIFY_ID">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<!-- 根据设备号查询是否已经鉴权 -->
+	<select id="getTerminalAuth" resultClass="Integer"  parameterClass="terminalAuth">
+		select count(*) from ECS_CAR_REGISTER_NOTIFY where CAR_TEL = #carTel# and USER_TYPE = #userType#
+	</select>
+	
+	<!-- 删除终端鉴权 -->
+	<delete id="deleteTerminalAuth" parameterClass="string">
+		<![CDATA[
+		   delete from  ECS_CAR_REGISTER_NOTIFY
+		          WHERE  CAR_TEL = #carTel#
+		]]>
+	</delete>
+
+	<!-- 得到鉴权表数据列表 -->
+	<select id="getTerminalAuthList" resultClass="terminalAuth" >
+		select car_tel carTel,user_type userType from ECS_CAR_REGISTER_NOTIFY 
+	</select>
+	
+	<!-- 得到鉴权表数据列表 -->
+	<update id="updateTerminalAuth"  parameterClass="terminalAuth">
+		update ECS_CAR_REGISTER_NOTIFY  set user_type = #userType# where car_tel = #carTel#
+	</update>
+
+</sqlMap>

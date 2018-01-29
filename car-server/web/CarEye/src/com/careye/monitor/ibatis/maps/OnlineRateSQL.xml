@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-OnlineRateSQL">
+
+	<typeAlias alias="onlineRate" type="com.careye.monitor.domain.OnlineRate" />
+
+	<!-- 车辆信息-->
+	<select id="findCarInfoList" resultClass="onlineRate"
+		parameterClass="onlineRate">	
+		select 
+		  a.carid,
+		  c.blocid,
+		  b.bloc_name blocname,
+		  c.carnumber,
+		  a.inlinecount,
+		  a.offlinecount,
+		  (select sum(cc.inlinetime) from TO_OVERHEADS_STATISTIC cc where cc.carid(+) = a.carid
+		  <isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		cc.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		cc.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		  ) onlinetimes
+		from
+		(select 
+		      t.carid,
+		      sum(t.inlinecount) inlinecount,
+		      sum(t.offlinecount) offlinecount		      
+		       from TO_CAR_INLINE_COUNT t where 1=1
+		<dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id ))
+			 </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		</dynamic>
+		    group by carid) a , TO_CAR_INFO c, TO_BLOC b
+		       where a.carid = c.id(+) and c.blocid = b.id(+)
+	</select>
+	
+	<!-- 车辆信息总条数-->
+	<select id="findCarInfoListCount" resultClass="int" parameterClass="onlineRate">
+	select 
+		count(a.carid)
+	from 	
+		(select 
+     		 t.carid      
+       	from TO_CAR_INLINE_COUNT t where 1=1
+       	<dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id ))
+			 </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		</dynamic>
+   		group by carid) a
+   		
+	</select>
+	
+	
+	<!-- 查询在线时长 -->
+	<select id="findTwoCarInfoList" resultClass="onlineRate"
+		parameterClass="onlineRate">	
+		select 
+		  t.carid,
+		  c.blocid,
+		  b.bloc_name blocname,
+		  c.carnumber,
+		  t.inlinetime onlinetimes,
+		  to_char(t.createtime, 'yyyy-mm-dd') createtime	      
+		 from TO_OVERHEADS_STATISTIC t, TO_CAR_INFO c, TO_BLOC b
+		 where t.carid = c.id(+) and c.blocid = b.id(+)
+		 <dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id ))
+			 </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carid">
+					  t.carid = #carid#
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.createtime
+	</select>
+	
+	<!-- 在线时长总条数-->
+	<select id="findTwoCarInfoListCount" resultClass="int" parameterClass="onlineRate">
+	select 
+		  count(t.id)      
+		 from TO_OVERHEADS_STATISTIC t
+		 where 1=1
+		 <dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id ))
+			 </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carid">
+					  t.carid = #carid#
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		</dynamic>
+		
+	</select>
+	
+	<!-- 查询上下线次数 -->
+	<select id="findThreeCarInfoList" resultClass="onlineRate"
+		parameterClass="onlineRate">	
+		select 
+		  t.carid,
+		  c.blocid,
+		  b.bloc_name blocname,
+		  c.carnumber,
+		  t.inlinecount,
+		  t.offlinecount,
+		  to_char(t.createtime, 'yyyy-mm-dd') createtime	      
+		 from TO_CAR_INLINE_COUNT t, TO_CAR_INFO c, TO_BLOC b
+		 where t.carid = c.id(+) and c.blocid = b.id(+)
+		 <dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id ))
+			 </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carid">
+					  t.carid = #carid#
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.createtime
+	</select>
+	
+	<!-- 上下线次数总条数-->
+	<select id="findThreeCarInfoListCount" resultClass="int" parameterClass="onlineRate">
+	select 
+		  count(t.id)      
+		 from TO_CAR_INLINE_COUNT t
+		 where 1=1
+		 <dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id ))
+			 </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="carid">
+					  t.carid = #carid#
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		</dynamic>
+		
+	</select>
+	
+
+</sqlMap>

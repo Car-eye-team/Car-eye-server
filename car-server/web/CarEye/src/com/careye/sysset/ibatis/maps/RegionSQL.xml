@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sqlMap namespace="oracle-regionSQL">
+	<typeAlias alias="region" type="com.careye.sysset.domain.Region" />
+
+	<!-- 查看统一行政级别下行政编码是否存在 -->
+	<select id="findSzcodeIsExist" parameterClass="region"
+		resultClass="int">
+		select count(id)
+		from tb_city_info t where
+		t.szcode = ltrim(rtrim(#szcode#)) and
+		t.clevel=#clevel#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+		 		<![CDATA[ t.id !=#id# ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 查看统一行政级别下区划名称是否存在 -->
+	<select id="findCnnameIsExist" parameterClass="region"
+		resultClass="int">
+		select count(id)
+		from tb_city_info t where
+		t.cnname = ltrim(rtrim(#cnname#)) and
+		t.clevel=#clevel#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+		 		<![CDATA[ t.id !=#id# ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 依据id查询区划对象 -->
+	<select id="findRegionById" parameterClass="int" resultClass="region">
+		select
+		t.id,
+		t.areaid,
+		t.parentid,
+		t.szcode,
+		t.cnname,
+		t.enname,
+		t.clevel,
+		t.bmcode,
+		t.stcnname,
+		t.stenname,
+		t.isdelete,
+		t.createtime,
+		t.updatetime
+		from
+		tb_city_info t where
+		t.id=#id#
+	</select>
+	<!-- 依据行政级别查询区划对象 -->
+	<select id="findRegionByClevel" parameterClass="int"
+		resultClass="region">
+		select
+		t.id,
+		t.areaid,
+		t.parentid,
+		t.szcode,
+		t.cnname,
+		t.enname,
+		t.clevel,
+		t.bmcode,
+		t.stcnname,
+		t.stenname,
+		t.isdelete,
+		t.createtime,
+		t.updatetime
+		from
+		tb_city_info t where
+		t.clevel=#clevel#
+	</select>
+	<!-- 查询行政区划 -->
+	<select id="findPageRegionList" resultClass="region">
+		select c.id,
+		c.szcode,
+		c.cnname,
+		c.clevel,
+		c.areaid,
+		c.parentid,
+		c.bmcode,
+		c.enname,
+		c.stcnname,
+		c.stenname,
+		c.isdelete,
+		p.szcode parentcode,
+		p.cnname parentname,
+		to_char(c.updatetime,'yyyy-mm-dd hh24:mi:ss') updatetime,
+		to_char(c.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		from tb_city_info c,tb_city_info p
+		where c.parentid=p.areaid(+)
+		<dynamic>
+				<isNotEmpty prepend="and" property="cnname">
+					c.cnname like '%'||#cnname#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="clevel">
+					c.clevel = #clevel#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="parentname">
+					c.parentid in (select areaid from tb_city_info d where d.cnname like '%'||#parentname#||'%')
+				</isNotEmpty>
+		  </dynamic>
+		order by c.id desc
+     </select>
+	<!-- 查询行政区划count -->
+	<select id="findPageRegionListCount" resultClass="int">
+		select
+		count(c.id)
+		from tb_city_info c,tb_city_info p
+		where c.parentid=p.areaid(+)
+		<dynamic>
+				<isNotEmpty prepend="and" property="cnname">
+					c.cnname like '%'||#cnname#||'%'
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="clevel">
+					c.clevel = #clevel#
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="parentname">
+					c.parentid in (select areaid from tb_city_info d where d.cnname like '%'||#parentname#||'%')
+				</isNotEmpty>
+		  </dynamic>
+     </select>
+	<!-- 批量删除行政区划 -->
+	<delete id="deleteRegion" parameterClass="java.util.List">
+		DELETE FROM tb_city_info where
+		<iterate property="" conjunction="," open="id in (" close=")">#list[]#
+		</iterate>
+	</delete>
+	<!-- 级联删除行政区划 -->
+	<delete id="deleteChildRegion" parameterClass="region">
+		DELETE FROM tb_city_info where areaid in(SELECT areaid FROM tb_city_info START WITH
+		areaid =#areaid#
+		CONNECT BY PRIOR areaid = parentid)
+	</delete>
+	<!-- 查看是否存在下级行政区域 -->
+	<select id="findChildIsExist" parameterClass="region"
+		resultClass="int">
+		select count(id)
+		from tb_city_info t where
+		t.parentid = #areaid# 
+		<![CDATA[ and t.clevel !=1 ]]>
+	</select>
+
+	<!-- 增加非省级行政区划 -->
+	<insert id="saveRegion" parameterClass="region">
+     <![CDATA[ 
+        insert into tb_city_info(
+			szcode,
+			enname,
+			cnname,
+			clevel,
+			parentid,
+			bmcode,
+			stenname,
+			stcnname,
+			isdelete,
+			createtime
+        )values(
+	        #szcode#,
+			#enname#,
+			#cnname#,
+			#clevel#,
+			#parentid#,
+			#bmcode#,
+			#stenname#,
+			#stcnname#,
+			#isdelete#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]>
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TB_CITY_INFO_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+
+
+	<!-- 更新行政区划 -->
+	<update id="updateRegion" parameterClass="region">
+		update tb_city_info set
+		szcode = #szcode#,
+		enname = #enname#,
+		cnname = #cnname#,
+		clevel = #clevel#,
+		parentid = #parentid#,
+		bmcode = #bmcode#,
+		stenname = #stenname#,
+		updatetime=to_date(#updatetime#,'yyyy-mm-dd hh24:mi:ss'),
+		stcnname = #stcnname#
+		WHERE id = #id#
+     </update>
+
+	<!-- 增加省级行政区划 -->
+	<insert id="saveProvinceRegion" parameterClass="region">
+     <![CDATA[ 
+        insert into tb_city_info(
+			szcode,
+			enname,
+			cnname,
+			clevel,
+			bmcode,
+			stenname,
+			stcnname,
+			isdelete,
+			createtime
+        )values(
+	        #szcode#,
+			#enname#,
+			#cnname#,
+			#clevel#,
+			#bmcode#,
+			#stenname#,
+			#stcnname#,
+			#isdelete#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]>
+		<selectKey resultClass="Integer" keyProperty="areaid">
+  			<![CDATA[SELECT TB_CITY_INFO_AREAID_SEQ.CURRVAL AS areaid FROM DUAL]]>
+		</selectKey>
+	</insert>
+
+	<!-- 更新 省级行政区划 -->
+	<update id="updateProvinceRegion" parameterClass="region">
+		update tb_city_info set
+		parentid = #areaid#
+		WHERE areaid = #areaid#
+     </update>
+</sqlMap>

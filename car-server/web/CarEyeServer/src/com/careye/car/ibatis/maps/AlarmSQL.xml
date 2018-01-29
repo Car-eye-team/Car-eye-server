@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-alarmSQL">
+
+	<typeAlias alias="alarm" type="com.careye.car.domain.Alarm" />
+	
+	<!-- 获取报警名称 -->
+	<select id="getAlarmName" resultClass="String" parameterClass="String">
+		select t.alarmname from to_alarm_type t where t.alarmkey = #alarmkey#
+	</select>
+	
+		
+</sqlMap>
+
+
+
+
+
+
+

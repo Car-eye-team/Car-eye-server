@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+	<bean id="baseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="taxiBaseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient1" />
+	</bean>
+	
+	<bean id="tspBaseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient2" />
+	</bean>
+	
+	<bean id="authBaseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient3" />
+	</bean>
+
+	<!-- 公共的service父类 -->
+	<bean id="commonServiceImpl" abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+	
+	<bean id="taxiCommonServiceImpl" abstract="true">
+		<property name="baseDao">
+			<ref bean="taxiBaseDao" />
+		</property>
+	</bean>
+	
+	<bean id="tspCommonServiceImpl" abstract="true">
+		<property name="baseDao">
+			<ref bean="tspBaseDao" />
+		</property>
+	</bean>
+	
+	
+	<bean id="authCommonServiceImpl" abstract="true">
+		<property name="baseDao">
+			<ref bean="authBaseDao" />
+		</property>
+	</bean>
+
+	<!-- 公共接口service -->
+	<bean id="commonService" class="com.careye.api.service.impl.CommonServiceImpl"
+		parent="commonServiceImpl">
+	</bean>
+	
+	<!-- API接口service -->
+	<bean id="apiService" class="com.careye.api.service.impl.ApiServiceImpl"
+		parent="taxiCommonServiceImpl">
+	</bean>
+	
+	<!-- 私家车API接口service -->
+	<bean id="tspService" class="com.careye.api.service.impl.TspServiceImpl"
+		parent="tspCommonServiceImpl">
+	</bean>
+	
+	
+	<!-- 验证鉴权码API接口service -->
+	<bean id="authService" class="com.careye.api.service.impl.AuthServiceImpl"
+		parent="authCommonServiceImpl">
+	</bean>
+
+</beans>

@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-appOrderSQL">
+
+	<insert id="addOrderInfo" parameterClass="orderInfo">
+		insert into APP_TRANSPORTATION_RECORD
+		(
+		userid,
+		orderid,
+		orderTime,
+		passengerName,
+		telPhone,
+		sex,
+		useTime,
+		carpool,
+		carpoolPersonNum,
+		useaddr,
+		destinationaddr,
+		slng,
+		slat,
+		elng,
+		elat,
+		orderTyp,
+		orderstatus,
+		pay,
+		url,
+		createtime)
+		values
+		(
+		#userid#,
+		#orderid#,
+		to_date(#orderTime#,'yyyy-mm-dd hh24:mi:ss'),
+		#passengerName#,
+		#telPhone#,
+		#sex#,
+		to_date(#useTime#,'yyyy-mm-dd hh24:mi:ss'),
+		#carpool#,
+		#carpoolPersonNum#,
+		#useaddr#,
+		#destinationaddr#,
+		#slng#,
+		#slat#,
+		#elng#,
+		#elat#,
+		#orderTyp#,
+		#orderstatus#,
+		#pay#,
+		#url#,
+		to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		)
+
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT APP_TRANSPORTATION_RECORD_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+
+	</insert>
+	<!-- 更新订单信息 -->
+	<update id="updateOrderInfo" parameterClass="orderInfo">
+		update APP_TRANSPORTATION_RECORD set
+		vname=#vname#,
+		carnumber=#carnumber#,
+		cellphone=#cellphone#,
+		phone=#phone#,
+		dsex=#dsex#,
+		orderstatus=#orderstatus#
+		where orderid=#orderid# 
+	</update>
+	
+	<!-- 更新订单信息 -->
+	<update id="updateOrderPayStatus" parameterClass="String">
+		update APP_TRANSPORTATION_RECORD set
+		orderstatus=5,
+		pay=2
+		where orderid=#orderid# 
+	</update>
+	
+	<!--根据订单号更新交易状态 -->
+	<update id="updateOrderTradeStatus" parameterClass="orderInfo">
+		update APP_TRANSPORTATION_RECORD 
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="tradestatus">
+			    tradestatus = #tradestatus#
+			</isNotEmpty>
+		</dynamic>
+		where orderid=#orderid# 
+	</update>
+	
+
+	<!-- 更新是否上车状态 -->
+	<update id="updateOrderInfoUpTaix" parameterClass="orderInfo">
+		update APP_TRANSPORTATION_RECORD set isup=#isup# 
+		<isNotEmpty prepend="," property="orderstatus">
+		    orderstatus = #orderstatus#
+		</isNotEmpty>
+		where orderid=#orderid# 
+	</update>
+	
+	<!-- 更新订单支付信息 -->
+	<update id="updateOrderPaymentInfo" parameterClass="orderInfo">
+		update APP_TRANSPORTATION_RECORD set cost=#cost#,paymethods=#paymethods# where orderid=#orderid# 
+	</update>
+	
+	
+	<!-- 获取订单详情-->
+	<select id="getOrderdetail" resultClass="orderInfo" parameterClass="String">
+		select t.id,
+		       t.orderid,
+		       t.passengername,
+		       t.telphone,
+		       t.sex,
+		       to_char(t.ordertime, 'yyyy-mm-dd hh24:mi:ss') ordertime,
+		       to_char(t.usetime, 'yyyy-mm-dd hh24:mi') usetime,
+		       t.carpool,
+		       t.carpoolpersonnum,
+		       t.useaddr,
+		       t.destinationaddr,
+		       t.ordertyp,
+		       t.orderstatus,
+		       t.vname,
+		       t.cellphone,
+		       t.dsex,
+		       nvl(t.cost, 0.0) cost,
+		       t.pay,
+		       to_char(t.createtime, 'yyyy-mm-dd hh24:mi') createtime,
+		       t.carnumber,
+		       t.isup,
+		       t.paymethods
+		  from fwc_transportation_record t  where orderid=#orderid#
+	</select>
+	
+	
+	<!--根据订单号更新订单状态 -->
+	<update id="updateOrderStatus" parameterClass="orderInfo">
+		update APP_TRANSPORTATION_RECORD 
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="orderstatus">
+			    orderstatus = #orderstatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="outtradeno">
+			    outtradeno = #outtradeno#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="cost">
+			    cost = #cost#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="pay">
+			    pay = #pay#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="tradestatus">
+			    tradestatus = #tradestatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="isappraise">
+			    isappraise = #isappraise#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="iscomplaint">
+			    iscomplaint = #iscomplaint#
+			</isNotEmpty>
+		</dynamic>
+		where orderid=#orderid# 
+	</update>
+	
+	<!--根据商户唯一订单号更新订单状态 -->
+	<update id="updateOrderStatusByOuttradeno" parameterClass="orderInfo">
+		update APP_TRANSPORTATION_RECORD 
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="pay">
+			    pay = #pay#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="tradestatus">
+			    tradestatus = #tradestatus#
+			</isNotEmpty>
+		</dynamic>
+		where outtradeno=#outtradeno# 
+	</update>
+	
+	
+	<!-- 获取订单列表 -->
+	<select id="queryOrderInfoByphone" resultClass="orderInfo" parameterClass="java.util.HashMap">
+		select t.id,
+		       t.orderid,
+		       t.passengername,
+		       t.telphone,
+		       
+		       t.phone,
+		       t.elng,
+		       t.elat,
+		       t.slng,
+		       t.slat,
+		       t.tradestatus,
+		       
+		       t.sex,
+		       to_char(t.ordertime, 'yyyy-mm-dd hh24:mi:ss') orderTime,
+		       to_char(t.usetime, 'yyyy-mm-dd hh24:mi') useTime,
+		       t.carpool,
+		       t.carpoolpersonnum,
+		       t.useaddr,
+		       t.destinationaddr,
+		       t.ordertyp,
+		       t.orderstatus,
+		       t.vname,
+		       t.cellphone,
+		       t.dsex,
+		       nvl(t.cost, 0.0) cost,
+		       t.pay,
+		       to_char(t.createtime, 'yyyy-mm-dd') createtime,
+		       t.carnumber,
+		       t.isup,
+		       t.url,
+		       t.paymethods,
+		       t.isappraise,
+		       t.iscomplaint
+		  from APP_TRANSPORTATION_RECORD t  where 1=1
+          <dynamic>
+			<isNotEmpty prepend="and" property="telphone">
+			 		t.telphone =#telphone#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+				t.ordertime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+				<![CDATA[
+				t.ordertime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isEqual property="sorttype" compareValue="1">
+				order by t.ordertime desc
+			</isEqual>
+			<isEqual property="sorttype" compareValue="2">
+				order by t.ordertime asc
+			</isEqual>
+		</dynamic>
+        
+	</select>
+	
+	<!-- 司机端-获取订单分页列表 -->
+	<select id="getPageDriverOrderInfoList" resultClass="orderInfo" parameterClass="java.util.HashMap">
+		select t.id,
+		       t.orderid,
+		       t.passengername,
+		       t.telphone,
+		       
+		       t.phone,
+		       t.elng,
+		       t.elat,
+		       t.slng,
+		       t.slat,
+		       t.tradestatus,
+		       
+		       t.sex,
+		       to_char(t.ordertime, 'yyyy-mm-dd hh24:mi:ss') orderTime,
+		       to_char(t.usetime, 'yyyy-mm-dd hh24:mi') useTime,
+		       t.carpool,
+		       t.carpoolpersonnum,
+		       t.useaddr,
+		       t.destinationaddr,
+		       t.ordertyp,
+		       t.orderstatus,
+		       t.vname,
+		       t.cellphone,
+		       t.dsex,
+		       nvl(t.cost, 0.0) cost,
+		       t.pay,
+		       to_char(t.createtime, 'yyyy-mm-dd') createtime,
+		       t.carnumber,
+		       t.isup,
+		       t.url,
+		       t.paymethods
+		  from APP_TRANSPORTATION_RECORD t where 1=1
+          <dynamic>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+				t.ordertime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+				<![CDATA[
+				t.ordertime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			
+			<isEqual property="querytype" compareValue="1">
+				and t.orderTyp = 1
+			</isEqual>
+			<isEqual property="querytype" compareValue="2">
+			 	and t.cellphone =#cellphone#
+			</isEqual>
+			
+			<isNotEmpty prepend="AND" property="orderstatus">
+				<![CDATA[
+				t.orderstatus = #orderstatus#
+				]]>
+			</isNotEmpty>
+			
+			<isEqual property="sorttype" compareValue="1">
+				order by t.ordertime desc
+			</isEqual>
+			<isEqual property="sorttype" compareValue="2">
+				order by t.ordertime asc
+			</isEqual>
+		</dynamic>
+        
+	</select>
+	<select id="getPageDriverOrderInfoListCount" resultClass="int" parameterClass="java.util.HashMap">
+		select count(t.id)
+		  from APP_TRANSPORTATION_RECORD t where 1=1
+          <dynamic>
+			<isNotEmpty prepend="and" property="cellphone">
+			 		t.cellphone =#cellphone#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+				t.ordertime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+				<![CDATA[
+				t.ordertime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="orderstatus">
+				<![CDATA[
+				t.orderstatus = #orderstatus#
+				]]>
+			</isNotEmpty>
+			
+			<isEqual property="querytype" compareValue="1">
+				and t.orderTyp = 1
+			</isEqual>
+			<isEqual property="querytype" compareValue="2">
+			 	and t.cellphone =#cellphone#
+			</isEqual>
+			
+		</dynamic>
+        
+	</select>
+	
+   
+	<!-- 依据商户订单号获取乘客手机号和订单id -->
+	<select id="findByOuttradeno"  resultClass="java.util.HashMap" parameterClass="string">
+		 select 
+		  t.orderid,t.telphone from APP_TRANSPORTATION_RECORD t where t.outtradeno=#outtradeno#
+	</select>
+	
+	
+</sqlMap>
+
+
+
+

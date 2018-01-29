@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="reportformsjson" extends="qhtaxijson" namespace="/reportformsjson">
+	<!-- 报警记录报表 -->
+	<action name="*" method="{1}"
+			class="com.careye.common.action.AlarmAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	<action name="exportExcel" method="exportExcel"
+			class="com.careye.common.action.AlarmAction">
+	</action>
+	
+	<!-- Excel车辆分布列表 -->
+	<action name="exportCarLocationList" method="exportCarLocationList"
+			class="com.careye.common.action.TerminalDeviceInfoAction">
+	</action>
+	
+	<!-- word 导出企业车辆在线情况 -->
+	<action name="exportCarLocationWord" method="exportCarLocationWord"
+			class="com.careye.common.action.TerminalDeviceInfoAction">
+	</action>
+	
+	<!-- 车辆分布列表 -->
+	<action name="getCarLocationList" method="getCarLocationList"
+			class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- 车辆历史记录列表 -->
+	<action name="getCarhistoryList" method="getCarhistoryList"
+			class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	<action name="deleteCarhistory" method="deleteCarhistory"
+			class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- Excel车辆历史记录列表 -->
+	<action name="exportCarhistory" method="exportCarhistory"
+			class="com.careye.common.action.TerminalDeviceInfoAction">
+	</action>
+	
+	
+	<!-- 车辆实时信息列表 -->
+	<action name="getCarrealtimeList" method="getCarrealtimeList"
+			class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	<!-- Excel车辆实时信息列表 -->
+	<action name="exportCarrealtime" method="exportCarrealtime"
+			class="com.careye.common.action.TerminalDeviceInfoAction">
+	</action>
+	
+	
+	
+	<!-- 营运时长分析 -->
+	<action name="queryOta" method="queryOta" class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	<!-- Excel导出 营运时长分析 数据以及图表 -->
+	<action name="exportOta" method="exportOta"
+			class="com.careye.common.action.TerminalDeviceInfoAction">
+	</action>
+	<action name="getOtaList" method="getOtaList" class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- 营运里程统计 -->
+	<action name="getOperaMileStatiList" method="getOperaMileStatiList" class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- Excel导出营运里程统计 -->
+	<action name="exportOms" method="exportOms" class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- 日均营运统计 -->
+	<action name="getOperaDayStatiList" method="getOperaDayStatiList" class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	<!-- 日均营运统计  excel -->
+	<action name="exportOperaDayStati" method="exportOperaDayStati" 
+		class="com.careye.common.action.TerminalDeviceInfoAction">
+	</action>
+	
+	
+	<!-- 营运时长统计 -->
+	<action name="getOperaTimeStatiList" method="getOperaTimeStatiList" class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- Excel导出营运时长统计 -->
+	<action name="exportOts" method="exportOts" class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- 营运里程分析 -->
+	<action name="queryOma" method="queryOma" class="com.careye.common.action.TerminalDeviceInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	
+	</package>
+	
+</struts>

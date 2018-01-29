@@ -1,0 +1,127 @@
+.gaodemarkerContentStyle{position:relative;}
+.gaodemarkerContentStyle span{
+	background-color: #FFFFFF;
+	color:#004a91;
+	width:65px;
+	heigth:80px;
+	border:1px solid #ccc;
+	position:absolute;
+	top:-10px;left:25px;
+	white-space:nowrap
+	-webkit-border-radius:5px;
+}
+.gaodecarmarkerContentStyle span{
+	background-color: #FFFFFF;
+	color:#004a91;
+	width:160px;
+	heigth:80px;
+	border:1px solid #ccc;
+	position:absolute;
+	top:-10px;left:25px;
+	white-space:nowrap
+	-webkit-border-radius:5px;
+}
+
+   .markerContentStyle{position:relative;}
+.markerContentStyle span{
+	background-color: #FFFFFF;
+	color:#004a91;
+	width:150px;
+	heigth:80px;
+	border:1px solid #ccc;
+	position:absolute;
+	top:-10px;left:25px;
+	white-space:nowrap
+	-webkit-border-radius:5px;
+}
+.carmarkerContentStyle span{
+	background-color: #FFFFFF;
+	color:#004a91;
+	width:160px;
+	heigth:80px;
+	border:1px solid #ccc;
+	position:absolute;
+	top:-10px;left:25px;
+	white-space:nowrap
+	-webkit-border-radius:5px;
+}
+
+
+.icon_zoomin{
+    background-image:url(images/zoomin.png)!important;
+}
+
+.icon_zoomout{
+    background-image:url(images/zoomout.png)!important;
+}
+.icon_measure{
+    background-image:url(images/measure.png)!important;
+}
+
+.icon_clear{
+    background-image:url(images/clearLine.png)!important;
+}
+.icon_search{
+	 background-image:url(images/search.png)!important;
+}
+.icon_reload{
+	 background-image:url(images/car_reload.png)!important;
+}
+.icon_car_collapse{
+	 background-image:url(images/car_collapse.png)!important;
+}
+.icon_car_realtime{
+	 background-image:url(images/car_realtime.png)!important;
+}
+
+.icon_lock{
+	 background-image:url(images/lock.png)!important;
+}
+
+.icon_logout{
+	 background-image:url(images/logout.png)!important;
+}
+
+.icon_expand_all{
+	 background-image:url(images/expand-all.gif)!important;
+}
+
+.icon_collapse_all{
+	 background-image:url(images/collapse-all.gif)!important;
+}
+
+.icon_eye{
+	 background-image:url(images/application_form_magnify.png)!important;
+}
+
+.icon_liftAlarm{
+	 background-image:url(images/liftAlarm.png)!important;
+}
+
+
+.x-tab-default-top .x-tab-inner {
+	height: 14px !important;
+	line-height: 14px !important;
+}
+
+.icon_fastforward{
+	 background-image:url(images/fastforward.png)!important;
+}
+
+.icon_slowdown{
+	 background-image:url(images/slowdown.png)!important;
+}
+
+.icon_pause{
+	 background-image:url(images/pause.png)!important;
+}
+
+.icon_recovery{
+	 background-image:url(images/recovery.png)!important;
+}
+
+.icon_stop{
+	 background-image:url(images/stop.png)!important;
+}
+
+

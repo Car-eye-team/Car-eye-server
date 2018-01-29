@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-systemfunctionSQL">
+
+	<typeAlias alias="systemFunctionMenu" type="com.careye.system.domain.SysFunctionMenu" />
+	
+	<!-- 系统功能下拉列表 -->
+	<select id="getMenuList" resultClass="systemFunctionMenu" parameterClass="systemFunctionMenu">
+		select t.menu_id menuid,
+			(select menu_name from TB_SYS_FUNCTION_MENU where menu_id = t.menu_id) menuname
+  		from TB_SYS_FUNCTION_MENU t  where t.menu_level != 4 and t.if_activate = 1
+  	    <dynamic>
+			<isNotEmpty prepend="AND" property="menulevel">
+				t.menu_level = #menulevel#
+			</isNotEmpty>
+			<isNotEmpty prepend="" property="parentmenuid">
+				or t.parent_menuid = #parentmenuid#
+			</isNotEmpty>
+		</dynamic>
+        order by t.menu_id asc
+	</select>
+	
+	<!-- 系统功能分页列表 -->
+	<select id="findPageSystemFunctionList" resultClass="systemFunctionMenu" parameterClass="systemFunctionMenu">
+		<![CDATA[ 
+          select  menu_id menuid,
+                  parent_menuid parentmenuid,
+                  menu_name menuname,
+                 (select menu_name from TB_SYS_FUNCTION_MENU i where i.MENU_ID = m.PARENT_MENUID) parentmenuname,
+                  menu_addr menuaddr,
+                  menu_sort menusort,
+                  to_char(CREATE_TIME,'yyyy-mm-dd hh24:mi:ss') createtime,
+                  ME_DE_TYPE medetype,
+                  MENU_TYPE menutype,
+                  menu_level menulevel,
+                  IF_ACTIVATE ifactivate
+            from TB_SYS_FUNCTION_MENU m
+           where menu_id = menu_id
+
+		]]>
+		<dynamic>
+			<isNotEmpty prepend="AND" property="menuname">
+				menu_name like '%'||#menuname#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="parentmenuname">
+				(select menu_name from TB_SYS_FUNCTION_MENU i where i.MENU_ID = m.PARENT_MENUID) like '%'||#parentmenuname#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="menulevel">
+				menu_level = #menulevel#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="medetype">
+				ME_DE_TYPE = #medetype#
+			</isNotEmpty>
+		</dynamic>
+
+		 order by menu_id asc
+	
+	</select>
+	
+	<!--系统功能分页列表数量 -->
+	<select id="findPageSystemFunctionListCount" resultClass="int" parameterClass="systemFunctionMenu">
+		<![CDATA[ 
+			select count(*)
+			 from TB_SYS_FUNCTION_MENU m
+           	where 1 = 1
+		]]>
+		
+		<dynamic>
+			<isNotEmpty prepend="AND" property="menuname">
+				menu_name like '%'||#menuname#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="parentmenuname">
+				(select menu_name from TB_SYS_FUNCTION_MENU i where i.MENU_ID = m.PARENT_MENUID) like '%'||#parentmenuname#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="menulevel">
+				menu_level = #menulevel#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="medetype">
+				ME_DE_TYPE = #medetype#
+			</isNotEmpty>
+		</dynamic>
+		
+	</select>
+	
+	<!-- 查看菜单名是否存在 -->
+	<select id="menuNameIsExist" parameterClass="systemFunctionMenu" resultClass="int">
+		select	count(*)
+		from TB_SYS_FUNCTION_MENU where menu_name=rtrim(ltrim(#menuname#)) and menu_level = #menulevel#
+		<dynamic>
+			<isNotEmpty prepend="and" property="menuid">
+				<![CDATA[
+					menu_id <> #menuid#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 添加菜单 -->
+	<insert id="addSystemFunction" parameterClass="systemFunctionMenu">
+		<![CDATA[ 
+			insert into TB_SYS_FUNCTION_MENU
+			  (MENU_ID,
+			   PARENT_MENUID,
+			   MENU_NAME,
+			   MENU_ADDR,
+			   MENU_SORT,
+			   ME_DE_TYPE,
+			   CREATE_TIME,
+			   MENU_TYPE,
+			   MENU_LEVEL,
+			   IF_ACTIVATE,
+			   user_id
+			   )
+			values
+			  (#menuid#,
+			   #parentmenuid#,
+			   #menuname#,
+			   #menuaddr#,
+			   #menusort#,
+			   #medetype#,
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+			   #menutype#,
+			   #menulevel#,
+			   #ifactivate#,
+			   #userid#
+			   )
+		]]>
+		
+		<selectKey resultClass="Integer" keyProperty="menuid">
+  			<![CDATA[SELECT max(menu_id) FROM TB_SYS_FUNCTION_MENU]]>
+		</selectKey>
+		
+	</insert>
+	
+	<!-- 修改菜单信息 -->
+		<update id="updateSystemFunction" parameterClass="systemFunctionMenu">
+			 update TB_SYS_FUNCTION_MENU set
+			        parent_menuid = #parentmenuid#,
+			        menu_name = #menuname#,
+			        menu_addr = #menuaddr#,
+			        menu_sort = #menusort#,
+			        ME_DE_TYPE = #medetype#,
+			        menu_type = #menutype#,
+			        menu_level = #menulevel#,
+			        IF_ACTIVATE = #ifactivate#
+			    where menu_id = #menuid#
+	</update>
+	
+	<!-- 得到指定等级下最新的菜单id -->
+	<select id="getMaxMenuId" parameterClass="systemFunctionMenu" resultClass="Integer">
+		select max(menu_id) from TB_SYS_FUNCTION_MENU
+		
+		<isEqual property="menulevel" compareValue="1">
+			<![CDATA[
+				where menu_id < 100
+			]]>
+		</isEqual>
+		<isEqual property="menulevel" compareValue="2">
+			<![CDATA[
+				where parent_menuid=#parentmenuid# and menu_id between 1000 and 9999
+			]]>
+		</isEqual>
+		<isEqual property="menulevel" compareValue="3">
+			<![CDATA[
+				where parent_menuid=#parentmenuid# and menu_id between 100000 and 999999
+			]]>
+		</isEqual>
+		<isEqual property="menulevel" compareValue="4">
+			<![CDATA[
+				where parent_menuid=#parentmenuid# and menu_id between 10000000 and 99999999
+			]]>
+		</isEqual>
+	</select>
+	
+	<!-- 激活系统功能 -->
+	<update id="activeSystemFunction" parameterClass="int">
+		<![CDATA[
+		    update TB_SYS_FUNCTION_MENU set IF_ACTIVATE = 1 WHERE menu_id = #menuid#
+		]]>
+	</update>
+	
+	<!-- 禁用系统功能 -->
+	<update id="inactiveSystemFunction" parameterClass="int">
+		<![CDATA[
+		     update TB_SYS_FUNCTION_MENU set IF_ACTIVATE = 2 WHERE menu_id = #menuid#
+		]]>
+		
+	</update>
+	
+</sqlMap>

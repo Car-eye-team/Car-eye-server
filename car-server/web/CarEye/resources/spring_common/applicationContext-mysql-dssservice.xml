@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+	<bean id="baseDssServiceDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient1" />
+	</bean>
+
+	<bean id="mysqlDssService" class="com.careye.dssservice.service.DssService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDssServiceDao" />
+		</property>
+	</bean>
+
+	<bean id="dssService" class="com.careye.dssservice.service.impl.DssServiceImpl"
+		parent="mysqlDssService">
+	</bean>
+
+</beans>

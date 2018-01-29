@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="carjson" extends="qhtaxijson" namespace="/carjson">
+	
+	<action name="*" method="{1}"
+			class="com.careye.car.action.CarAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- 读取车辆相信信息-->
+		<action name="readCarDetailInfo" method="readCarDetailInfo"
+			class="com.careye.car.action.CarAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+		</action>
+		
+	</package>
+	
+</struts>

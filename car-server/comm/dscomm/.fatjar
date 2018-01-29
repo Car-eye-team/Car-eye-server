@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Fri Jan 19 10:39:54 CST 2018
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=dscomm_1.0.jar
+manifest.mergeall=true
+manifest.mainclass=com.careye.dscomm.server.StartDsCommServer
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=
+includes=

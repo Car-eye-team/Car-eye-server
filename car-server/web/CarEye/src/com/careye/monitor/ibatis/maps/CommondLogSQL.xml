@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-commondLogSQL">
+
+	<typeAlias alias="commondLogs" type="com.careye.monitor.domain.CommondLog" />
+
+	<!-- 下发日志列表-->
+	<select id="getCommondLogList" resultClass="commondLogs"
+		parameterClass="commondLogs">
+		select t.id,
+		t.userid,
+		u.user_name username,
+		t.carid,
+		c.blocid,
+		e.bloc_name blocname,
+		c.terminal,
+		c.carnumber,
+		t.msgid,
+		t.status,
+		t.seq,
+		t.data,
+		t.remark,
+		t.msgtype,
+		to_char(t.restime, 'yyyy-mm-dd hh24:mi:ss') restime,
+		to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+		from TO_COMMOND_SEND_LOG t, TO_BLOC e,TO_CAR_INFO c,TO_BLOC_USER u
+		where c.blocid = e.id(+) and t.carid = c.id(+) and t.userid = u.id(+)
+		<dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id ))
+			   	    </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="carnumber">
+					 		t.carid in (select id from to_car_info where carnumber  like '%'||#carnumber#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.carid in (select id from to_car_info where terminal  like '%'||#terminal#||'%')
+					</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				t.status = #status#
+			</isNotEmpty>
+		</dynamic>
+		order by t.createtime desc
+	</select>
+	<!-- 下发日志列表总数 -->
+	<select id="getCommondLogListCount" resultClass="int"
+		parameterClass="commondLogs">
+		select count(t.id)
+		from TO_COMMOND_SEND_LOG t, TO_BLOC e,TO_CAR_INFO c,TO_BLOC_USER u
+		where c.blocid = e.id(+) and t.carid = c.id(+) and t.userid = u.id(+)
+		<dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id ))
+			   	    </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="carnumber">
+					 		t.carid in (select id from to_car_info where carnumber  like '%'||#carnumber#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.carid in (select id from to_car_info where "terminal"  like '%'||#"terminal"#||'%')
+					</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				t.status = #status#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+	 <!-- 删除-->
+     <delete id="deleteCommondLog">
+         delete from TO_COMMOND_SEND_LOG where id=#id#
+     </delete>
+     
+
+</sqlMap>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="multimediajson" extends="qhtaxijson" namespace="/multimedia/multimediajson">
+		<!-- 拍照设置并下发拍照指令Action -->
+		<action name="takePhotos" method="takePhotos"
+				class="com.careye.monitor.action.PhotoRecordAction">
+				<result name="success" type="json">
+					<param name="includeProperties">success,result.*</param>
+				</result>
+				<result name="error" type="json">
+					<param name="includeProperties">success,result.*</param>
+				</result>
+		</action>
+		<!-- 摄像头立即拍摄记录Action -->
+		<action name="findPhotoRecordList" method="findPhotoRecordList"
+				class="com.careye.monitor.action.PhotoRecordAction">
+				<result name="success" type="json">
+					<param name="includeProperties">success,result.*</param>
+				</result>
+				<result name="error" type="json">
+					<param name="includeProperties">success,result.*</param>
+				</result>
+		</action>
+		<!-- 导出拍摄记录Action -->
+		<action name="exportPhotoRecordList" method="exportPhotoRecordList"
+				class="com.careye.monitor.action.PhotoRecordAction">
+				<result name="success" type="json">
+					<param name="includeProperties">success,result.*</param>
+				</result>
+				<result name="error" type="json">
+					<param name="includeProperties">success,result.*</param>
+				</result>
+		</action>
+		<!-- 多媒体数据相关Action -->
+		<action name="*" method="{1}"
+				class="com.careye.monitor.action.MultiMediaAction">
+				<result name="success" type="json">
+					<param name="includeProperties">success,result.*</param>
+				</result>
+				<result name="error" type="json">
+					<param name="includeProperties">success,result.*</param>
+				</result>
+		</action>
+	</package>
+	
+</struts>

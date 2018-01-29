@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sqlMap namespace="oracle-videoParamSetSQL">
+    <typeAlias alias="vdieoParamSet" type="com.careye.sysset.domain.VideoParamSet"/>
+	
+	<!-- 获取设置参数 -->
+	<select id="queryVideoParamSet" resultClass="vdieoParamSet">
+
+		select
+			protocol,
+			ip,
+			port,
+			rendertype,
+			name,
+			password,
+			inspectionday,
+			playsound,
+			showtoscale,
+			showsatic
+
+		from VIDEO_PARAM_SET 
+		  
+	</select>
+	
+	
+	<!-- 更新参数信息 -->
+	<update id="updateVideoParamSet" parameterClass="vdieoParamSet">
+		update VIDEO_PARAM_SET
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="protocol">
+				protocol = #protocol#
+			    </isNotEmpty>
+			<isNotEmpty prepend="," property="ip">
+				ip = #ip#
+			    </isNotEmpty>
+			<isNotEmpty prepend="," property="port">
+				port = #port#
+			    </isNotEmpty>
+			<isNotEmpty prepend="," property="rendertype">
+				rendertype = #rendertype#
+			    </isNotEmpty>
+			<isNotEmpty prepend="," property="name">
+				name= #name#
+			    </isNotEmpty>
+			<isNotEmpty prepend="," property="password">
+				password = #password#
+			    </isNotEmpty>
+			<isNotEmpty prepend="," property="inspectionday">
+				inspectionday = #inspectionday#
+			    </isNotEmpty>
+			<isNotEmpty prepend="," property="playsound">
+				playsound = #playsound#
+			    </isNotEmpty>
+			<isNotEmpty prepend="," property="showtoscale">
+				showtoscale = #showtoscale#
+			    </isNotEmpty>
+			<isNotEmpty prepend="," property="showsatic">
+				showsatic = #showsatic#
+			    </isNotEmpty>
+			
+		</dynamic>
+
+	</update>
+	
+
+</sqlMap>

@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-onCallCountSQL">
+
+	<typeAlias alias="onCallCount"
+		type="com.careye.statement.oncalltransaction.domain.OnCallCountInfo" />
+	<typeAlias alias="inBoundInfo"
+		type="com.careye.statement.oncalltransaction.domain.InBoundInfo" />
+	<typeAlias alias="inSystemInfo"
+		type="com.careye.statement.oncalltransaction.domain.InSystemInfo" />
+	<typeAlias alias="transaction"
+		type="com.careye.transaction.domain.Transaction" />
+
+	<!-- 查询电召统计数据 -->
+	<select id="findOnCallCountData" resultClass="onCallCount"
+		parameterClass="onCallCount">
+		select 1 counttype,count(id) countnumber from TO_CUSTOMER_INBOUND t where 1=1
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		union
+		select 2 counttype,count(id) countnumber from TO_CUSTOMER_INBOUND t where 1=1
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+					<![CDATA[ 
+					CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+					]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+					<![CDATA[ 
+					CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+					]]>
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		union
+		select 3 counttype,count(id) countnumber from TO_TRANSACTION_INFO t where 1=1
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')  
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		union
+		select 4 counttype,count(id) countnumber from TO_TRANSACTION_INFO t where
+		carid is not null
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')  
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		union
+		select 5 counttype,count(id) countnumber from TO_TRANSACTION_INFO t where
+		carid is not null and status in(5,2)
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')  
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		union
+		select 6 counttype,count(id) countnumber from TO_TRAN_CUSTOMER_CANCEL t where
+		1=1
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				canceltime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				canceltime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.username like '%'||#cusname#||'%'
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		union
+		select 7 counttype,count(id) countnumber from TO_TRAN_DRIVER_CANCEL t where
+		1=1
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				canceltime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				canceltime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')  
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+		</dynamic>
+		union
+		select 8 counttype,count(id) countnumber from TO_TRAN_CUSTOMER_CANCEL t where
+		wy=1
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				canceltime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				canceltime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.username like '%'||#cusname#||'%'
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		union
+		select 9 counttype,count(id) countnumber from TO_TRAN_DRIVER_CANCEL t where
+		wy=1
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				canceltime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				canceltime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+				<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')  
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 拨入电话记录start -->
+	<select id="findInBoundList" resultClass="inBoundInfo"
+		parameterClass="onCallCount">
+		select t.id,
+			t.cid,
+			t.agentid,
+			t.callnumber,
+			to_char(t.inboundcalltime,'yyyy-mm-dd hh24:mi:ss') inboundcalltime,
+			to_char(t.hangupcalltime,'yyyy-mm-dd hh24:mi:ss') hangupcalltime,
+			t.userid,
+			c.cname cusname,
+			to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime 
+		from TO_CUSTOMER_INBOUND t,TO_CUSTOMER_INFO c where t.cid=c.id(+) 
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<select id="findInBoundListCount" resultClass="int"
+		parameterClass="onCallCount">
+		select count(t.id)  
+		from TO_CUSTOMER_INBOUND t,TO_CUSTOMER_INFO c where t.cid=c.id(+) 
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 拨入电话记录end -->
+	<!-- 接入系统记录start -->
+	<select id="findInSystemList" resultClass="inSystemInfo"
+		parameterClass="onCallCount">
+		select t.id,
+			t.cid,
+			t.agentid,
+			t.callnumber,
+			to_char(t.inboundcalltime,'yyyy-mm-dd hh24:mi:ss') inboundcalltime,
+			to_char(t.hangupcalltime,'yyyy-mm-dd hh24:mi:ss') hangupcalltime,
+			t.userid,
+			c.cname cusname,
+			to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime 
+		from TO_CUSTOMER_INBOUND t,TO_CUSTOMER_INFO c where t.cid=c.id(+) 
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<select id="findInSystemListCount" resultClass="int"
+		parameterClass="onCallCount">
+		select count(t.id)  
+		from TO_CUSTOMER_INBOUND t,TO_CUSTOMER_INFO c where t.cid=c.id(+) 
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				t.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 接入系统记录end -->
+	<!-- 下发业务记录start -->
+	<select id="findTransactionList" resultClass="transaction"
+		parameterClass="onCallCount">
+		 SELECT
+        a.id, 
+		a.cid, 
+		a.source, 
+		a.typeid, 
+		a.phone, 
+		a.username usernametwo, 
+		a.saddress, 
+		a.slat, 
+		a.slng, 
+		a.eaddress, 
+		a.elat, 
+		a.elng, 
+		a.status, 
+		a.tratype, 
+		a.resstatus, 
+		a.carid, 
+		to_char(a.answertime,'yyyy-mm-dd hh24:mi:ss') answertime,
+		to_char(a.starttime,'yyyy-mm-dd hh24:mi:ss') starttime,
+		to_char(a.endtime,'yyyy-mm-dd hh24:mi:ss') endtime,
+		a.userid, 
+		a.remark,
+		a.callbackphone,
+		a.carpool,
+		a.carpoolpersonnum,
+		decode(a.tratype,'1',to_char(a.appointmenttime,'yyyy-mm-dd hh24:mi:ss') ,'') appointmenttime,
+		a.callfee,
+		a.sex,
+		a.orderid,
+		t.typename,
+		cui.cname,
+		ci.carnumber,
+        to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name  username,
+        
+        a.isup,
+        to_char(a.usetime,'yyyy-mm-dd hh24:mi:ss') usetime,
+        a.pay,
+        a.calltype,
+        a.filepath
+      from TO_TRANSACTION_INFO a,to_bloc_user u,TO_TRANSACTION_TYPE t,to_customer_info cui,to_car_info ci
+      where 1=1
+      <dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				a.CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				a.CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				a.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				a.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')  
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				a.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				a.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+      and  a.userid=u.id(+)
+      and  a.typeid=t.id(+)
+      and  a.cid=cui.id(+)
+      and  a.carid=ci.id(+)
+      order by a.createtime
+      desc 
+	</select>
+
+	<!--  根据条件得到所有的约车信息 数量-->
+	<select id="findTransactionListCount" resultClass="int"
+		parameterClass="onCallCount">
+	  SELECT
+      count(a.id) 
+            from TO_TRANSACTION_INFO a,to_bloc_user u,TO_TRANSACTION_TYPE t,to_customer_info cui,to_car_info ci
+      where 1=1
+      <dynamic>
+            <isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				a.CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				a.CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				a.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				a.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')  
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				a.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+			<isNotEmpty property="cusname" prepend="and">
+				<![CDATA[ 
+				a.cid in (select id from TO_CUSTOMER_INFO where cname like '%'||#cusname#||'%') 
+				]]>
+			</isNotEmpty>
+		</dynamic>
+      and  a.userid=u.id(+)
+      and  a.typeid=t.id(+)
+      and  a.cid=cui.id(+)
+      and  a.carid=ci.id(+)
+	</select>
+	<!-- 下发业务记录end -->
+</sqlMap>

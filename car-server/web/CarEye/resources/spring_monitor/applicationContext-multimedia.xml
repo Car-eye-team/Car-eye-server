@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+	<bean id="baseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	
+	<bean id="photoRecordServiceImpl" class="com.careye.monitor.service.PhotoRecordService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+
+	<bean id="photoRecordService" class="com.careye.monitor.service.impl.PhotoRecordServiceImpl"
+		parent="photoRecordServiceImpl">
+	</bean>
+	
+	<bean id="multiMediaServiceImpl" class="com.careye.monitor.service.MultiMediaService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+
+	<bean id="multiMediaDataService" class="com.careye.monitor.service.impl.MultiMediaServiceImpl"
+		parent="multiMediaServiceImpl">
+	</bean>
+</beans>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="systemsetjson" extends="qhtaxijson" namespace="/systemsetjson">
+	
+	<!-- 系统参数设置-->
+		<action name="*" method="{1}"
+			class="com.careye.system.action.SystemControlAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+		</action>
+		
+	</package>
+	
+</struts>

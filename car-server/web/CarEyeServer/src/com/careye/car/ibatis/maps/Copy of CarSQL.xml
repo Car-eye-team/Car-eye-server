@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-carInfoSQL">
+
+	<typeAlias alias="carInfo" type="com.careye.car.domain.CarInfo" />
+	
+	<!-- 获取设备类型列表 -->
+	<select id="getDeviceTypeList" resultClass="deviceType">
+		select t.id,t.typeid,t.typename from TO_CAR_DEVICE_TYPE t  
+	</select>
+	
+	<!-- 获取车辆类型列表 -->
+	<select id="getCarTypeList" resultClass="carType">
+		select t.id,t.typename from TO_CAR_TYPE t  
+	</select>
+	
+	<!-- 获取车辆用途列表 -->
+	<select id="getCarUseList" resultClass="carUse">
+		select t.id,t.usename from TO_CAR_USE t  
+	</select>
+	
+	<!-- 查询司机列表-->
+	<select id="selectCarDriver" resultClass="carDriver" parameterClass="carDriver">
+		
+			select t.id ,t.drivername from TO_CAR_DRIVER_INFO t where 1=1
+			 <isNotNull prepend="and" property="userid" >
+				 t.blocid in (SELECT id FROM T0_BLOC  START WITH id = 
+					(select bloc_id from  T0_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+	   	    </isNotNull>
+		
+	</select>
+	
+	<!-- 车辆列表 -->
+	<select id="selectCarList"  resultClass="carInfo" parameterClass="carInfo">
+		select t.id carid, t.carnumber from TO_CAR_INFO t where t.flag=1
+		
+   	    <isNotNull prepend="and" property="userid" >
+			 t.blocid in (SELECT id FROM T0_BLOC  START WITH id = 
+				(select bloc_id from  T0_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+   	    </isNotNull>
+		<isNotNull prepend="and" property="carnumber" >
+			  t.carnumber like '%'||#carnumber#||'%' 
+		</isNotNull>
+		
+	</select>
+	
+	<!-- 根据设备号查询是否存在该车辆信息 -->
+	<select id="getCarInfo" resultClass="carInfo"  parameterClass="String">
+		   select t.id,
+		       t.blocid,
+		       t.userid,
+		       t.terminal,
+		       t.carnumber,
+           dept.BLOC_NAME deptname
+		  from TO_CAR_INFO t,T0_BLOC dept
+      where t.flag = 1 
+        and t.blocid = dept.id(+)
+		and t.terminal = #terminal#
+	</select>
+	
+	
+	<!-- 根据设备号查询是否存在该车辆信息 -->
+	<select id="getCarInfoCarnumber" resultClass="carInfo"  parameterClass="String">
+		  select t.id,
+		       t.blocid,
+		       t.userid,
+		       t.terminal,
+		       t.carnumber,
+           dept.BLOC_NAME deptname
+		  from TO_CAR_INFO t,T0_BLOC dept
+      where t.flag = 1 
+        and t.blocid = dept.id(+)
+		and t.carnumber = #carnumber#
+	</select>
+	
+	
+	<!-- 根据车牌号查询设备号 -->
+	<select id="getCarInfoByCarNumber" resultClass="carInfo"  parameterClass="String">
+		select *
+		  from TO_CAR_INFO t
+		 where t.flag = 1 
+          and t.carnumber = #carnumber#
+	</select>
+	
+	<!-- 根据车辆ID -->
+	<select id="getCarInfoCarId" resultClass="carInfo"  parameterClass="Integer">
+			select t.id,
+			       t.blocid,
+			       t.userid,
+			       t.terminal,
+			       t.password,
+			       t.phone,
+			       t.province,
+			       t.city,
+			       t.district,
+			       t.devicetype,
+			       t.cartype,
+			       t.color,
+			       t.cartype,
+			       t.caruse,
+			       t.onedriverid,
+			       t.twodriverid,
+			       t.oiltype,
+			       t.framenumber,
+			       t.drivlicnum,
+			       t.transnumber,
+			       t.ventingmeasure,
+			       t.enginenumber,
+			       t.remark,
+			       
+			       to_char(t.buytime, 'yyyy-mm-dd') buytime,
+			       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+			       
+			       s.bloc_name deptname,
+			       dt.usertype 
+			  from TO_CAR_INFO t, T0_BLOC s, TO_CAR_DEVICE_TYPE dt
+			 where t.flag = 1 
+               and t.blocid = s.id(+)
+			   and t.devicetype = dt.typeid
+			   and t.id = #carid#
+	</select>
+	
+	
+	<!-- 查询车牌号列表-->
+	<select id="selectCarNumber" resultClass="carInfo" parameterClass="carInfo">
+		select t.id,t.carnumber from TO_CAR_INFO t where t.flag=1
+			 <isNotNull prepend="and" property="userid" >
+				 t.blocid in (SELECT id FROM T0_BLOC  START WITH id = 
+					(select bloc_id from  T0_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+	   	    </isNotNull>
+	</select>
+	
+	<!-- 终端号码是否已存在-->
+	<select id="queryPhoneIsExist" resultClass="Integer" parameterClass="carInfo">
+		select count(*) from TO_CAR_INFO  where flag=1 and phone=#phone#
+		  <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+	
+	<!-- 终端号码是否已存在  and devicetype = #devicetype#-->
+	<select id="queryTerminalIsExist" resultClass="Integer" parameterClass="carInfo">
+		select count(*) from TO_CAR_INFO  where flag=1 and terminal=#terminal#
+		  <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+	
+	<!-- 车牌号是否在已存在-->
+	<select id="queryCarNumberIsExist" resultClass="Integer" parameterClass="carInfo">
+		select count(*) from TO_CAR_INFO  where flag=1 and carnumber=#carnumber#
+		  <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+	
+	<!-- 查询车辆信息数量 -->
+	<select id="selectCarInfo" resultClass="int" parameterClass="carInfo">
+       
+           select count(*)
+				   from TO_CAR_INFO t, T0_BLOC s, TO_CAR_DEVICE_TYPE dt,TO_CAR_USE tcu,
+			  	   TO_CAR_STATE cs,TO_CAR_TYPE tct,TO_CAR_DRIVER_INFO tcd1,TO_CAR_DRIVER_INFO tcd2,
+			  	   tb_city_info                  a,
+		           tb_city_info                  b,
+		           tb_city_info                  c
+			 where t.flag = 1 
+			   and t.blocid = s.id(+)
+			   and t.province = a.szcode(+)
+		       and t.city = b.szcode(+)
+		       and t.district = c.szcode(+)
+			   and t.devicetype = dt.typeid(+)
+			   and t.id = cs.carid(+)
+			   and t.cartype = tct.id(+)
+			   and t.caruse = tcu.id(+)
+			   and t.onedriverid = tcd1.id(+)
+			   and t.twodriverid = tcd2.id(+)
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					 t.blocid in (SELECT id FROM T0_BLOC  START WITH id = 
+						(select bloc_id from  T0_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="devicetype">
+					 		t.devicetype=#devicetype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.terminal like '%'||#terminal#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carstatus">
+						 cs.carstatus=#carstatus#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="cartype">
+					 		t.cartype=#cartype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="caruse">
+					 		t.caruse=#caruse#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="online">
+						 cs.carstatus != 1 and t.carstatus !=2
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carstatus">
+						 cs.carstatus = #carstatus#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					 	t.blocid in (SELECT t.id FROM T0_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					
+		        </dynamic>
+     </select>
+     
+	<!-- 查询车辆信息列表-->
+	<select id="selectCheckCarInfo" resultClass="carInfo" parameterClass="carInfo">
+                select t.id,
+                   t.blocid,
+                   t.blocid preblocid,
+                   t.carnumber,
+			       t.userid,
+			       t.terminal,
+			       t.password,
+			       t.phone,
+			       t.province,
+			       t.city,
+			       t.district,
+			       t.devicetype,
+			       t.color,
+			       t.cartype,
+			       t.caruse,
+			       t.onedriverid,
+			       t.twodriverid,
+			       t.oiltype,
+			       t.framenumber,
+			       t.drivlicnum,
+			       t.transnumber,
+			       t.ventingmeasure,
+			       t.enginenumber,
+			       t.remark,
+			       to_char(t.buytime, 'yyyy-mm-dd') buytime,
+			       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+			       
+			       s.bloc_name blocname,
+			       dt.usertype ,
+			       dt.typename,
+			       cs.carstatus,
+			       tcu.usename,
+			       tct.typename cartypename,
+			       tcd1.drivername drivername1,
+			       tcd2.drivername drivername2,
+			       
+			       a.cnname provincename,
+		           b.cnname cityname,
+		           c.cnname districtname
+			       
+			  from TO_CAR_INFO t, T0_BLOC s, TO_CAR_DEVICE_TYPE dt,TO_CAR_USE tcu,
+			  	   TO_CAR_STATE cs,TO_CAR_TYPE tct,TO_CAR_DRIVER_INFO tcd1,TO_CAR_DRIVER_INFO tcd2,
+			  	   tb_city_info                  a,
+		           tb_city_info                  b,
+		           tb_city_info                  c
+			 where t.flag = 1 
+			   and t.blocid = s.id(+)
+			   and t.province = a.szcode(+)
+		       and t.city = b.szcode(+)
+		       and t.district = c.szcode(+)
+			   and t.devicetype = dt.typeid(+)
+			   and t.id = cs.carid(+)
+			   and t.cartype = tct.id(+)
+			   and t.caruse = tcu.id(+)
+			   and t.onedriverid = tcd1.id(+)
+			   and t.twodriverid = tcd2.id(+)
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					 t.blocid in (SELECT id FROM T0_BLOC  START WITH id = 
+						(select bloc_id from  T0_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="devicetype">
+					 		t.devicetype=#devicetype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.terminal like '%'||#terminal#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carstatus">
+						 cs.carstatus=#carstatus#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="cartype">
+					 		t.cartype=#cartype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="caruse">
+					 		t.caruse=#caruse#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="online">
+						 cs.carstatus != 1 and t.carstatus !=2
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carstatus">
+						 cs.carstatus = #carstatus#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="blocid">
+					 	t.blocid in (SELECT t.id FROM T0_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+					</isNotEmpty>
+					
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     
+      <!-- 增加车辆信息 -->
+     <insert id="insertCarInfo" parameterClass="carInfo">
+     <![CDATA[ 
+        insert into TO_CAR_INFO
+					  (
+					  	blocid,
+						userid,
+						terminal,
+						password,
+						carnumber,
+						phone,
+						province,
+						city,
+						district,
+						devicetype,
+						color,
+						cartype,
+						caruse,
+						onedriverid,
+						twodriverid,
+						oiltype,
+						framenumber,
+						drivlicnum,
+						transnumber,
+						ventingmeasure,
+						enginenumber,
+						buytime,
+						createtime,
+						remark
+					   )
+					values
+					  (
+					   #blocid#,
+					   #userid#,
+					   #terminal#,
+					   #password#,
+						#carnumber#,
+						#phone#,
+						#province#,
+						#city#,
+						#district#,
+						#devicetype#,
+						#color#,
+						#cartype#,
+						#caruse#,
+						#onedriverid#,
+						#twodriverid#,
+						#oiltype#,
+						#framenumber#,
+						#drivlicnum#,
+						#transnumber#,
+						#ventingmeasure#,
+						#enginenumber#,
+					    to_date(#buytime#, 'yyyy-mm-dd'),
+					    to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss'),
+					   #remark#)
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_INFO_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+      <!-- 增加车辆状态 -->
+     <insert id="insertCarState" parameterClass="carState">
+     <![CDATA[ 
+        insert into TO_CAR_STATE
+					  (
+					  	CARID,
+						CARSTATUS,
+						KZSTATE
+					   )
+					values
+					  (
+					   #carid#,
+					   #carstatus#,
+					   #kzstate#
+					   )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_STATE_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新车辆信息 -->
+     <update id="updateCarInfo" parameterClass="carInfo">
+         update TO_CAR_INFO set
+		        blocid = #blocid#,
+		        terminal = #terminal#,
+		        password = #password#,
+				carnumber = #carnumber#,
+				phone = #phone#,
+				province = #province#,
+				city = #city#,
+				district = #district#,
+				devicetype = #devicetype#,
+				color = #color#,
+				cartype = #cartype#,
+				caruse = #caruse#,
+				onedriverid = #onedriverid#,
+				twodriverid = #twodriverid#,
+				oiltype = #oiltype#,
+				framenumber = #framenumber#,
+				drivlicnum = #drivlicnum#,
+				transnumber = #transnumber#,
+				enginenumber = #enginenumber#,
+				remark = #remark#,
+				ventingmeasure = #ventingmeasure#,
+		        buytime =to_date(#buytime#,'yyyy-mm-dd')
+		      WHERE id = #id#
+     </update>
+     
+	<!-- 根据设备号获取车辆用户类型 -->
+	<select id="getCarDeviceType" resultClass="Integer" parameterClass="String">
+		  select dt.usertype devicetype
+				  from TO_CAR_INFO t, TO_CAR_DEVICE_TYPE dt
+				 where t.flag = 1 
+			       and t.devicetype = dt.typeid(+)
+				   and t.carnumber = #carnumber#
+	</select>
+	
+	 <!--   删除银行存取款信息 -->
+     <update id="deleteCarInfo">
+        <![CDATA[
+		    update TO_CAR_INFO set flag=2 WHERE id = #id#
+		]]>	
+     </update>
+	
+     <!-- 车辆批量转移 -->
+     <update id="updateCarDept" parameterClass="java.util.HashMap">
+		 update TO_CAR_INFO set blocid=#blocid# where id in 
+		 <iterate property="list" conjunction="," open="(" close=")">
+		  	#list[]#
+		 </iterate>
+	</update>
+     
+     
+      <!-- 根据设备类型获取用户类型 -->
+	<select id="getUserType" resultClass="Integer"  parameterClass="Integer">
+		select t.usertype from TO_CAR_DEVICE_TYPE t where t.typeid = #devicetype#
+	</select>
+	
+      <!-- 根据设备类型获取用户类型 -->
+	<select id="getUserTypeByTerminal" resultClass="Integer"  parameterClass="String">
+		select dt.usertype from TO_CAR_INFO t,device_type dt where t.devicetype = dt.typeid and terminal = #terminal#
+	</select>
+	
+	 <!-- 根据单个组织机构得到上级组织机构列表 -->
+	<select id="getUpDeptlist" resultClass="Integer"  parameterClass="Integer">
+		   SELECT id
+              FROM T0_BLOC
+             START WITH id = #blocid#
+            CONNECT BY PRIOR  parent_id = id
+	</select>
+	
+	<!-- 重新统计单个组织机构对应车辆总数 -->
+	<update id="updateOneDeptTotal" parameterClass="Integer">
+			update T0_BLOC m
+			   set m.total = (select count(*)
+	                            from TO_CAR_INFO c
+	                           where c.flag = 1 and c.blocid in
+                                 (SELECT id
+                                    FROM T0_BLOC
+                                   START WITH id = #blocid#
+                                  CONNECT BY PRIOR id = parent_id)
+                       ),
+              m.caroffline = (
+                  select count(*)
+                      from TO_CAR_INFO c,TO_CAR_STATE s
+                     where c.flag = 1 and c.id = s.carid and s.carstatus = 2
+                       and c.blocid in (SELECT id
+                                FROM T0_BLOC
+                               START WITH id = #blocid#
+                              CONNECT BY PRIOR id = parent_id)
+            ),
+             m.longoffline = (
+            select count(*)
+                  from TO_CAR_INFO c,TO_CAR_STATE s
+                     where c.flag = 1 and c.id = s.carid and s.carstatus = 1
+                   and c.blocid in (SELECT id
+                              FROM T0_BLOC
+                             START WITH id = #blocid#
+                            CONNECT BY PRIOR id = parent_id)
+            )
+       where m.id = #blocid#
+			                
+
+	</update>
+	
+	<!-- 根据单个组织机构更新对应车辆总数 -->
+	<update id="updateDeptTotal" parameterClass="Integer">
+			update T0_BLOC m
+			   set m.total = (select (select count(*)
+			                            from TO_CAR_INFO c
+			                           where c.flag = 1 and c.blocid in
+			                                 (SELECT id
+			                                    FROM T0_BLOC
+			                                   START WITH id = t.id
+			                                  CONNECT BY PRIOR id = parent_id)) total
+			                  
+			                    from T0_BLOC t
+			                   where t.id = m.id),
+			        m.caroffline = (
+						select
+						      (select count(*)
+						          from TO_CAR_INFO c,TO_CAR_STATE s
+                                 where c.flag = 1 and c.id = s.carid and s.carstatus = 2
+						           and c.blocid in (SELECT id
+						                              FROM T0_BLOC
+						                             START WITH id = t.id
+						                            CONNECT BY PRIOR id = parent_id)) longoffline
+						      
+						      from T0_BLOC t
+						      where t.id = m.id
+						),
+			       m.longoffline = (
+						select
+						      (select count(*)
+						          from TO_CAR_INFO c,TO_CAR_STATE s
+                                where c.flag = 1 and c.id = s.carid and s.carstatus = 1
+						           and c.blocid in (SELECT id
+						                              FROM T0_BLOC
+						                             START WITH id = t.id
+						                            CONNECT BY PRIOR id = parent_id)) longoffline
+						      
+						      from T0_BLOC t
+						      where t.id = m.id
+						)
+			 where m.id in (SELECT id
+			                  FROM T0_BLOC
+			                 START WITH id = #blocid#
+			                CONNECT BY PRIOR parent_id = id)
+
+	</update>
+	
+	
+	  <!-- 根据Id得到车牌号-->
+	<select id="getCarNumberById" resultClass="string"  parameterClass="int">
+		select carnumber from  TO_TO_CAR_INFO  where  id=#id#
+	</select>
+	
+	
+</sqlMap>
+
+
+
+
+
+
+

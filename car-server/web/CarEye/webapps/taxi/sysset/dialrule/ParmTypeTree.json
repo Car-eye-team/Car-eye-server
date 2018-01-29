@@ -1,0 +1,38 @@
+{
+	"text" : "电召调度策略",
+	"children" : [{
+				"text" : "电召调度策略",
+				"children" : [{
+							"text" : "即时调度策略",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "jsdd",
+							"parentId" : "1"
+						},{
+							"text" : "预约调度策略",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "yydd",
+							"parentId" : "1"
+						},{
+							"text" : "指派模式",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "zpms",
+							"parentId" : "1"
+						},{
+							"text" : "再调度",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "zdd",
+							"parentId" : "1"
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "1",
+				"parentId" : "0"
+			}],
+	"leaf" : false,
+	"expanded" : true,
+	"id" : "0"
+}

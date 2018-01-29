@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-areaMoreSQL">
+
+	<typeAlias alias="areaMore" type="com.careye.statement.domain.AreaMore" />
+    <typeAlias alias="terminalPositionInfo" type="com.careye.common.domain.TerminalPositionInfo" />
+		
+		
+	<!-- 查询多区域数量 -->
+	<select id="getAreaMoreListCount" resultClass="int" parameterClass="areaMore">
+            select  count(m.id)
+				from  to_area_more m,to_bloc_user u,to_bloc b
+				where 1=1 
+				and m.userid=u.id(+)
+				and m.blocid=b.id(+)
+				<dynamic>
+	           		 <isNotNull prepend="and" property="userid" >
+	           		 and m.blocid in (SELECT id FROM to_bloc  START WITH id = 
+                          (select bloc_id from  to_bloc_user where user_id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+				    <isNotEmpty prepend="and" property="areaname">
+						 m.areaname like '%'||#areaname#||'%'
+				    </isNotEmpty>
+		 		 </dynamic>
+     </select>
+     
+	<!-- 查询多区域列表-->
+	<select id="getAreaMoreList" resultClass="areaMore" parameterClass="areaMore">
+		       select    m.id, 
+				         m.blocid, 
+				         m.userid, 
+				         m.areatype, 
+				         m.areaname, 
+				         m.ylat, 
+				         m.ylng, 
+				         m.radius, 
+				         m.latlt, 
+				         m.lnglt, 
+				         m.latrb, 
+				         m.lngrb, 
+				         u.user_name username,
+				         b.bloc_name blocname,
+				         to_char(m.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+				from  to_area_more m,to_bloc_user u,to_bloc b
+				where 1=1 
+				and m.userid=u.id(+)
+				and m.blocid=b.id(+)
+				<dynamic>
+	           		 <isNotNull prepend="and" property="userid" >
+	           		 and m.blocid in (SELECT id FROM to_bloc  START WITH id = 
+                          (select bloc_id from  to_bloc_user where user_id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+				    <isNotEmpty prepend="and" property="areaname">
+						 m.areaname like '%'||#areaname#||'%'
+				    </isNotEmpty>
+		 		 </dynamic>
+		  order by m.id desc
+     </select>
+
+     
+     <!--   删除多区域 -->
+     <delete id="deleteAreaMore">
+        <![CDATA[
+		    delete from  to_area_more  WHERE id = #id#
+		]]>	
+     </delete>
+     
+   
+     
+      <!-- 增加多区域 -->
+     <insert id="insertAreaMore" parameterClass="areaMore">
+     <![CDATA[ 
+        insert into TO_AREA_MORE(
+			blocid,
+			userid,
+			areatype,
+			areaname,
+			ylat,
+			ylng,
+			radius,
+			latlt,
+			lnglt,
+			latrb,
+			lngrb,
+			createtime
+        )values(
+	        #blocid#,
+			#userid#,
+			#areatype#,
+			#areaname#,
+			#ylat#,
+			#ylng#,
+			#radius#,
+			#latlt#,
+			#lnglt#,
+			#latrb#,
+			#lngrb#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_AREA_MORE_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新多区域 -->
+     <update id="updateAreaMore" parameterClass="areaMore">
+         update TO_AREA_MORE  set
+		        latlt = #latlt#,
+		        lnglt = #lnglt#,
+		        latrb = #latrb#,
+		        lngrb = #lngrb#,
+		        ylng = #ylng#,
+		        ylat = #ylat#,
+		        radius = #radius#,
+		        blocid = #blocid#,
+		        areatype = #areatype#,
+		        areaname = #areaname#
+		      WHERE id = #id#
+     </update>
+	
+	
+	 <!--  查询是否相同的名字存在-->
+	<select id="queryAreaMoreNameIsExits" resultClass="int" parameterClass="areaMore">
+	    select count(a.id) from  TO_AREA_MORE  a  where  a.areaname=ltrim(rtrim(#areaname#))
+	    <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+	
+     
+    <!-- 查询多区域对象-->
+	<select id="getAreaMoreById" resultClass="areaMore" parameterClass="Integer">
+	select  t.id,
+            t.areatype,
+            t.areaname
+          from TO_AREA_MORE t
+         where   t.id = #id#
+     </select>
+    
+     
+	<!-- 查询多区域车辆列表-->
+ <select id="queryCarPositionInfoList" resultClass="terminalPositionInfo" parameterClass="terminalPositionInfo">
+			  select c.id carid,
+			         c.phone,
+			         (case cs.carstatus
+			           WHEN 7 THEN
+			            '在线'
+			           WHEN 1 THEN
+			            '长时间离线'
+			           WHEN 2 THEN
+			            '离线'
+			           WHEN 3 THEN
+			            '熄火'
+			           WHEN 4 THEN
+			            '停车'
+			           WHEN 5 THEN
+			            '行驶'
+			           WHEN 6 THEN
+			            '报警'
+			           WHEN 8 THEN
+			            '未定位'
+			           ELSE
+			            ''
+			         END) carstatus,
+			         t.carnumber,
+			         t.speed,
+			         t.direction,
+			         t.altitude,
+			         t.glng,
+			         t.glat,
+			         (case t.gpsflag
+			           WHEN 0 THEN
+			            '无效'
+			           WHEN 1 THEN
+			            '有效'
+			           WHEN 2 THEN
+			            '上次信号有效'
+			           ELSE
+			            ''
+			         END) gpsflagtext,
+			         t.gaddress,
+			         t.mileage,
+			         t.terminal,
+			         t.acc,
+			         to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+			    from TO_CAR_POSITION_INFO t, TO_CAR_INFO c, TO_CAR_STATE cs
+			   where t.carnumber = c.carnumber
+			     and c.id = cs.carid
+			     and c.flag = 1
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+					 c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	   		</isNotNull>
+		   	   		 <isNotEmpty prepend="and" property="blocid">
+                      c.blocid in (SELECT t.id FROM TO_BLOC t 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+                    </isNotEmpty>  
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.terminal like '%'||#terminal#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="" property="lng">
+					 		<isNotEmpty prepend="" property="lat">
+					 			<isNotEmpty prepend="and" property="mileage">
+					 				<![CDATA[GETDISTANCE(t.glat,t.glng,#lat#,#lng#) <= #mileage#]]>	
+					 			</isNotEmpty>
+							</isNotEmpty>
+					</isNotEmpty>
+		      </dynamic>
+</select>
+	
+	
+	
+		<!-- 查询多区域车辆列表-->
+ <select id="queryCarPositionInfoTwoList" resultClass="terminalPositionInfo" parameterClass="terminalPositionInfo">
+			  select c.id carid,
+			         c.phone,
+			         (case cs.carstatus
+			           WHEN 7 THEN
+			            '在线'
+			           WHEN 1 THEN
+			            '长时间离线'
+			           WHEN 2 THEN
+			            '离线'
+			           WHEN 3 THEN
+			            '熄火'
+			           WHEN 4 THEN
+			            '停车'
+			           WHEN 5 THEN
+			            '行驶'
+			           WHEN 6 THEN
+			            '报警'
+			           WHEN 8 THEN
+			            '未定位'
+			           ELSE
+			            ''
+			         END) carstatus,
+			         t.carnumber,
+			         t.speed,
+			         t.direction,
+			         t.altitude,
+			         t.glng,
+			         t.glat,
+			         (case t.gpsflag
+			           WHEN 0 THEN
+			            '无效'
+			           WHEN 1 THEN
+			            '有效'
+			           WHEN 2 THEN
+			            '上次信号有效'
+			           ELSE
+			            ''
+			         END) gpsflagtext,
+			         t.gaddress,
+			         t.mileage,
+			         t.terminal,
+			         t.acc,
+			         to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+			    from TO_CAR_POSITION_INFO t, TO_CAR_INFO c, TO_CAR_STATE cs
+			   where t.carnumber = c.carnumber
+			     and c.id = cs.carid
+			     and c.flag = 1
+				<dynamic>
+					<isNotNull prepend="and" property="userid" >
+					 c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	   		</isNotNull>
+		   	   		 <isNotEmpty prepend="and" property="blocid">
+                      c.blocid in (SELECT t.id FROM TO_BLOC t 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+                    </isNotEmpty>  
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="terminal">
+					 		t.terminal like '%'||#terminal#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="lnglt">
+						 	<![CDATA[
+						 	    t.glat <= #lnglt#
+						 	]]>
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="lngrb">
+						 	<![CDATA[
+						 		t.glat>= #lngrb#
+						 	 ]]>
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="latlt">
+						 	<![CDATA[
+						 		t.glng >= #latlt#
+						 	]]>
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="latrb">
+						 	<![CDATA[
+						 		t.glng <= #latrb#
+						 	 ]]>
+						</isNotEmpty>
+		        </dynamic>
+     </select>
+
+     <!-- 根据id得到对象 -->     
+     <select id="getMoreAreaById" resultClass="terminalPositionInfo" parameterClass="string">
+			  select m.latlt,m.lnglt,m.latrb,m.lngrb,m.radius mileage,m.ylat lat,m.ylng lng,m.areatype
+			   from to_area_more m where id=#id#
+     </select>
+</sqlMap>

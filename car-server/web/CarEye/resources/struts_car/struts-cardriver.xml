@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="cardriverjson" extends="qhtaxijson" namespace="/cardriverjson">
+	
+	<action name="*" method="{1}"
+			class="com.careye.car.action.CarDriverAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- 司机信息Excel导出 -->
+	<action name="exportExcel" method="exportExcel"
+			class="com.careye.car.action.CarDriverAction">
+	</action>
+	
+	<!-- 车辆管理计价器Excel导出 -->
+	<action name="exportTaxiMeterExcel" method="exportTaxiMeterExcel"
+			class="com.careye.car.action.CarDriverAction">
+	</action>
+	</package>
+	
+</struts>

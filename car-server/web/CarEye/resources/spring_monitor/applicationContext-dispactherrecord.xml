@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+	<bean id="baseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="dispatcherRecordImpl" class="com.careye.monitor.service.DispatcherRecordService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+		<property name="logService"  ref="logService" />
+	</bean>
+	<bean id="dispatcherRecord" class="com.careye.monitor.service.impl.DispatcherRecordServiceImpl"
+		parent="dispatcherRecordImpl">
+	</bean>
+
+</beans>

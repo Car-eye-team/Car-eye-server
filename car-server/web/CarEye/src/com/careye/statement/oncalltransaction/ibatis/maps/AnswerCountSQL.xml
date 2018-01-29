@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-answerCountSQL">
+
+	<typeAlias alias="answerCount"
+		type="com.careye.statement.oncalltransaction.domain.AnswerCountInfo" />
+
+	<!-- 查询抢答数据 -->
+	<select id="findAnswerList1" resultClass="answerCount"
+		parameterClass="answerCount">
+		select t.id,
+		t.orderid,
+		t.carid,
+		t.source,
+		t.typeid,
+		t.saddress,
+		t.eaddress,
+		t.tratype,
+		t.remark,
+		to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+		b.BLOC_NAME blocname,
+		d.DRIVERNAME,
+		c.terminal,
+		c.carnumber
+		from TO_TRANSACTION_INFO t,TO_CAR_INFO c,TO_BLOC b,TO_CAR_DRIVER_INFO d
+		where t.carid is not null and t.carid=c.id(+) and c.blocid=b.id(+) and
+		c.SHIFTDRIVERID=d.id
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%' or
+				upper(carnumber) like '%'||#carnumber#||'%' or lower(carnumber) like
+				'%'||#carnumber#||'%')  
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 查询抢答数据Count -->
+	<select id="findAnswerListCount1" resultClass="int"
+		parameterClass="answerCount">
+		select count(t.id)
+		from TO_TRANSACTION_INFO t,TO_CAR_INFO c,TO_BLOC b,TO_CAR_DRIVER_INFO d
+		where t.carid is not null and t.carid=c.id(+) and c.blocid=b.id(+) and
+		c.SHIFTDRIVERID=d.id
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 查询派车成功数据 -->
+	<select id="findSendSuccessList" resultClass="answerCount"
+		parameterClass="answerCount">
+		select t.id,
+		t.orderid,
+		t.carid,
+		c.terminal,
+		c.carnumber,
+		to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+		b.BLOC_NAME blocname,
+		d.DRIVERNAME
+		from TO_TRANSACTION_INFO t,TO_CAR_INFO c,TO_BLOC b,TO_CAR_DRIVER_INFO d
+		where t.carid is not null and t.status in(2,5)
+		and t.carid=c.id(+) and c.blocid=b.id(+) and c.SHIFTDRIVERID=d.id
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 查询派车成功数据Count -->
+	<select id="findSendSuccessListCount" resultClass="int"
+		parameterClass="answerCount">
+		select count(t.id)
+		from TO_TRANSACTION_INFO t,TO_CAR_INFO c,TO_BLOC b,TO_CAR_DRIVER_INFO d
+		where t.carid is not null and t.status in (2,5)
+		and t.carid=c.id(+) and c.blocid=b.id(+) and c.SHIFTDRIVERID=d.id
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%')
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 查询抢答数据 -->
+	<select id="findAnswerList" resultClass="answerCount"
+		parameterClass="answerCount">
+		select t.id,
+		t.orderid,
+		t.carid,
+		t.zbstatus,
+		to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+		b.BLOC_NAME blocname,
+		d.DRIVERNAME,
+		t.terminal,
+		t.carnumber
+		from TO_TRANSACTION_ANSWER t left join TO_CAR_INFO c on t.carid=c.id 
+   		left join TO_BLOC b on c.blocid=b.id 
+   		left join TO_CAR_DRIVER_INFO d on c.SHIFTDRIVERID=d.id
+		where 1=1 
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%' or
+				upper(carnumber) like '%'||#carnumber#||'%' or lower(carnumber) like
+				'%'||#carnumber#||'%')  
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+			<isNotEmpty property="zbstatus" prepend="and">
+				t.zbstatus =#zbstatus#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 查询抢答数据Count -->
+	<select id="findAnswerListCount" resultClass="int"
+		parameterClass="answerCount">
+		select count(t.id)
+		from TO_TRANSACTION_ANSWER t left join TO_CAR_INFO c on t.carid=c.id 
+   		left join TO_BLOC b on c.blocid=b.id 
+   		left join TO_CAR_DRIVER_INFO d on c.SHIFTDRIVERID=d.id
+		where 1=1 
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.CREATETIME <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="blocid" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where blocid in (
+				select id from TO_BLOC START WITH id=#blocid# CONNECT BY PRIOR
+				id=parent_id
+				)
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+			t.carid in(select
+				id from TO_CAR_INFO where carnumber like '%'||#carnumber#||'%' or
+				upper(carnumber) like '%'||#carnumber#||'%' or lower(carnumber) like
+				'%'||#carnumber#||'%')
+			</isNotEmpty>
+			<isNotEmpty property="drivername" prepend="and">
+				t.carid in (
+				select id from TO_CAR_INFO where shiftdriverid in(
+				select id from TO_CAR_DRIVER_INFO where drivername like
+				'%'||#drivername#||'%'
+				)
+				)  
+			</isNotEmpty>
+			<isNotEmpty property="zbstatus" prepend="and">
+				t.zbstatus =#zbstatus#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+</sqlMap>

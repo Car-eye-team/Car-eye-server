@@ -1,0 +1,184 @@
+.common-add-icon {
+    background: url("../images/icons/common/add.gif")  !important;
+}
+.common-refresh-icon {
+    background: url("../images/icons/common/refresh.png")  !important;
+}
+.common-search-icon {
+    background: url("../images/icons/common/query.png")  !important;
+}
+.common-assignauthority-icon {
+    background: url("../images/icons/common/assignauthority.png")  !important;
+}
+.common-insert-icon {
+    background: url("../images/icons/common/plus.png")  !important;
+}
+.common-export-icon {
+    background: url("../images/icons/common/download.png")  !important;
+}
+.common-excel-icon{
+	 background-image: url("../images/excel.png") !important;
+}
+.common-word-icon{
+	 background-image: url("../images/word.png") !important;
+}
+.common-upload-icon {
+    background: url("../images/icons/common/file-upload.png")  !important;
+}
+
+.common-issue-icon {
+    background: url("../images/icons/common/issue.png")  !important;
+}
+.common-unissue-icon {
+    background: url("../images/icons/common/unissue.png")  !important;
+}
+.common-office-icon {
+    background: url("../images/icons/common/office.png")  !important;
+}
+.common-start-icon {
+    background: url("../images/icons/common/start.png")  !important;
+}
+.common-stop-icon {
+    background: url("../images/icons/common/stop.png")  !important;
+}
+.common-printzoom-icon {
+    background: url("../images/icons/common/printzoom.png")  !important;
+}
+.common-print-icon {
+    background: url("../images/icons/common/print.png")  !important;
+}
+.common-printsetup-icon {
+    background: url("../images/icons/common/printsetup.png")  !important;
+}
+.common-printquick-icon {
+    background: url("../images/icons/common/printquick.png")  !important;
+}
+.common-printdesign-icon {
+    background: url("../images/icons/common/printdesign.png")  !important;
+}
+.icon-edit {
+    background-image: url("../images/icons/common/edit.png") !important;
+}
+.icon-delete {
+    background-image: url("../images/icons/common/busy.png") !important;
+}
+.icon-new {
+    background-image: url("../images/icons/common/plus.png") !important;
+}
+
+.common-login-panel {
+
+}
+
+.common-set-icon{
+	 background-image: url("../images/icons/common/set.png") !important;
+}
+
+.common-editpassword-icon{
+	 background-image: url("../images/icons/common/editpassword.png") !important;
+}
+
+.common-addressbook-icon{
+	 background-image: url("../images/icons/common/addressbook.png") !important;
+}
+
+.common-smstemplet-icon{
+	 background-image: url("../images/icons/common/smstemplet.png") !important;
+}
+
+.common-groupsms-icon{
+	 background-image: url("../images/icons/common/group_sms.png") !important;
+}
+
+.add {
+    background-image:url(../images/add.png) !important;
+}
+.delete {
+    background-image:url(../images/delete.gif) !important;
+}
+.edit {
+    background-image:url(../images/edit.png) !important;
+}
+.save {
+    background-image:url(../images/save.png) !important;
+}
+.remove {
+    background-image:url(../images/delete.gif) !important;
+}
+.openlock {
+    background-image:url(../images/lock_open.png) !important;
+}
+.common-search-icon {
+    background: url(../images/query.png) !important;
+}
+.active {
+    background-image:url(../images/active.png) !important;
+}
+.inactive {
+    background-image:url(../images/inactive.png) !important;
+}
+.common-assignauthority-icon {
+    background: url(../images/assignauthority.png)  !important;
+}
+.common-reset-icon {
+    background: url(../images/eraser.png)  !important;
+}
+.common-login-ico {
+    background-image: url(../images/login.png) !important;
+}
+.play {
+    background-image:url(../images/play.png) !important;
+}
+.pause {
+    background-image:url(../images/pause.png) !important;
+}
+.undo {
+    background-image:url(../images/arrow_undo.png) !important;
+}
+.password {
+    background-image:url(../images/edit_password.png) !important;
+}
+.scrap {
+    background-image:url(../images/scrap.png) !important;
+}
+.icon_bmap{
+	background-image:url(../images/bmap.png) !important;
+}
+.icon_gmap{
+	background-image:url(../images/gmap.png) !important;
+}
+
+.icon_fullscreen{
+	background-image:url(../images/fullscreen.png) !important;
+}
+.phone{
+	background-image:url(../images/phone.png) !important;
+}
+.contact{
+	background-image:url(../images/contact.png) !important;
+}
+.mapcar{
+	background-image:url(../images/mapcar.png) !important;
+}
+.deptmove{
+	background-image:url(../images/deptmove.png) !important;
+}
+.flaggreen{
+	background-image:url(../images/flaggreen.png) !important;
+}
+.printer{
+		background-image:url(../images/printer.png) !important;
+}
+.map_orange{
+		background-image:url(../images/map_orange.png) !important;
+}
+.sound_delete{
+		background-image:url(../images/sound_delete.png) !important;
+}
+.sound{
+		background-image:url(../images/sound.png) !important;
+}
+.note_go{
+		background-image:url(../images/note_go.png) !important;
+}
+

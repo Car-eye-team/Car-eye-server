@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-commonSQL">
+
+	<typeAlias alias="controlRecord" type="com.careye.common.domain.ControlRecord" />
+	<typeAlias alias="poiInfo" type="com.careye.common.domain.PoiInfo" />
+	<typeAlias alias="sendRecord" type="com.careye.common.domain.SendRecord" />
+	<typeAlias alias="areaSet" type="com.careye.common.domain.AreaSet" />
+	<typeAlias alias="photoSendRecord" type="com.careye.car.domain.PhotoSendRecord" />
+	<typeAlias alias="multimediaSearchRecord" type="com.careye.common.domain.MultimediaSearchRecord" />
+	<typeAlias alias="commondLog" type="com.careye.common.domain.CommondLog" />
+	<typeAlias alias="heartRecord" type="com.careye.common.domain.HeartRecord" />
+	<typeAlias alias="multiMedia" type="com.careye.common.domain.MultiMedia" />
+	<typeAlias alias="mediaEvent" type="com.careye.common.domain.MediaEvent" />
+	<typeAlias alias="clockInfo" type="com.careye.mq.domain.ClockInfo" />
+	<typeAlias alias="ledMessage" type="com.careye.mq.domain.LedMessage" />
+	<typeAlias alias="operateData" type="com.careye.mq.domain.OperateData" />
+	<typeAlias alias="areaSet" type="com.careye.common.domain.AreaSet" />
+	<typeAlias alias="terminalPositionInfo" type="com.careye.common.domain.TerminalPositionInfo" />
+
+	
+	<!-- 根据流水号更新处理结果 -->
+	<update id="updateControlResult" parameterClass="controlRecord">
+		<![CDATA[
+			UPDATE TO_TERMINAL_PARAM_RECORD SET STATUS = #result#
+		 ]]>
+		where seq = #seq# and carnumber = #carnumber#
+
+	</update>
+	
+	<!-- 根据流水号更新处理结果-->
+	<update id="updatePoiInfoResult" parameterClass="poiInfo">
+		<![CDATA[
+			UPDATE TO_POI_INFO_SEND_RECORD SET result = #result#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber#
+		
+	</update>
+	 
+	 <!-- 根据流水号修改文本信息发送结果-->
+	<update id="updateTextInfoResule" parameterClass="sendRecord">
+		<![CDATA[
+			UPDATE TO_DISPATCHER_RECORD SET STATUS = #result#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber#
+		
+	</update>
+	 
+	 <!-- 根据流水号更新处理结果-->
+	<update id="updateAreaCarResult" parameterClass="areaSet">
+		<![CDATA[
+			UPDATE TO_CAR_AREA_RECORD SET result = #result#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber# and areatype = #areatype#
+		
+	</update>
+	 
+	<!-- 更新摄像头立即拍摄结果 -->
+	<update id="updatePhotoSendRecordResult" parameterClass="photoSendRecord">
+		<![CDATA[
+			UPDATE TO_PHOTOGRAPH_SEND_RECORD SET result = #result#
+		 ]]>	
+			where seq = #seq# and carid = #carid#
+	</update>
+	
+	<!-- 更新多媒体数据检索记录结果 -->
+	<update id="updateMultimediaSearchRecordResult" parameterClass="multimediaSearchRecord">
+		<![CDATA[
+			UPDATE TO_MULTIMEDIA_SEARCH_RECORD SET result = #result#
+		 ]]>	
+			where seq = #seq# and carid = #carid#
+	</update>
+	
+	<!-- 添加指令下发日志记录 -->
+	<insert id="addCommondLog" parameterClass="commondLog">
+		INSERT INTO TO_COMMOND_SEND_LOG
+	      (
+	        CARID,
+			STATUS,
+			USERID,
+			RESTIME,
+			DATA,
+			MSGID,
+			MSGTYPE,
+			SEQ,
+			REMARK,
+	        CREATETIME
+	       )
+	    VALUES
+	      (
+	        #carid#,
+			#status#,
+			#userid#,
+			to_date(#restime#,'yyyy-mm-dd hh24:mi:ss'),
+			#data#,
+			#msgid#,
+			#msgtype#,
+			#seq#,
+			#remark#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+	       )
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_COMMOND_SEND_LOG_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	<!-- 修改指令下发日志记录 -->
+	<update id="updateCommondLog" parameterClass="commondLog">
+		UPDATE TO_COMMOND_SEND_LOG SET STATUS = #status#,
+			restime = to_date(#restime#,'yyyy-mm-dd hh24:mi:ss')
+		where seq = #seq# and carid = #carid# and msgid = #msgid#
+
+	</update>
+	
+	
+	<!-- 添加多媒体数据 -->
+	<insert id="addMultiMedia" parameterClass="multiMedia">
+		INSERT INTO TO_MULTIMEDIA_INFO
+	      (
+	        blocid,
+			userid,
+			terminal,
+			carid,
+			dataid,
+			mediatype,
+			format,
+			eventcode,
+			accessid,
+			multimediapath,
+			data,
+			msid,
+			mediaid,
+			blng,
+			blat,
+			address,
+			speed,
+			altitude,
+			direction,
+			gpstime,
+	        createtime
+	       )
+	    VALUES
+	      (
+	        #blocid#,
+			#userid#,
+			#terminal#,
+			#carid#,
+			#dataid#,
+			#mediatype#,
+			#format#,
+			#eventcode#,
+			#accessid#,
+			#multimediapath#,
+			#data#,
+			#msid#,
+			#mediaid#,
+			#blng#,
+			#blat#,
+			#address#,
+			#speed#,
+			#altitude#,
+			#direction#,
+			to_date(#gpstime#,'yyyy-mm-dd hh24:mi:ss'),
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+	       )
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_MULTIMEDIA_INFO_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	<!-- 添加多媒体数据 -->
+	<insert id="addMediaEvent" parameterClass="mediaEvent">
+		INSERT INTO TO_MEDIAEVENT_INFO
+	      (
+			carid,
+			dataid,
+			mediatype,
+			format,
+			eventcode,
+			accessid,
+	        createtime
+	       )
+	    VALUES
+	      (
+			#carid#,
+			#dataid#,
+			#mediatype#,
+			#format#,
+			#eventcode#,
+			#accessid#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+	       )
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_MEDIAEVENT_INFO_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	
+	<!-- 添加考勤信息-->
+	<insert id="addClockInfo" parameterClass="clockInfo">
+		INSERT INTO TO_CLOCK_INFO
+	      (
+	        CARID,
+	        CREATETIME,
+	        type,
+			companycode,
+			drivercode,
+			vehicleid,
+			signintime,
+			count,
+			result,
+			driverid,
+			mcs,
+			stime,
+			etime,
+			dbmileage,
+			dbyymileage,
+			vehicletrips,
+			jstmie,
+			totalamount,
+			cardamount,
+			cardnum,
+			bjmileage,
+			totalmileage,
+			totalyymileage,
+			price,
+			totalnumber,
+			totalwaittime,
+			sblat,
+			sblng,
+			sbblat,
+			sbblng,
+			sbbaddress,
+			sbaltitude,
+			sbspeed,
+			sbdirection,
+			xblat,
+			xblng,
+			xbblat,
+			xbblng,
+			xbbaddress,
+			xbaltitude,
+			xbspeed,
+			xbdirection
+	       )
+	    VALUES
+	      (
+	        #carid#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+	        #type#,
+			#companycode#,
+			#drivercode#,
+			#vehicleid#,
+			to_date(#signintime#,'yyyy-mm-dd hh24:mi:ss'),
+			#count#,
+			#result#,
+			#driverid#,
+			#mcs#,
+			to_date(#stime#,'yyyy-mm-dd hh24:mi:ss'),
+			to_date(#etime#,'yyyy-mm-dd hh24:mi:ss'),
+			#dbmileage#,
+			#dbyymileage#,
+			#vehicletrips#,
+			#jstmie#,
+			#totalamount#,
+			#cardamount#,
+			#cardnum#,
+			#bjmileage#,
+			#totalmileage#,
+			#totalyymileage#,
+			#price#,
+			#totalnumber#,
+			#totalwaittime#,
+			#sblat#,
+			#sblng#,
+			#sbblat#,
+			#sbblng#,
+			#sbbaddress#,
+			#sbaltitude#,
+			#sbspeed#,
+			#sbdirection#,
+			#xblat#,
+			#xblng#,
+			#xbblat#,
+			#xbblng#,
+			#xbbaddress#,
+			#xbaltitude#,
+			#xbspeed#,
+			#xbdirection#
+	       )
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CLOCK_INFO_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	<!--查询车辆文本信息 -->
+	<select id="queryTextInfoExist" resultClass="Integer" parameterClass="Integer">
+		select count(*) from TO_LED_MESSAGE t where t.carid = #carid#
+	</select>
+	
+	<!-- 添加文本信息 -->
+	<insert id="addTextInfo" parameterClass="ledMessage">
+		INSERT INTO TO_LED_MESSAGE
+	      (
+			carid,
+			seq,
+			type1,
+			type2,
+			type3,
+			type4,
+			textmessage,
+	        createtime
+	       )
+	    VALUES
+	      (
+			#carid#,
+			#seq#,
+			#type1#,
+			#type2#,
+			#type3#,
+			#type4#,
+			#textmessage#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+	       )
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_LED_MESSAGE_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	<!-- 更新文本信息 -->
+	<update id="updateTextInfo" parameterClass="ledMessage">
+		<![CDATA[
+			UPDATE TO_LED_MESSAGE SET 
+			seq = #seq#,
+			textmessage = #textmessage#,
+			createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		 ]]>	
+			where carid = #carid#
+	</update>
+	
+		<!-- 添加运营数据 -->
+	<insert id="addOperateData" parameterClass="operateData">
+		INSERT INTO TO_OPERATE_DATA
+	      (
+			carid,
+			kalarminfo,
+			kstateinfo,
+			klat,
+			klng,
+			kaltitude,
+			kspeed,
+			kdirection,
+			ktime,
+			zalarminfo,
+			zstateinfo,
+			zlat,
+			zlng,
+			zaltitude,
+			zspeed,
+			zdirection,
+			ztime,
+			runid,
+			peoplenumber,
+			evaluateid,
+			options,
+			carnumber,
+			companycode,
+			drivercode,
+			driverid,
+			stime,
+			etime,
+			mileage,
+			airmileage,
+			fuelsurcharge,
+			waitingtime,
+			tradeamount,
+			vehicletrips,
+			tradetime,
+			tradetype,
+			cardtype,
+			cardoem,
+			csn,
+			tradecardno,
+			tradeseq,
+			samno,
+			samseq,
+			cardtradeamount,
+			tradebalance,
+			extend,
+			kaddress,
+			zaddress,
+	        createtime
+	       )
+	    VALUES
+	      (
+			#carid#,
+			#kalarminfo#,
+			#kstateinfo#,
+			#klat#,
+			#klng#,
+			#kaltitude#,
+			#kspeed#,
+			#kdirection#,
+			#ktime#,
+			#zalarminfo#,
+			#zstateinfo#,
+			#zlat#,
+			#zlng#,
+			#zaltitude#,
+			#zspeed#,
+			#zdirection#,
+			#ztime#,
+			#runid#,
+			#peoplenumber#,
+			#evaluateid#,
+			#options#,
+			#carnumber#,
+			#companycode#,
+			#drivercode#,
+			#driverid#,
+			#stime#,
+			#etime#,
+			#mileage#,
+			#airmileage#,
+			#fuelsurcharge#,
+			#waitingtime#,
+			#tradeamount#,
+			#vehicletrips#,
+			#tradetime#,
+			#tradetype#,
+			#cardtype#,
+			#cardoem#,
+			#csn#,
+			#tradecardno#,
+			#tradeseq#,
+			#samno#,
+			#samseq#,
+			#cardtradeamount#,
+			#tradebalance#,
+			#extend#,
+			#kaddress#,
+			#zaddress#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+	       )
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_OPERATE_DATA_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	<!-- 查询车辆区域列表-->
+	<select id="getCarAreaList" resultClass="areaSet" parameterClass="String">
+		     <![CDATA[
+		        select  t.id,
+						t.blocid deptid,
+						r.bloc_name deptname,
+						t.userid,
+						t.carnumber,
+						c.terminal,
+						t.areaid,
+						to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+						t.seq,
+						t.result,
+						
+						m.areatype,
+						m.areaname,
+						m.attr0,
+						m.attr1,
+						m.attr2,
+						m.attr3,
+						m.attr4,
+						m.attr5,
+						m.attr6,
+						m.attr7,
+						to_char(m.stime,'yyyy-mm-dd hh24:mi:ss') stime,
+						to_char(m.etime,'yyyy-mm-dd hh24:mi:ss') etime,
+						m.maxspeed,
+						m.speedtime,
+						m.ylat,
+						m.ylng,
+						m.radius,
+						m.latlt,
+						m.lnglt,
+						m.latrb,
+						m.lngrb,
+						m.latsrt,
+						m.lngsrt
+						
+				  from TO_CAR_AREA t, TO_BLOC r,TO_AREA_SYSTEM m,to_car_info c
+				 where t.blocid = r.id(+) and t.areaid = m.id and c.carnumber = t.carnumber
+				 and t.carnumber = #carnumber#
+		         and stime <= sysdate
+		         and etime >= sysdate
+		        order by t.id desc
+		     ]]>	
+     </select>
+	
+	<!-- 根据carid获取车辆最后位置信息 -->
+	<select id="getLngLatByCarid" parameterClass="Integer" resultClass="terminalPositionInfo">
+		<![CDATA[
+			select t.terminal,
+			       t.speed,
+			       t.direction,
+			       t.address,
+			       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+			       t.blng,
+			       t.blat,
+			       t.lng,
+			       t.lat,
+			       t.mileage
+			  from TO_CAR_POSITION_INFO t
+			 where t.carid = #carid#
+		]]>
+	</select>
+	
+	<!-- 查看上下线次数记录是否存在  -->
+	<select id="queryHeartRecordCount" parameterClass="heartRecord" resultClass="Integer">
+		<![CDATA[
+			select count(*)
+			  from TO_CAR_INLINE_COUNT t
+			 where t.carid = #carid#
+			 and to_char(t.createtime, 'yyyy-mm-dd') = #today#
+		]]>
+	</select>
+	
+	<!-- 添加上下线次数 -->
+	<insert id="addHeartRecord" parameterClass="heartRecord">
+		INSERT INTO TO_CAR_INLINE_COUNT
+	      (
+	        carid,
+			inlinecount,
+			offlinecount,
+	        createtime
+	       )
+	    VALUES
+	      (
+	        #carid#,
+			#inlinecount#,
+			#offlinecount#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+	       )
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_INLINE_COUNT_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	<!-- 更新上下线次数-->
+	<update id="updateHeartRecord" parameterClass="heartRecord">
+			UPDATE TO_CAR_INLINE_COUNT SET carid = #carid#
+			<isNotEmpty property="inlinecount" prepend=",">
+				inlinecount = inlinecount+#inlinecount# 
+			</isNotEmpty>
+			<isNotEmpty property="offlinecount" prepend=",">
+				offlinecount = offlinecount+#offlinecount# 
+			</isNotEmpty>
+			 ,createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+			where  carid = #carid#
+	</update>
+	
+	<!-- 根据carid与上班时间判断是否有上班打卡记录  -->
+	<select id="queryClockInfoIsExist" parameterClass="clockInfo" resultClass="Integer">
+		<![CDATA[
+			select id
+			  from TO_CLOCK_INFO t
+			 where t.carid = #carid#
+			 and to_char(t.stime, 'yyyy-mm-dd') = substr(#stime#, 0, 10)
+		]]>
+	</select>
+	
+	<!-- 更新考勤信息 -->
+	<update id="updateClockInfo" parameterClass="clockInfo">
+		UPDATE TO_CLOCK_INFO SET id = #id#
+		<isNotEmpty property="companycode" prepend=",">
+			companycode = #companycode#
+		</isNotEmpty>
+		<isNotEmpty property="drivercode" prepend=",">
+			drivercode = #drivercode#
+		</isNotEmpty>
+		<isNotEmpty property="vehicleid" prepend=",">	
+			vehicleid = #vehicleid#
+		</isNotEmpty>
+		<isNotEmpty property="signintime" prepend=",">
+			signintime = to_date(#signintime#,'yyyy-mm-dd hh24:mi:ss')
+		</isNotEmpty>
+		<isNotEmpty property="count" prepend=",">
+			count = #count#
+		</isNotEmpty>
+		<isNotEmpty property="result" prepend=",">
+			result = #result#
+		</isNotEmpty>
+		<isNotEmpty property="driverid" prepend=",">
+			driverid = #driverid#
+		</isNotEmpty>
+		<isNotEmpty property="mcs" prepend=",">
+			mcs = #mcs#
+		</isNotEmpty>
+		<isNotEmpty property="stime" prepend=",">
+			stime = to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+		</isNotEmpty>
+		<isNotEmpty property="etime" prepend=",">
+			etime = to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+		</isNotEmpty>
+		<isNotEmpty property="dbmileage" prepend=",">
+			dbmileage = #dbmileage#
+		</isNotEmpty>
+		<isNotEmpty property="dbyymileage" prepend=",">
+			dbyymileage = #dbyymileage#
+		</isNotEmpty>
+		<isNotEmpty property="vehicletrips" prepend=",">
+			vehicletrips = #vehicletrips#
+		</isNotEmpty>
+		<isNotEmpty property="jstmie" prepend=",">
+			jstmie = #jstmie#
+		</isNotEmpty>
+		<isNotEmpty property="totalamount" prepend=",">
+			totalamount = #totalamount#
+		</isNotEmpty>
+		<isNotEmpty property="cardamount" prepend=",">
+			cardamount = #cardamount#
+		</isNotEmpty>
+		<isNotEmpty property="cardnum" prepend=",">
+			cardnum = #cardnum#
+		</isNotEmpty>
+		<isNotEmpty property="bjmileage" prepend=",">
+			bjmileage = #bjmileage#
+		</isNotEmpty>
+		<isNotEmpty property="totalmileage" prepend=",">
+			totalmileage = #totalmileage#
+		</isNotEmpty>
+		<isNotEmpty property="totalyymileage" prepend=",">
+			totalyymileage = #totalyymileage#
+		</isNotEmpty>
+		<isNotEmpty property="price" prepend=",">
+			price = #price#
+		</isNotEmpty>
+		<isNotEmpty property="totalnumber" prepend=",">
+			totalnumber = #totalnumber#
+		</isNotEmpty>
+		<isNotEmpty property="totalwaittime" prepend=",">
+			totalwaittime = #totalwaittime#
+		</isNotEmpty>
+		<isNotEmpty property="sblat" prepend=",">
+			sblat = #sblat#
+		</isNotEmpty>
+		<isNotEmpty property="sblng" prepend=",">
+			sblng = #sblng#
+		</isNotEmpty>
+		<isNotEmpty property="sbblat" prepend=",">
+			sbblat = #sbblat#
+		</isNotEmpty>
+		<isNotEmpty property="sbblng" prepend=",">
+			sbblng = #sbblng#
+		</isNotEmpty>
+		<isNotEmpty property="sbbaddress" prepend=",">
+			sbbaddress = #sbbaddress#
+		</isNotEmpty>
+		<isNotEmpty property="sbaltitude" prepend=",">
+			sbaltitude = #sbaltitude#
+		</isNotEmpty>
+		<isNotEmpty property="sbspeed" prepend=",">
+			sbspeed = #sbspeed#
+		</isNotEmpty>
+		<isNotEmpty property="sbdirection" prepend=",">
+			sbdirection = #sbdirection#
+		</isNotEmpty>
+		<isNotEmpty property="xblat" prepend=",">
+			xblat = #xblat#
+		</isNotEmpty>
+		<isNotEmpty property="xblng" prepend=",">
+			xblng = #xblng#
+		</isNotEmpty>
+		<isNotEmpty property="xbblat" prepend=",">
+			xbblat = #xbblat#
+		</isNotEmpty>
+		<isNotEmpty property="xbblng" prepend=",">
+			xbblng = #xbblng#
+		</isNotEmpty>
+		<isNotEmpty property="xbbaddress" prepend=",">
+			xbbaddress = #xbbaddress#
+		</isNotEmpty>
+		<isNotEmpty property="xbaltitude" prepend=",">
+			xbaltitude = #xbaltitude#
+		</isNotEmpty>
+		<isNotEmpty property="xbspeed" prepend=",">
+			xbspeed = #xbspeed#
+		</isNotEmpty>
+		<isNotEmpty property="xbdirection" prepend=",">
+			xbdirection = #xbdirection#
+		</isNotEmpty>
+		where id = #id#
+	</update>
+	
+	<!-- 根据carid与上班时间、营运次数判断是否有重复营运记录  -->
+	<select id="queryOperateDataExist" parameterClass="operateData" resultClass="Integer">
+		<![CDATA[
+			select count(*)
+			  from TO_OPERATE_DATA t
+			 where t.carid = #carid#
+			 and runid = #runid#
+			 and substr(t.stime, 0, 16) = substr(#stime#, 0, 16)
+		]]>
+	</select>
+	
+</sqlMap>
+
+
+
+
+
+
+

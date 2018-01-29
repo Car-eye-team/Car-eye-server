@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sqlMap namespace="oracle-carTypeSQL">
+    <typeAlias alias="carType" type="com.careye.sysset.domain.CarType"/>
+	
+	 <!-- 查看车辆名称是否存在 -->
+	<select id="queryCarTypeNameIsExits" parameterClass="carType" resultClass="int">
+		select count(id) from to_car_type t where t.typename = ltrim(rtrim(#typename#)) 
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+   
+     <!-- 根据条件查询车辆类型信息 -->
+     <select id="selectPageCarType" resultClass="carType" parameterClass="carType">
+      select c.id,
+		     c.typename,
+		     c.remark,
+		     u.user_name username,
+		     to_char(c.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+			from to_car_type c,to_bloc_user u
+			where 1=1
+            and c.userid=u.id(+)
+			<dynamic>
+				<isNotEmpty prepend="and" property="typename">
+					c.typename like '%'||#typename#||'%'
+				</isNotEmpty>
+		  </dynamic>
+		  order by c.id desc
+     </select>
+     
+      <!-- 获取车辆类型数量 -->
+     <select id="selectPageCarTypeCount" resultClass="int" parameterClass="carType">
+           select count(*) 
+			from to_car_type c,to_bloc_user u
+			where 1=1
+            and c.userid=u.id(+)
+			<dynamic>
+				<isNotEmpty prepend="and" property="typename">
+					c.typename like '%'||#typename#||'%'
+				</isNotEmpty>
+		  </dynamic>
+     </select>
+     
+     <!-- 删除车辆类型名称信息 -->
+     <delete id="deleteCarType" parameterClass="java.util.List">
+		DELETE FROM TO_CAR_TYPE where
+		<iterate property="" conjunction="," open="id in (" close=")">#list[]#
+		</iterate>
+	</delete>
+     
+     
+     <!-- 增加车辆类型名称信息 -->
+     <insert id="insertCarType" parameterClass="carType">
+     <![CDATA[ 
+        insert into TO_CAR_TYPE(
+			typename,
+			remark,
+			userid,
+			createtime
+        )values(
+	        #typename#,
+			#remark#,
+			#userid#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_TYPE_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     
+     <!-- 更新车辆类型名称信息 -->
+     <update id="updateCarType" parameterClass="carType">
+         update TO_CAR_TYPE set
+		         typename = #typename#,
+		         remark = #remark#
+          WHERE id = #id#
+     </update>
+     
+     <!-- 根据id得到对象 -->
+     <select id="getCarTypeById" resultClass="carType" parameterClass="int">
+      select c.id,
+		     c.typename,
+		     c.remark,
+		     u.user_name username,
+		     to_char(c.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+			from to_car_type c,to_bloc_user u
+			where 1=1
+            and c.userid=u.id(+)
+            and c.id=#id#
+     </select>
+     
+     
+      <!-- 得到当前车辆类型下的车辆数量信息 -->
+     <select id="judgeTypeIsDelete" parameterClass="java.util.List" resultClass="int">
+		select count(t.id) from to_car_info t where 
+		<iterate property="" conjunction="," open="t.cartype in (" close=")">#list[]#
+		</iterate>
+	</select>
+
+</sqlMap>

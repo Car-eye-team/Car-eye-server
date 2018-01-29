@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+	<bean id="baseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	<!-- 公共的service父类 -->
+	<bean id="commonServiceImpl" abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+	
+	<bean id="dsocsbaseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient2" />
+	</bean>
+
+	<!-- 公共的service父类 -->
+	<bean id="ocsServiceImpl" abstract="true">
+		<property name="baseDao">
+			<ref bean="dsocsbaseDao" />
+		</property>
+	</bean>
+	
+	<bean id="cmssBaseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient3" />
+	</bean>
+
+	<!-- 公共的service父类 -->
+	<bean id="cmssServiceImpl" abstract="true">
+		<property name="baseDao">
+			<ref bean="cmssBaseDao" />
+		</property>
+	</bean>
+	
+	<bean id="gtalkBaseDao" class="com.careye.base.dao.impl.GenericDaoImpl">
+		<property name="sqlMapClient" ref="sqlMapClient4" />
+	</bean>
+
+	<bean id="gtalkServiceImpl" abstract="true">
+		<property name="baseDao">
+			<ref bean="gtalkBaseDao" />
+		</property>
+	</bean>
+	
+	<bean id="gtalkService" class="com.careye.gtalk.service.impl.GtalkServiceImpl"
+		parent="gtalkServiceImpl">
+	</bean>
+
+	<!-- 用户登陆 -->
+	<bean id="userLoginServiceImpl" class="com.careye.common.service.UserLoginService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+
+	<bean id="userLoginService" class="com.careye.common.service.impl.UserLoginServiceImpl"
+		parent="userLoginServiceImpl">
+	</bean>
+
+	<!-- 菜单树加载 -->
+	<bean id="menuTreeServiceImpl" class="com.careye.common.service.MenuTreeService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+
+	<bean id="menuTreeService" class="com.careye.common.service.impl.MenuTreeServiceImpl"
+		parent="menuTreeServiceImpl">
+	</bean>
+	
+    <!-- 日志管理 -->
+	<bean id="loginServiceImpl" class="com.careye.common.service.SysOperateLogService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+
+	<bean id="logService" class="com.careye.common.service.impl.SysOperateLogServiceImpl"
+		parent="loginServiceImpl">
+	</bean>
+
+	<!-- 省市县 -->
+	<bean id="cityInfoServiceImpl" class="com.careye.common.service.CityInfoService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+
+	<bean id="cityInfoService" class="com.careye.common.service.impl.CityInfoServiceImpl"
+		parent="cityInfoServiceImpl">
+	</bean>
+
+	<!-- 车辆位置相关信息 -->
+	<bean id="terminalDeviceInfoServiceImpl" class="com.careye.common.service.TerminalDeviceInfoService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+		<property name="logService"  ref="logService" />
+	</bean>
+
+	<bean id="terminalDeviceInfoService" class="com.careye.common.service.impl.TerminalDeviceInfoServiceImpl"
+		parent="terminalDeviceInfoServiceImpl">
+	</bean>
+
+
+
+
+	
+	
+	<!--工作台-->
+	<bean id="workPlaceService" class="com.careye.common.service.impl.WorkPlaceServiceImpl"
+		parent="commonServiceImpl">
+	</bean>
+	<bean id="ocsWorkPlaceService" class="com.careye.common.service.impl.OcsWorkPlaceServiceImpl"
+		parent="ocsServiceImpl">
+	</bean>
+	
+	<bean id="cmssService" class="com.careye.common.service.impl.CmssServiceImpl"
+		parent="cmssServiceImpl">
+	</bean>
+	
+	
+	<!-- 用户注册 -->
+	<bean id="userRegisterServiceImpl" class="com.careye.common.service.UserRegisterService"
+		abstract="true">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+
+	<bean id="userRegisterService" class="com.careye.common.service.impl.UserRegisterServiceImpl"
+		parent="userRegisterServiceImpl">
+	</bean>
+	
+</beans>

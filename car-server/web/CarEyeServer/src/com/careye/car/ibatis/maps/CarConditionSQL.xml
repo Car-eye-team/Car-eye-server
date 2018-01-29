@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-carConditionSQL">
+
+	<typeAlias alias="carCondition" type="com.careye.car.domain.CarCondition" />
+	
+	<!-- 新增车辆信息统计 -->
+	<insert id="insertCarCondition" parameterClass="carCondition">
+		<![CDATA[
+			insert into TO_OVERHEADS_STATISTIC
+		      (
+		       carid,
+		       inlinetime,
+		        offlinetime,
+				passengertime,
+				drivermile,
+				emptymile,
+				passengermile,
+				alarmcount,
+				income,
+				waittime,
+				feetime,
+				passengercount,
+				passengertime1,
+				drivertime1,
+				drivermile1,
+				passengermile1,
+		       createtime
+		       )
+		    values
+		      (
+		       #carid#,
+		       #inlinetime#,
+		       #offlinetime#,
+				#passengertime#,
+				#drivermile#,
+				#emptymile#,
+				#passengermile#,
+				#alarmcount#,
+				#income#,
+				#waittime#,
+				#feetime#,
+				#passengercount#,
+				#passengertime1#,
+				#drivertime1#,
+				#drivermile1#,
+				#passengermile1#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_OVERHEADS_STATISTIC_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 更新车辆信息统计 -->
+	<update id="updateCarCondition" parameterClass="carCondition">
+		update TO_OVERHEADS_STATISTIC t set t.id=#id#
+		<dynamic>
+			<isNotEmpty property="inlinetime" prepend=",">
+				t.inlinetime = #inlinetime#   
+			</isNotEmpty>
+			<isNotEmpty property="offlinetime" prepend=",">
+				t.offlinetime = #offlinetime#   
+			</isNotEmpty>
+			<isNotEmpty property="passengertime" prepend=",">
+				t.passengertime = #passengertime#   
+			</isNotEmpty>
+			<isNotEmpty property="drivermile" prepend=",">
+				t.drivermile = #drivermile#   
+			</isNotEmpty>
+			<isNotEmpty property="emptymile" prepend=",">
+				t.emptymile = #emptymile#   
+			</isNotEmpty>
+			<isNotEmpty property="passengermile" prepend=",">
+				t.passengermile = #passengermile#   
+			</isNotEmpty>
+			<isNotEmpty property="alarmcount" prepend=",">
+				t.alarmcount = #alarmcount#   
+			</isNotEmpty>
+			<isNotEmpty property="income" prepend=",">
+				t.income = #income#   
+			</isNotEmpty>
+			<isNotEmpty property="waittime" prepend=",">
+				t.waittime = #waittime#   
+			</isNotEmpty>
+			<isNotEmpty property="feetime" prepend=",">
+				t.feetime = #feetime#   
+			</isNotEmpty>
+			<isNotEmpty property="passengercount" prepend=",">
+				t.passengercount = #passengercount#   
+			</isNotEmpty>
+			<isNotEmpty property="passengertime1" prepend=",">
+				t.passengertime1 = #passengertime1#   
+			</isNotEmpty>
+			<isNotEmpty property="drivertime1" prepend=",">
+				t.drivertime1 = #drivertime1#   
+			</isNotEmpty>
+			<isNotEmpty property="drivermile1" prepend=",">
+				t.drivermile1 = #drivermile1#   
+			</isNotEmpty>
+			<isNotEmpty property="passengermile1" prepend=",">
+				t.passengermile1 = #passengermile1#   
+			</isNotEmpty>
+			<isNotEmpty property="createtime" prepend=",">
+				t.createtime = to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')  
+			</isNotEmpty>
+		</dynamic>
+		where t.id = #id#
+	</update>
+	
+	<!-- 根据carid查询当天是否存在车辆统计信息 -->
+	<select id="findCarCondition" resultClass="carCondition" parameterClass="carCondition">
+		select  t.id,
+				t.carid,
+				to_char(#createtime#, 'yyyy-mm-dd hh24:mi:ss') createtime,
+				t.inlinetime
+				from TO_OVERHEADS_STATISTIC t
+		where t.carid = #carid# 
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 统计营运数据 -->
+	<select id="queryCarConditionData" resultClass="carCondition" parameterClass="java.util.HashMap">
+		select  nvl(sum(t.totalamount),0) income,
+				trunc(nvl(sum(t.totalwaittime),0)/60,2) waittime,
+				trunc(nvl(sum(t.jstmie),0)/60,2) feetime,
+				nvl(sum(t.count),0) passengercount
+				from TO_CLOCK_INFO t 
+		where t.carid = #carid# 
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+</sqlMap>
+
+
+
+
+
+
+

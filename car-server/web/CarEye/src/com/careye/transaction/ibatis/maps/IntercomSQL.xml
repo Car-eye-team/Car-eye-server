@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-intercomSQL">
+
+	<typeAlias alias="intercom" type="com.careye.transaction.domain.Intercom"/>
+	
+	
+	<!-- 组列表 -->
+	<select id="selGroupList" resultClass="intercom" parameterClass="intercom">
+		 select
+		 		ti.id,
+				ti.carid,
+				ti.name,
+				ti.remark,
+				ti.lng,
+				ti.lat,
+				ti.province,
+				ti.city,
+				ti.district,
+				ti.blng,
+				ti.blat,
+				ti.baddress,
+				to_char(ti.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+				tc.carnumber
+				
+		 from TO_INTERCOM_GROUP ti,TO_CAR_INFO tc
+		 where ti.carid = tc.id
+		 
+		<dynamic>
+			<isNotEmpty prepend="AND" property="name">
+				ti.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+				<![CDATA[
+					 ti.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+				<![CDATA[
+					 ti.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		
+		order by ti.id desc
+		
+	</select>
+
+	<!-- 组数量 -->
+	<select id="selGroupListCount" resultClass="int" parameterClass="intercom">
+		select count(*) from TO_INTERCOM_GROUP ti,TO_CAR_INFO tc
+		 where ti.carid = tc.id
+		
+		<dynamic>
+			<isNotEmpty prepend="AND" property="name">
+				ti.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+				<![CDATA[
+					 ti.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+				<![CDATA[
+					 ti.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+		<!-- 删除组 -->
+     <delete id="deleteGroup">
+         delete from TO_INTERCOM_GROUP where id=#id#
+     </delete>
+     
+     <!-- 删除之前判断该组下是否存在组成员-->
+     <select id="queryGroup" resultClass="int"  parameterClass="int">
+		select count(*) from TO_INTERCOM_GROUP_MEMBER  where gid = #id#
+	 </select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- 组成员列表 -->
+	<select id="selMemberList" resultClass="intercom" parameterClass="intercom">
+		 select
+		 		tg.id,
+				tg.gid,
+				tg.carid,
+				tg.isadmin,
+				to_char(tg.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+				tc.carnumber
+		 from TO_INTERCOM_GROUP_MEMBER tg,TO_CAR_INFO tc
+		 where tg.carid = tc.id
+		 
+		<dynamic>
+			<isNotEmpty prepend="AND" property="carnumber">
+				tc.carnumber like '%'||#carnumber#||'%'
+			</isNotEmpty>
+		</dynamic>
+		<isNotEmpty prepend="and" property="ids">
+				  	tg.gid in
+	             <iterate property="ids"  conjunction="," open="(" close=")">#ids[]#</iterate>
+			</isNotEmpty>
+		
+		order by tg.id desc
+		
+	</select>
+
+	<!-- 组成员数量 -->
+	<select id="selMemberListCount" resultClass="int" parameterClass="intercom">
+		select count(*) from TO_INTERCOM_GROUP_MEMBER tg,TO_CAR_INFO tc
+		where tg.carid = tc.id
+		<dynamic>
+			<isNotEmpty prepend="AND" property="carnumber">
+				tc.carnumber like '%'||#carnumber#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="ids">
+				  	tg.gid in
+	             <iterate property="ids"  conjunction="," open="(" close=")">#ids[]#</iterate>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 删除组成员 -->
+     <delete id="deleteMember">
+         delete from TO_INTERCOM_GROUP_MEMBER where id=#id#
+     </delete>
+    
+</sqlMap>
+
+
+

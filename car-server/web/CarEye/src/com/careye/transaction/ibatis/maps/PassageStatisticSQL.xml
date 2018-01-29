@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-PassageStatisticSQL">
+
+	<typeAlias alias="passageStatistic" type="com.careye.transaction.domain.PassageStatistic"/>
+
+	
+	<!-- 乘客人数统计-->
+	<select id="getPassageStatisticList" resultClass="passageStatistic"
+		parameterClass="passageStatistic">
+		 SELECT
+		 t.id,
+		 c.blocid,
+		 d.BLOC_NAME blocname,
+		 t.terminal,
+		 t.carnumber,
+		 t.carid,
+		 t.peoplenumber,
+		 t.lng,
+		 t.lat,
+		 t.serialnumber,
+		 t.address,
+		 to_char(t.uploadtime,'yyyy-mm-dd hh24:mi:ss') uploadtime,
+		 to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+        from TO_PASSAGE_STATISTIC t, TO_CAR_INFO c, TO_BLOC d 
+        where t.carid = c.id(+) and c.blocid = d.id(+)
+      <dynamic>
+ 			 <isNotNull prepend="and" property="userid" >
+						t.carid in ( select id from TO_CAR_INFO where blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						  (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+		   	 </isNotNull>
+			<isNotEmpty prepend="and" property="blocid">
+					 	t.carid in ( select id from TO_CAR_INFO where blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+			</isNotEmpty>     		
+			<isNotEmpty property="carnumber" prepend="and">
+				<![CDATA[ 
+				t.carnumber  like '%'||#carnumber#||'%'  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="terminal" prepend="and">
+				<![CDATA[ 
+				t.terminal  like '%'||#terminal#||'%' 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.uploadtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.uploadtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.uploadtime desc
+	</select>
+
+	<!--  乘客人数统计 数量-->
+	<select id="getPassageStatisticListCount" resultClass="int"
+		parameterClass="passageStatistic">
+		 SELECT
+		 count(t.id)
+         from TO_PASSAGE_STATISTIC t, TO_CAR_INFO c, TO_BLOC d 
+        where t.carid = c.id(+) and c.blocid = d.id(+)
+      <dynamic>
+ 			 <isNotNull prepend="and" property="userid" >
+						t.carid in ( select id from TO_CAR_INFO where blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+						  (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id ))
+		   	 </isNotNull>
+			<isNotEmpty prepend="and" property="blocid">
+					 	t.carid in ( select id from TO_CAR_INFO where blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+			</isNotEmpty>     		
+			<isNotEmpty property="carnumber" prepend="and">
+				<![CDATA[ 
+				t.carnumber  like '%'||#carnumber#||'%'  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="terminal" prepend="and">
+				<![CDATA[ 
+				t.terminal  like '%'||#terminal#||'%' 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.uploadtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.uploadtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>   
+    
+</sqlMap>
+
+
+

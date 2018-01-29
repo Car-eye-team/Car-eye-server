@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<package name="apijson" extends="dstaxiapijson" namespace="/api">
+	
+		 <!-- 没有配置的action,默认在ApiAction通配符-->
+		 <action name="*" method="{1}" class="com.careye.api.action.AppAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		 
+		 <!-- 下订单 -->
+		 <action name="generateOrder" method="generateOrder" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		
+		 <!--取消订单 -->
+		 <action name="cancelTaxi" method="cancelTaxi" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		
+		 <!--通过订单号查询订单信息 -->
+		 <action name="queryOrderInfoByOrderNo" method="queryOrderInfoByOrderNo" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		 
+		 <!--1.1.6查询直径范围内车辆 -->
+		 <action name="queryVehicleForEmpty" method="queryVehicleForEmpty" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		
+		 <!--获取司机信息 -->
+		 <action name="queryDriverInfo" method="queryDriverInfo" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		
+		<!--通过手机号和时间查询订单信息 -->
+		 <action name="queryOrderInfoByphone" method="queryOrderInfoByphone" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		 
+		<!--支付订单费用 -->
+		 <action name="prePay" method="prePay" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		
+		<!--支付回调接口 -->
+		 <action name="notifyOrderStatus" method="notifyOrderStatus" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		 
+		<!--是否上车接口 -->
+		 <action name="upTaxi" method="upTaxi" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		 
+		 <!--分页获取订单列表接口 -->
+		 <action name="getTransactionList" method="getTransactionList" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+	
+		 <!--添加客户评价接口 -->
+		 <action name="addCustomerEvaluation" method="addCustomerEvaluation" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		 
+		 <!--获得司机评价数据接口 -->
+		 <action name="getDriverData" method="getDriverData" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>	
+		 
+		  <!--获得司机被评价列表api接口 -->
+		 <action name="getDriverDataList" method="getDriverDataList" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+		 
+		   <!--获得客户评价列表api接口 -->
+		 <action name="getCustomerDataList" method="getCustomerDataList" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+		 
+		  <!--添加顺风车订单api接口 -->
+		 <action name="addShunfengOrder" method="addShunfengOrder" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+		 
+		  <!--添加拼车乘客api接口 -->
+		 <action name="addShunfengPassengers" method="addShunfengPassengers" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+		 
+		 <!--历史订单列表api接口 -->
+		 <action name="getHistoryOrderList" method="getHistoryOrderList" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+		 
+		  <!--订单乘客列表api接口 -->
+		 <action name="getOrderPassengersList" method="getOrderPassengersList" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+		 
+		  <!--拼车乘客轨迹api接口 -->
+		 <action name="findNotStopCarTrackPointList" method="findNotStopCarTrackPointList" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+		 
+		 <!-- 语音下订单 -->
+		 <action name="generateVoiceOrder" method="generateVoiceOrder" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+		 
+		 <!-- 根据车牌号获取司机信息列表 -->
+		 <action name="findDriverInfoList" method="findDriverInfoList" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+		 
+		 <!-- 修改当班司机 -->
+		 <action name="updateDutyDriver" method="updateDutyDriver" class="com.careye.api.action.OrderAction">
+			<result name="success" type="json">
+				<param name="root">jsondata</param>
+			</result>
+			<result name="error" type="json">
+				<param name="root">jsondata</param>
+			</result>
+		 </action>
+		 
+	</package>
+
+</struts>

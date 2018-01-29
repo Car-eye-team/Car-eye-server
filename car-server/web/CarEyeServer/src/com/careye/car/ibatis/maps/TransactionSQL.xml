@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-transactionSQL">
+
+	<typeAlias alias="transactionInfo" type="com.careye.car.domain.TransactionInfo" />
+	<typeAlias alias="tranDriverCancel" type="com.careye.car.domain.TranDriverCancel" />
+	<typeAlias alias="carState" type="com.careye.car.domain.CarState" />
+	<typeAlias alias="carDriver" type="com.careye.car.domain.CarDriver" />
+	<typeAlias alias="tranDriverCancel" type="com.careye.car.domain.TranDriverCancel" />
+	<typeAlias alias="dialfeeSet" type="com.careye.car.domain.DialfeeSet" />
+	<typeAlias alias="taximeter" type="com.careye.car.domain.Taximeter" />
+	<typeAlias alias="passageStatistic" type="com.careye.car.domain.PassageStatistic" />
+	<typeAlias alias="driverEvaluation" type="com.careye.car.domain.DriverEvaluation" />	
+
+	<!-- 插入约车抢答 -->
+	<insert id="insertTransactionAnswer" parameterClass="transactionInfo">
+		<![CDATA[
+			insert into to_transaction_answer
+		      (
+		       orderid,
+		       carid,
+		       terminal,
+		       carnumber,
+		       createtime
+		       )
+		    values
+		      (
+		       #orderid#,
+		       #carid#,
+		       #terminal#,
+		       #carnumber#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_TRANSACTION_ANSWER_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+
+
+	<!-- 批量插入约车抢答记录 -->
+	<insert id="insertBitchTransactionAnswer" parameterClass="java.util.List">
+		<![CDATA[ 
+			insert into to_transaction_answer
+		      (
+		       orderid,
+		       carid,
+		       terminal,
+		       carnumber,
+		       createtime
+		       )
+		]]>
+		<iterate conjunction="union all" property="">
+		      <![CDATA[
+		          select
+		              #list[].orderid#,
+		              #list[].carid#,
+		              #list[].terminal#,
+		              #list[].carnumber#,
+		              to_date(#list[].createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		          from dual 
+		      ]]>
+		 </iterate>
+	</insert>
+	
+
+
+	<!-- 根据订单号获取约车业务信息 -->
+	<select id="getTransactionInfo" resultClass="transactionInfo"
+		parameterClass="String">
+		select t.orderid,
+	           t.phone,
+	           t.source,
+	           t.saddress,
+	           t.eaddress,
+	           t.username,
+	           t.callfee,
+	           t.tratype,
+	           t.status,
+	           to_char(t.answertime, 'yyyy-MM-dd HH24:mi:ss') answertime,
+	           to_char(t.appointmenttime, 'yyyy-MM-dd HH24:mi:ss') appointmenttime
+	      from to_transaction_info t
+		 where t.orderid = #orderid#
+	</select>
+	
+	
+	<!-- 更新约车业务状态 -->
+	<update id="updateTransactionInfo" parameterClass="transactionInfo">
+		<![CDATA[
+			UPDATE to_transaction_info SET orderid = #orderid#
+		 ]]>
+		 <isNotNull prepend="," property="status">
+			status = #status#
+		 </isNotNull>
+		 <isNotNull prepend="," property="resstatus">
+			resstatus = #resstatus#
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="carid">
+			carid = #carid#
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="drivercode">
+			drivercode = #drivercode#
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="callfee">
+			callfee = #callfee#
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="cancel">
+			cancel = #cancel#
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="answertime">
+			answertime = to_date(#answertime#, 'yyyy-mm-dd hh24:mi:ss')
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="endtime">
+			endtime = to_date(#endtime#, 'yyyy-mm-dd hh24:mi:ss')
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="starttime">
+			starttime = to_date(#starttime#, 'yyyy-mm-dd hh24:mi:ss')
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="callbackphone">
+			callbackphone = #callbackphone#
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="pay">
+			pay = #pay#
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="processstatus">
+			processstatus = #processstatus#
+		 </isNotNull>
+		 
+		 <isNotNull prepend="," property="carpoolPersonNum">
+			carpoolPersonNum = #carpoolPersonNum#
+		 </isNotNull>
+		 
+		where orderid = #orderid#
+	</update>
+	
+	
+	
+	<!-- 根据订单号获取约车业务信息 -->
+	<select id="getYyTransactionInfoList" resultClass="transactionInfo"
+		parameterClass="String">
+		<![CDATA[
+		select t.phone,
+		       t.username,
+		       t.slng,
+		       t.slat,
+		       t.elng,
+		       t.elat,
+		       t.saddress,
+		       t.eaddress,
+		       t.orderid,
+		       to_char(t.appointmenttime, 'yyyy-MM-dd HH24:mi:ss') appointmenttime
+		  from to_transaction_info t
+		 where t.tratype = 1
+		 and t.status = 0
+		 and t.appointmenttime <= to_date(#datetime#, 'yyyy-mm-dd hh24:mi:ss')
+		]]>
+	</select>
+	
+	
+	<!-- 根据订单号查询抢答总数 -->
+	<select id="getTransactionInfoAnswerCount" resultClass="int"
+		parameterClass="String">
+		<![CDATA[
+			select count(t.id) from to_transaction_answer t where t.orderid = #orderid# and zbstatus = 2
+		]]>
+	</select>
+	
+	
+	<!-- 插入司机取消记录-->
+	<insert id="insertTranDriverCancel" parameterClass="tranDriverCancel">
+		<![CDATA[
+			insert into to_tran_driver_cancel
+		      (
+		       orderid,
+		       driverid,
+		       carid,
+		       carnumber,
+		       wy,
+		       canceltime
+		       )
+		    values
+		      (
+		       #orderid#,
+		       #driverid#,
+		       #carid#,
+		       #carnumber#,
+		       #wy#,
+		       to_date(#canceltime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_TRAN_DRIVER_CANCEL_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 根据车辆id更改车辆状态表记录-->
+	<update id="updateCarState" parameterClass="carState">
+		<![CDATA[
+			UPDATE TO_CAR_STATE SET dispaterstatus = #dispaterstatus#
+		 ]]>
+		where CARID = #carid#
+	</update>
+	
+	<!-- 根据订单号把所有调派车辆调度状态改为未调度-->
+	<update id="updateCarStateByOrderid" parameterClass="String">
+			UPDATE TO_CAR_STATE SET dispaterstatus = 1 where
+		carid in (select carid from TO_TRANSACTION_ANSWER where orderid = #orderid#)
+	</update>
+	
+	<!-- 根据carid车辆调度状态改为未调度-->
+	<update id="updateCarStateByCarid" parameterClass="int">
+			UPDATE TO_CAR_STATE SET dispaterstatus = 1 where carid  = #id#
+	</update>
+	
+	<!-- 根据车辆id更改车辆状态表记录-->
+	<update id="updateTransactionAnswer" parameterClass="transactionInfo">
+		<![CDATA[
+			UPDATE to_transaction_answer SET zbstatus = #zbstatus#
+		 ]]>
+		where CARID = #carid# and ORDERID = #orderid#
+	</update>
+	
+	<!--根据订单号得到订单状态 -->
+	<select id="getOrderStatus" resultClass="int"
+		parameterClass="String">
+		<![CDATA[
+			select status from to_transaction_info t where t.orderid = #orderid#
+		]]>
+	</select>
+	
+	<!-- 获取未处理订单列表 -->
+	<select id="getUntreatedOrderList" resultClass="transactionInfo" parameterClass="transactionInfo">
+		select t.id,
+		       t.orderid,
+		       to_char(t.usetime, 'yyyy-mm-dd hh24:mi:ss') usetime,
+		       to_char(t.appointmenttime, 'yyyy-mm-dd hh24:mi:ss') appointmenttime,
+		       t.tratype,
+		       t.status
+		  from to_transaction_info t  where 
+		   t.status = 0 or t.status = 1
+        order by t.createtime desc
+	</select>
+	
+	<!-- 获取电召费用设置最新一条记录-->
+	<select id="getDialfeeSetMaxId"  resultClass="dialfeeSet">
+	  select a.dialfee,a.oilcost,trunc(a.discount,0) discount
+           from TO_DIALFEE_SET a where a.id=(select max(id) from TO_DIALFEE_SET)
+	</select>
+	
+	<!-- 插入计价器数据 -->
+	<insert id="insertMeterData" parameterClass="taximeter">
+		<![CDATA[
+			insert into TO_YX_METER_DATA
+		      (
+		        blocid,
+				userid,
+				terminal,
+				carnumber,
+				framenum,
+				slat,
+				slng,
+				elat,
+				elng,
+				taxseq,
+				driverid,
+				day,
+				tradingdate,
+				stime,
+				etime,
+				psamcount,
+				psamno,
+				mileage,
+				waitingtime,
+				airmileage,
+				tradetype,
+				amountsreceivable,
+				realamount,
+				cardbalance,
+				wlcardtype,
+				cardtype,
+				usrtradecount,
+				tertradecount,
+				psamcardnum,
+				tradeauthcode,
+				opernum,
+				callcharge,
+				fuelsurcharge,
+				otherexpenses,
+				remark,
+		        createtime
+		       )
+		    values
+		      (
+		        #blocid#,
+				#userid#,
+				#terminal#,
+				#carnumber#,
+				#framenum#,
+				#slat#,
+				#slng#,
+				#elat#,
+				#elng#,
+				#taxseq#,
+				#driverid#,
+				#day#,
+				#tradingdate#,
+				#stime#,
+				#etime#,
+				#psamcount#,
+				#psamno#,
+				#mileage#,
+				#waitingtime#,
+				#airmileage#,
+				#tradetype#,
+				#amountsreceivable#,
+				#realamount#,
+				#cardbalance#,
+				#wlcardtype#,
+				#cardtype#,
+				#usrtradecount#,
+				#tertradecount#,
+				#psamcardnum#,
+				#tradeauthcode#,
+				#opernum#,
+				#callcharge#,
+				#fuelsurcharge#,
+				#otherexpenses#,
+				#remark#,
+		        to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_YX_METER_DATA_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 插入乘客人数上报统计 -->
+	<insert id="insertTerminalPassageStatistic" parameterClass="passageStatistic">
+		<![CDATA[
+			insert into TO_PASSAGE_STATISTIC
+		      (
+		        terminal,
+				carnumber,
+				carid,
+				peoplenumber,
+				lng,
+				lat,
+				serialnumber,
+				address,
+		        uploadtime,
+		        createtime
+		       )
+		    values
+		      (
+				#terminal#,
+				#carnumber#,
+				#carid#,
+				#peoplenumber#,
+				#lng#,
+				#lat#,
+				#serialnumber#,
+				#address#,
+		        to_date(#uploadtime#, 'yyyy-mm-dd hh24:mi:ss'),
+		        to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_PASSAGE_STATISTIC_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 添加司机取消记录表 -->
+	<insert id="addTranDriverCancel" parameterClass="tranDriverCancel">
+		<![CDATA[
+			insert into TO_TRAN_DRIVER_CANCEL
+		      (
+		        orderid,
+				driverid,
+				carid,
+				carnumber,
+				wy,
+				remark,
+		        canceltime
+		       )
+		    values
+		      (
+				#orderid#,
+				#driverid#,
+				#carid#,
+				#carnumber#,
+				#wy#,
+				#remark#,
+		        to_date(#canceltime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_TRAN_DRIVER_CANCEL_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!--得到当班司机信息 -->
+	<select id="getCurrentDriver" resultClass="carDriver" parameterClass="int">
+		<![CDATA[
+			 select tcp.blat lat,tcp.blng lng,
+			 (select id from TO_CAR_DRIVER_INFO where drivercode = c.drivercode) id,
+			 (select drivercode from TO_CAR_DRIVER_INFO where drivercode = c.drivercode) drivercode,
+			 (select drivername from TO_CAR_DRIVER_INFO where drivercode = c.drivercode) drivername,
+			 (select phone from TO_CAR_DRIVER_INFO where drivercode = c.drivercode) phone
+			from  TO_CAR_INFO c,to_car_position_info tcp
+			 where c.id = tcp.carid(+)
+			 and c.id = #id#
+		]]>
+	</select>
+	
+	<!-- 根据车辆id得到订单状态为已调派或者载客中的订单 -->
+	<select id="getTransactionInfoList" resultClass="transactionInfo"
+		parameterClass="int">
+		<![CDATA[
+		select t.orderid,
+		       t.status
+		  from to_transaction_info t
+		 where (t.status = 2 or t.status = 5)
+		 and t.carid = #carid#
+		]]>
+	</select>
+	
+	<!-- 插入司机评价乘客 -->
+	<insert id="insertDriverEvaluation" parameterClass="driverEvaluation">
+		<![CDATA[
+			insert into TO_DRIVER_EVALUATION
+		      (
+		        orderid,
+				slevel,
+				content,
+		        createtime
+		       )
+		    values
+		      (
+				#orderid#,
+				#slevel#,
+				#content#,
+		        to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		       )
+	       ]]>
+
+		<selectKey resultClass="Integer" keyProperty="id">
+	        	<![CDATA[SELECT TO_DRIVER_EVALUATION_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+</sqlMap>
+
+
+
+
+
+
+

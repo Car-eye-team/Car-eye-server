@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-positionInfoSQL">
+
+	<typeAlias alias="positionInfo" type="com.careye.car.domain.PositionInfo" />
+	<typeAlias alias="carInfo" type="com.careye.car.domain.CarInfo" />
+
+	<!-- 根据设备号获取车辆上一次里程数 -->
+	<select id="getTerminalmileage" resultClass="int"
+		parameterClass="String">
+		select t.mileage from to_car_position_info t where
+		t.terminal = #terminal# 
+	</select>
+
+	<!-- 更新设备位置信息(调用存储过程) -->
+	<procedure id="updateTerminalPositionInfo_procedure"
+		parameterClass="positionInfo">
+		{call update_to_car_position_info(#carid#,#terminal#,#carnumber#,#msgid#,#acc#,#lng#,#lat#,#altitude#,#speed#,#direction#,#gpstime#,#gpsflag#,#province#,#city#,#district#,#blng#,#blat#,#address#,#glng#,#glat#,#gaddress#,#mileage#,#daymileage#,#createtime#,#remark#)}
+	</procedure>
+	
+	<!-- 更新设备位置信息(调用存储过程) -->
+	<procedure id="updateYxTerminalPositionInfo_procedure"
+		parameterClass="positionInfo">
+		{call update_to_yx_position_info(#carid#,#terminal#,#carnumber#,#msgid#,#acc#,#lng#,#lat#,#altitude#,#speed#,#direction#,#gpstime#,#gpsflag#,#province#,#city#,#district#,#blng#,#blat#,#address#,#glng#,#glat#,#gaddress#,#mileage#,#daymileage#,#createtime#,#remark#)}
+	</procedure>
+
+	<!-- 更新设备位置信息 -->
+	<update id="updateTerminalPositionInfo" parameterClass="positionInfo">
+		<![CDATA[
+		UPDATE to_car_position_info
+		   SET msgid      = #msgid#,
+		       altitude   = #altitude#,
+		       speed      = #speed#,
+		       direction  = #direction#,
+		       terminal   = #terminal#,
+		       gpsflag    = #gpsflag#,
+		       carnumber  = #carnumber#,
+		       remark     = #remark#,
+		       createtime = to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss'),
+		       gpstime =  to_date(#gpstime#, 'yyyy-mm-dd hh24:mi:ss')
+		     ]]>
+
+		<isNotNull prepend="," property="lng">
+			lng = #lng#
+		</isNotNull>
+		<isNotNull prepend="," property="lat">
+			lat = #lat#
+        </isNotNull>
+		<isNotNull prepend="," property="blng">
+			blng = #blng#
+		</isNotNull>
+		<isNotNull prepend="," property="blat">
+			blat = #blat#
+        </isNotNull>
+		<isNotNull prepend="," property="address">
+			address = #address#
+		</isNotNull>
+		<isNotNull prepend="," property="province">
+			province = #province#
+		</isNotNull>
+		<isNotNull prepend="," property="city">
+			city = #city#
+		</isNotNull>
+		<isNotNull prepend="," property="district">
+			district = #district#
+		</isNotNull>
+		<isNotNull prepend="," property="glng">
+			glng = #glng#
+		</isNotNull>
+		<isNotNull prepend="," property="glat">
+			glat = #glat#
+		</isNotNull>
+		<isNotNull prepend="," property="gaddress">
+			gaddress = #gaddress#
+		</isNotNull>
+		<isNotNull prepend="," property="mileage">
+			mileage = #mileage#
+		</isNotNull>
+		<isNotNull prepend="," property="acc">
+			acc = #acc#
+		</isNotNull>
+		<isNotNull prepend="," property="daymileage">
+			daymileage =daymileage+#daymileage#
+		</isNotNull>
+
+		WHERE carid = #carid#
+
+	</update>
+
+	<!-- 插入位置信息车辆位置表中存储过程 -->
+	<procedure id="insertTerminalPositionInfo_procedure" parameterClass="positionInfo">
+		{call insert_to_vehicle_position(
+			   #tName#,
+		       #terminal#,
+		       #carnumber#,
+		       #msgid#,
+		       #seq#,
+		       #lng#,
+		       #lat#,
+		       #altitude#,
+		       #speed#,
+		       #direction#,
+		       #mileage#,
+		       #summileage#,
+		       #gpstime#,
+		       #gpsflag#,
+		       #datapacket#,
+		       #createtime#,
+		       #blng#,
+		       #blat#,
+		       #address#,
+		       #province#,
+		       #city#,
+		       #district#,
+		       #sn#,
+		       #snvalue#,
+		       #an#,
+		       #anvalue#,
+		       #carstatus#,
+		       #oil#,
+		       #oilsum#,
+		       #oilavg#,
+		       #oilat#,
+		       #acc#,
+		       #zkstate#,
+		       #cardoorstate#,
+		       #brakestate#,
+		       #reserve1#,
+		       #reserve2#,
+		       #reserve3#,
+		       #reserve4#,
+		       #reserve5#,
+		       #glng#,
+		       #glat#,
+		       #gaddress#
+		       )}
+	</procedure>
+	<!-- 雅讯插入位置信息车辆位置表中存储过程 -->
+	<procedure id="insertYxTerminalPositionInfo_procedure" parameterClass="positionInfo">
+		{call insert_to_yx_vehicle_position(
+			   #tName#,
+		       #terminal#,
+		       #carnumber#,
+		       #msgid#,
+		       #seq#,
+		       #lng#,
+		       #lat#,
+		       #altitude#,
+		       #speed#,
+		       #direction#,
+		       #mileage#,
+		       #summileage#,
+		       #gpstime#,
+		       #gpsflag#,
+		       #datapacket#,
+		       #createtime#,
+		       #blng#,
+		       #blat#,
+		       #address#,
+		       #province#,
+		       #city#,
+		       #district#,
+		       #sn#,
+		       #snvalue#,
+		       #an#,
+		       #anvalue#,
+		       #carstatus#,
+		       #oil#,
+		       #oilsum#,
+		       #oilavg#,
+		       #oilat#,
+		       #acc#,
+		       #zkstate#,
+		       #cardoorstate#,
+		       #brakestate#,
+		       #reserve1#,
+		       #reserve2#,
+		       #reserve3#,
+		       #reserve4#,
+		       #reserve5#,
+		       #glng#,
+		       #glat#,
+		       #gaddress#
+		       )}
+	</procedure>
+
+	<!-- 插入位置信息车辆位置表中 -->
+	<insert id="insertTerminalPositionInfo" parameterClass="positionInfo">
+		<![CDATA[
+			insert into $tName$
+		      (
+		       terminal,
+		       carnumber,
+		       msgid,
+		       seq,
+		       lng,
+		       lat,
+		       altitude,
+		       speed,
+		       direction,
+		       mileage,
+		       summileage,
+		       gpstime,
+		       gpsflag,
+		       datapacket,
+		       createtime,
+		       blng,
+		       blat,
+		       address,
+		       province,
+		       city,
+		       district,
+		       sn,
+		       snvalue,
+		       an,
+		       anvalue,
+		       carstatus,
+		       oil,
+		       oilsum,
+		       oilavg,
+		       oilat,
+		       acc,
+		       zkstate,
+		       cardoorstate,
+		       brakestate,
+		       reserve1,
+		       reserve2,
+		       reserve3,
+		       reserve4,
+		       reserve5,
+		       glng,
+		       glat,
+		       gaddress
+		       )
+		    values
+		      (
+		       #terminal#,
+		       #carnumber#,
+		       #msgid#,
+		       #seq#,
+		       #lng#,
+		       #lat#,
+		       #altitude#,
+		       #speed#,
+		       #direction#,
+		       #mileage#,
+		       #summileage#,
+		       to_date(#gpstime#, 'yyyy-mm-dd hh24:mi:ss'),
+		       #gpsflag#,
+		       #datapacket#,
+		       to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss'),
+		       #blng#,
+		       #blat#,
+		       #address#,
+		       #province#,
+		       #city#,
+		       #district#,
+		       #sn#,
+		       #snvalue#,
+		       #an#,
+		       #anvalue#,
+		       #carstatus#,
+		       #oil#,
+		       #oilsum#,
+		       #oilavg#,
+		       #oilat#,
+		       #acc#,
+		       #zkstate#,
+		       #cardoorstate#,
+		       #brakestate#,
+		       #reserve1#,
+		       #reserve2#,
+		       #reserve3#,
+		       #reserve4#,
+		       #reserve5#,
+		       #glng#,
+		       #glat#,
+		       #gaddress#
+		       )
+	       ]]>
+
+	</insert>
+	
+	
+	<!-- 离线时间超过5天，状态变成长离线 -->
+	<select id="getCarOffLine" parameterClass="String" resultClass="carInfo">
+		<![CDATA[
+			   select t.id,t.blocid, t.carnumber, t.terminal, tcs.carstatus, tcs.kzstate
+					  from to_car_info t, to_car_state tcs, to_car_position_info tpi
+					 where t.id = tcs.carid
+					   and t.id = tpi.carid
+					   and tpi.createtime <= to_date(#queryDate#, 'yyyy-mm-dd hh24:mi:ss')
+					   and tcs.carstatus = 2
+		]]>
+	</select>
+	
+	
+	<!-- 获取超过指定时间的记录 -->
+	<select id="getCarOnlineStatus" parameterClass="String" resultClass="carInfo">
+		<![CDATA[
+			select t.id,t.blocid, t.carnumber, t.terminal, tcs.carstatus, tcs.kzstate
+					  from to_car_info t, to_car_state tcs, to_car_position_info tpi
+					 where t.id = tcs.carid
+					   and t.id = tpi.carid
+					   and tpi.createtime <= to_date(#queryDate#, 'yyyy-mm-dd hh24:mi:ss')
+					   and tcs.carstatus <> 1
+					   and tcs.carstatus <> 2
+		]]>
+	</select>
+
+</sqlMap>
+
+
+
+
+
+
+

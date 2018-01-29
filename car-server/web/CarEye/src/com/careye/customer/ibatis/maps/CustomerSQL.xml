@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-customerSQL">
+
+	<typeAlias alias="customer" type="com.careye.customer.domain.Customer"/>
+	<typeAlias alias="customerType" type="com.careye.customer.domain.CustomerType"/>
+
+	<!-- 根据条件得到所有的客户信息-->
+	<select id="getAllCustomer" resultClass="customer"
+		parameterClass="customer">
+		 SELECT
+      a.id, 
+      a.typeid, 
+      a.cname,
+      a.sex, 
+      a.tel,
+      a.phone,
+      a.postaddr,
+      a.postalcode,
+      a.flag,
+      a.source,
+      a.remark, 
+      a.userid, 
+      t.typename,
+      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name  username
+      from to_customer_info a,to_bloc_user u,to_customer_type t
+      where 1=1
+      and a.flag=1  
+      <dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="cname">
+				a.cname like  '%$cname$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="typename">
+				t.typename =#typename#
+			</isNotEmpty>
+		    <isNotEmpty prepend="and" property="ids">
+			    a.typeid in
+               <iterate property="ids"  conjunction="," open="(" close=")">#ids[]#</iterate>
+			</isNotEmpty>
+		</dynamic>
+    and  a.userid=u.id(+)
+    and  a.typeid=t.id(+)
+      order by a.createtime
+      desc 
+	</select>
+	
+
+	<!--  根据条件得到所有的客户信息 数量-->
+	<select id="getAllCustomerCount" resultClass="int"
+		parameterClass="customer">
+	  SELECT
+      count(a.id) 
+      from to_customer_info a,to_bloc_user u,to_customer_type t
+      where 1=1  
+      and a.flag=1  
+      <dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="cname">
+				a.cname like  '%$cname$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="typename">
+				t.typename =#typename#
+			</isNotEmpty>
+		    <isNotEmpty prepend="and" property="ids">
+			    a.typeid in
+               <iterate property="ids"  conjunction="," open="(" close=")">#ids[]#</iterate>
+			</isNotEmpty>
+		</dynamic>
+    and  a.userid=u.id(+)
+    and  a.typeid=t.id(+)
+	</select>
+
+	<!--  添加客户信息 -->
+	<insert id="addCustomer" parameterClass="customer">
+		<![CDATA[ 
+		INSERT INTO TO_CUSTOMER_INFO(
+			typeid, 
+			cname, 
+			sex, 
+			tel, 
+			phone, 
+			postaddr, 
+			postalcode, 
+			flag, 
+			remark, 
+			source, 
+			userid, 
+			createtime
+         ) VALUES (
+			#typeid#, 
+			#cname#, 
+			#sex#, 
+			#tel#, 
+			#phone#, 
+			#postaddr#, 
+			#postalcode#, 
+			#flag#, 
+			#remark#, 
+			#source#, 
+			#userid#, 
+			to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+		]]>
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CUSTOMER_INFO_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+
+	<!--  删除客户信息 -->
+	<delete id="delCustomer" parameterClass="java.util.List">
+     UPDATE  TO_CUSTOMER_INFO set flag=0 where
+    <iterate property=""  conjunction="," open="id in (" close=")">#list[]#</iterate>
+    </delete> 
+    
+    
+	<!-- 修改客户信息 -->
+	<update id="updateCustomer" parameterClass="customer">
+		UPDATE TO_CUSTOMER_INFO set
+				typeid=#typeid#, 
+				cname=#cname#, 
+				sex=#sex#, 
+				tel=#tel#, 
+				phone=#phone#, 
+				postaddr=#postaddr#, 
+				postalcode=#postalcode#, 
+				remark=#remark#, 
+				source=#source# 
+			WHERE id = #id#
+	</update>
+
+    <!-- 查询当前客户名称是否存在-->
+	<select id="queryCustomerNameIsExits" resultClass="int" parameterClass="customer">
+	    select count(a.id) from  TO_CUSTOMER_INFO  a  where  a.cname=rtrim(ltrim(#cname#))
+	    <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="typeid">
+			    a.typeid=#typeid#
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+
+
+    <!-- 根据id得到客户对象 -->
+	<select id="getCustomerById" resultClass="customer"
+			parameterClass="int">
+		     SELECT
+		      a.id, 
+      a.typeid, 
+      a.cname,
+      a.sex, 
+      a.tel,
+      a.phone,
+      a.postaddr,
+      a.flag,
+      a.source,
+      a.remark, 
+      a.userid, 
+      t.typename,
+      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name  username
+      from to_customer_info a,to_bloc_user u,to_customer_type t
+      where 1=1  
+			  and  a.id=#id#
+			 and  a.userid=u.id(+)
+             and  a.typeid=t.id(+)
+		</select>
+		
+    <!-- ###################### 资料类型       ###################### -->
+     <!-- 得到所有下拉客户类型信息 -->
+    <select id="selCustomerTypeList" resultClass="customerType">
+	  select id,typename  from  to_customer_type 
+	</select>
+		
+	<!-- 根据条件得到所有的客户类型信息-->
+	<select id="getAllCustomerType" resultClass="customerType"
+		parameterClass="customerType">
+		SELECT
+      a.id, 
+      a.typename, 
+      a.remark, 
+      a.userid, 
+      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name username 
+      from to_customer_type a,to_bloc_user u
+      where 1=1  
+      <dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="typename">
+					 a.typename like  '%$typename$%'
+			</isNotEmpty>
+		</dynamic>
+		and  a.userid=u.id(+)
+        order by a.createtime
+	    desc 
+	</select>
+
+	<!--  根据条件得到所有的客户类型信息 数量-->
+	<select id="getAllCustomerTypeCount" resultClass="int"
+		parameterClass="customerType">
+	 SELECT
+	   count(a.id) 
+      from to_customer_type a,to_bloc_user u
+      where 1=1  
+      <dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="typename">
+					 a.typename like  '%$typename$%'
+			</isNotEmpty>
+		</dynamic>
+		and  a.userid=u.id(+)
+	</select>
+
+	<!--  添加客户类型信息 -->
+	<insert id="addCustomerType" parameterClass="customerType">
+		<![CDATA[ 
+		INSERT INTO TO_CUSTOMER_TYPE(
+                typename, 
+                remark, 
+                userid, 
+                createtime
+         ) VALUES (
+               #typename#, 
+               #remark#, 
+               #userid#, 
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+		]]>
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CUSTOMER_TYPE_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+
+	<!--  删除客户类型信息 -->
+	<delete id="delCustomerType" parameterClass="java.util.List">
+     DELETE FROM TO_CUSTOMER_TYPE where
+    <iterate property=""  conjunction="," open="id in (" close=")">#list[]#</iterate>
+    </delete> 
+    
+    <select id="getCustomerCountById" resultClass="int"
+			parameterClass="int">
+	  SELECT
+      count(a.id)
+      from TO_CUSTOMER_INFO a
+      where 1=1  
+      and  a.typeid=#typeid#
+      and  a.flag = 1
+	</select>	
+    
+	<!-- 修改客户类型信息 -->
+	<update id="updateCustomerType" parameterClass="customerType">
+		UPDATE TO_CUSTOMER_TYPE set
+			    typename=#typename#, 
+			    remark=#remark#
+			WHERE id = #id#
+	</update>
+
+    <!-- 查询当前客户类型名称是否存在-->
+	<select id="queryCustomerTypeNameIsExits" resultClass="int" parameterClass="customerType">
+	    select count(a.id) from  TO_CUSTOMER_TYPE  a  where  a.typename=rtrim(ltrim(#typename#))
+	    <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+	 <!-- 根据id得到客户类型对象 -->
+	<select id="getCustomerTypeById" resultClass="customerType"
+			parameterClass="int">
+        SELECT
+      a.id, 
+      a.typename, 
+      a.remark, 
+      a.userid, 
+      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name username 
+      from to_customer_type a,to_bloc_user u
+      where 1=1 
+        and  a.id=#id# 
+		and  a.userid=u.id(+)
+	</select>	
+    
+    <!-- 根据手机号得到客户信息 -->
+	<select id="loadCustomerByPhone" resultClass="customer" parameterClass="customer">
+		 SELECT
+	      a.id, 
+	      a.typeid, 
+	      a.cname,
+	      a.sex, 
+	      a.tel,
+	      a.phone,
+	      a.postaddr,
+	      a.postalcode,
+	      a.source,
+	      a.remark, 
+	      a.userid, 
+	      t.typename,
+	      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+	      from to_customer_info a,to_customer_type t
+	      where a.phone = #phone#
+    	  and  a.typeid=t.id(+)
+    	  and a.flag=1  
+    	  and a.id = (select max(id) from to_customer_info where phone = #phone#)
+	</select>
+    
+</sqlMap>
+
+

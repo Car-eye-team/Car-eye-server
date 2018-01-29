@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-areaSetSQL">
+
+	<typeAlias alias="areaSet" type="com.careye.car.domain.AreaSet" />
+	<typeAlias alias="zoneAlarm" type="com.careye.mq.domain.ZoneAlarm" />
+    <typeAlias alias="areaCar" type="com.careye.car.domain.AreaCar" />
+	
+	
+	<!-- 查询系统区域数量 -->
+	<select id="queryPageAreaSetListCount" resultClass="int" parameterClass="areaSet">
+            select  count(t.id)
+				  from TO_AREA_SYSTEM t, to_bloc r
+				 where t.blocid = r.id(+)
+				<dynamic>
+	           		 <isNotNull prepend="and" property="userid" >
+	           		  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+                         (select id from  to_bloc_user where user_id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+				    <isNotEmpty prepend="and" property="areaname">
+						 t.areaname like '%'||#areaname#||'%'
+				    </isNotEmpty>
+		 		 </dynamic>
+     </select>
+     
+	<!-- 查询系统区域列表-->
+	<select id="queryPageAreaSetList" resultClass="areaSet" parameterClass="areaSet">
+		        select  t.id,
+						t.blocid,
+                        r.bloc_name blocname,
+						t.userid,
+						t.areatype,
+						t.areaname,
+						t.attr0,
+						t.attr1,
+						t.attr2,
+						t.attr3,
+						t.attr4,
+						t.attr5,
+						t.attr6,
+						t.attr7,
+						
+						t.attr8,
+			            t.attr9,
+			            t.ddalertinfo,
+			            t.driveralertinfo,
+						
+						to_char(t.stime,'yyyy-mm-dd hh24:mi:ss') stime,
+						to_char(t.etime,'yyyy-mm-dd hh24:mi:ss') etime,
+						t.maxspeed,
+						t.speedtime,
+						t.ylat,
+						t.ylng,
+						t.radius,
+						t.latlt,
+						t.lnglt,
+						t.latrb,
+						t.lngrb,
+						t.latsrt,
+						t.lngsrt,
+						to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+						t.termvalidity
+				  from TO_AREA_SYSTEM t, TO_BLOC r
+				 where t.blocid = r.id(+)
+				<dynamic>
+	           		 <isNotNull prepend="and" property="userid" >
+	           		 and t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+                          (select bloc_id from  to_bloc_user where user_id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			   	    </isNotNull>
+				    <isNotEmpty prepend="and" property="areaname">
+						 t.areaname like '%'||#areaname#||'%'
+				    </isNotEmpty>
+		 		 </dynamic>
+		  order by t.id desc
+     </select>
+
+     
+     <!--   删除系统区域 -->
+     <delete id="deleteAreaSet">
+        <![CDATA[
+		    delete from  TO_AREA_SYSTEM  WHERE id = #id#
+		]]>	
+     </delete>
+     
+   
+     
+      <!-- 增加系统区域 -->
+     <insert id="insertAreaSet" parameterClass="areaSet">
+     <![CDATA[ 
+        insert into TO_AREA_SYSTEM(
+			blocid,
+			userid,
+			areatype,
+			areaname,
+			attr0,
+			attr1,
+			attr2,
+			attr3,
+			attr4,
+			attr5,
+			attr6,
+			attr7,
+			
+			attr8,
+            attr9,
+            ddalertinfo,
+            driveralertinfo,
+			
+			stime,
+			etime,
+			maxspeed,
+			speedtime,
+			ylat,
+			ylng,
+			radius,
+			latlt,
+			lnglt,
+			latrb,
+			lngrb,
+			latsrt,
+			lngsrt,
+			createtime,
+			termvalidity
+        )values(
+	        #blocid#,
+			#userid#,
+			#areatype#,
+			#areaname#,
+			#attr0#,
+			#attr1#,
+			#attr2#,
+			#attr3#,
+			#attr4#,
+			#attr5#,
+			#attr6#,
+			#attr7#,
+			
+			#attr8#,
+            #attr9#,
+            #ddalertinfo#,
+            #driveralertinfo#,
+			
+			to_date(#stime#,'yyyy-mm-dd hh24:mi:ss'),
+			to_date(#etime#,'yyyy-mm-dd hh24:mi:ss'),
+			#maxspeed#,
+			#speedtime#,
+			#ylat#,
+			#ylng#,
+			#radius#,
+			#latlt#,
+			#lnglt#,
+			#latrb#,
+			#lngrb#,
+		    #latsrt#,
+			#lngsrt#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+	        #termvalidity#
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_AREA_SYSTEM_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新系统区域 -->
+     <update id="updateAreaSet" parameterClass="areaSet">
+         update TO_AREA_SYSTEM  set
+		        lngsrt = #lngsrt#,
+		        latlt = #latlt#,
+		        lnglt = #lnglt#,
+		        latrb = #latrb#,
+		        lngrb = #lngrb#,
+		        latsrt = #latsrt#,
+		        maxspeed = #maxspeed#,
+		        speedtime = #speedtime#,
+		        ylat = #ylat#,
+		        ylng = #ylng#,
+		        radius = #radius#,
+		        blocid = #blocid#,
+		        areatype = #areatype#,
+		        areaname = #areaname#,
+		        attr0 = #attr0#,
+		        attr1 = #attr1#,
+		        attr2 = #attr2#,
+		        attr3 = #attr3#,
+		        attr4 = #attr4#,
+		        attr5 = #attr5#,
+		        attr6 = #attr6#,
+		        attr7 = #attr7#,
+		        
+		        attr8 = #attr8#,
+            	attr9 = #attr9#,
+            	ddalertinfo = #ddalertinfo#,
+           	 	driveralertinfo = #driveralertinfo#,
+		        
+		       stime = to_date(#stime#,'yyyy-mm-dd hh24:mi:ss'),
+		       etime = to_date(#etime#,'yyyy-mm-dd hh24:mi:ss'),
+		        termvalidity = #termvalidity#
+		      WHERE id = #id#
+     </update>
+	
+	
+	 <!--  查询是否相同的名字存在-->
+	<select id="queryAreaSetNameIsExits" resultClass="int" parameterClass="areaSet">
+	    select count(a.id) from  TO_AREA_SYSTEM  a  where  a.areaname=rtrim(ltrim(#areaname#))
+	    <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+	
+    <!-- 查询系统区域追加数量-->
+	<select id="queryAreaSetCount" resultClass="int" parameterClass="int">
+           select count(*) from to_car_area t where areaid = #areaid#
+     </select>
+     
+     
+     
+    <!-- 查询系统区域详情-->
+	<select id="getAreaSetById" resultClass="areaSet" parameterClass="Integer">
+	select  t.id,
+            t.areatype,
+            t.areaname
+          from to_area_system t
+         where   t.id = #id#
+     </select>
+     
+     <!-- 查询系统区域详情-->
+	<select id="queryAreaById" resultClass="zoneAlarm" parameterClass="Integer">
+	select  t.id areaId,
+            t.blocid,
+            r.bloc_name blocname,
+            t.userid,
+            t.areatype,
+            t.areaname,
+            (t.attr0||t.attr1||t.attr2||t.attr3||t.attr4||t.attr5||nvl(t.attr6,0)
+            ||nvl(t.attr7,0)||nvl(t.attr8,0)||nvl(t.attr9,0)) attr,
+            t.attr0,
+            t.attr1,
+            t.attr2,
+            t.attr3,
+            t.attr4,
+            t.attr5,
+            t.attr6,
+            t.attr7,
+            
+            t.attr8,
+            t.attr9,
+            t.ddalertinfo,
+            t.driveralertinfo,
+            
+            to_char(t.stime,'yyyy-mm-dd hh24:mi:ss') timeS,
+            to_char(t.etime,'yyyy-mm-dd hh24:mi:ss') timeE,
+            t.maxspeed speedLimit,
+            t.speedtime speedTime,
+            t.ylat lat,
+            t.ylng lng,
+            t.radius,
+            t.latlt,
+            t.lnglt,
+            t.latrb,
+            t.lngrb,
+            t.latsrt,
+            t.lngsrt,
+            to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+            t.termvalidity
+          from to_area_system t, to_bloc r
+         where t.blocid = r.id(+) and t.id = #id#
+     </select>
+     
+     <!-- 条件查询车辆下发区域记录分页数量 -->
+	<select id="queryAreaSendRecordListCount" resultClass="int" parameterClass="areaSet">
+           select count(*) 
+                 from TO_CAR_AREA_RECORD t,to_car_info c, to_bloc r
+         where t.carnumber = c.carnumber(+) and c.blocid = r.id(+)
+			<dynamic>
+	           		 <isNotNull prepend="and" property="userid" >
+					   t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+            (select bloc_id from  to_bloc_user where user_id =1) CONNECT BY PRIOR  id = parent_id )
+                </isNotNull>
+				    <isNotEmpty prepend="and" property="areaname">
+						 t.areaname like '%'||#areaname#||'%'
+				    </isNotEmpty>
+				    <isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="opertype">
+					 		t.opertype = #opertype#
+					</isNotEmpty>
+		 	  </dynamic>
+     </select>
+     
+	<!-- 条件查询车辆下发区域记录分页列表-->
+	<select id="queryAreaSendRecordList" resultClass="areaSet" parameterClass="areaSet">
+		   select  t.id,
+            r.id blocid,
+            r.bloc_name blocname,
+            t.userid,
+            t.areatype,
+            t.areaname,
+            t.carnumber,
+            t.opertype,
+            t.attr0,
+            t.attr1,
+            t.attr2,
+            t.attr3,
+            t.attr4,
+            t.attr5,
+            t.attr6,
+            t.attr7,
+            
+            t.attr8,
+            t.attr9,
+            t.ddalertinfo,
+            t.driveralertinfo,
+            
+            to_char(t.stime,'yyyy-mm-dd hh24:mi:ss') stime,
+            to_char(t.etime,'yyyy-mm-dd hh24:mi:ss') etime,
+            t.maxspeed,
+            t.speedtime,
+            t.ylat,
+            t.ylng,
+            t.radius,
+            t.latlt,
+            t.lnglt,
+            t.latrb,
+            t.lngrb,
+            t.latsrt,
+            t.lngsrt,
+            t.seq,
+            t.result,
+            t.areaid,
+            to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+            t.termvalidity
+          from TO_CAR_AREA_RECORD t,to_car_info c, to_bloc r
+         where t.carnumber = c.carnumber(+) and c.blocid = r.id(+)
+			<dynamic>
+	           		 <isNotNull prepend="and" property="userid" >
+					   t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+            (select bloc_id from  to_bloc_user where user_id =1) CONNECT BY PRIOR  id = parent_id )
+                </isNotNull>
+				    <isNotEmpty prepend="and" property="areaname">
+						 t.areaname like '%'||#areaname#||'%'
+				    </isNotEmpty>
+				    <isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="opertype">
+					 		t.opertype = #opertype#
+					</isNotEmpty>
+		 	  </dynamic>
+      order by t.id desc
+     </select>
+     
+    <!-- ***************** 车辆区域    ******************* -->
+     
+	<!-- 查询车辆区域数量 -->
+	<select id="queryPageAreaCarListCount" resultClass="int" parameterClass="areaCar">
+           select count(*) from to_car_area t
+           where 1=1 
+           <dynamic>
+           		 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+			    <isNotEmpty prepend="and" property="carnumber">
+					 t.carnumber = #carnumber#
+			    </isNotEmpty>
+		  </dynamic>
+     </select>
+     
+	<!-- 查询车辆区域列表-->
+	<select id="queryPageAreaCarList" resultClass="areaSet" parameterClass="areaCar">
+    select  t.id,
+            t.blocid,
+            r.bloc_name blocname,
+            t.userid,
+            t.carnumber,
+            c.terminal,
+            t.areaid,
+            to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+            t.seq,
+            t.result,
+            m.areatype,
+            m.areaname,
+            m.attr0,
+            m.attr1,
+            m.attr2,
+            m.attr3,
+            m.attr4,
+            m.attr5,
+            m.attr6,
+            m.attr7,
+            
+            m.attr8,
+            m.attr9,
+            m.ddalertinfo,
+            m.driveralertinfo,
+            
+            to_char(m.stime,'yyyy-mm-dd hh24:mi:ss') stime,
+            to_char(m.etime,'yyyy-mm-dd hh24:mi:ss') etime,
+            m.maxspeed,
+            m.speedtime,
+            m.ylat,
+            m.ylng,
+            m.radius,
+            m.latlt,
+            m.lnglt,
+            m.latrb,
+            m.lngrb,
+            m.latsrt,
+            m.lngsrt
+          from to_car_area   t, to_bloc r,to_area_system m,to_car_info c
+         where t.blocid = r.id(+) and t.areaid = m.id and c.carnumber = t.carnumber
+			<dynamic>
+           		 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+			    <isNotEmpty prepend="and" property="carnumber">
+					 t.carnumber = #carnumber#
+			    </isNotEmpty>
+		  </dynamic>
+		  order by t.id desc
+     </select>
+     
+     <!--   删除车辆区域 -->
+     <delete id="deleteAreaCar">
+        <![CDATA[
+		    delete from  to_car_area  WHERE id = #id#
+		]]>	
+     </delete>
+     
+     <!-- 查看车辆区域-->
+	<select id="getAreaCarDetail" resultClass="areaSet" parameterClass="int">
+           select s.areatype ,t.areaid,c.terminal,t.carnumber
+           from to_car_area t , to_area_system s ,to_car_info c
+           where t.areaid = s.id  and c.carnumber = t.carnumber and t.id = #id#
+     </select>
+     
+     
+      <!-- 添加车辆区域操作记录表 -->
+     <insert id="insertAreaCarRecord" parameterClass="zoneAlarm">
+     <![CDATA[ 
+        insert into TO_CAR_AREA_RECORD(
+			blocid,
+			userid,
+			areatype,
+			areaname,
+			attr0,
+			attr1,
+			attr2,
+			attr3,
+			attr4,
+			attr5,
+			attr6,
+			attr7,
+			
+			attr8,
+            attr9,
+            ddalertinfo,
+            driveralertinfo,
+			
+			stime,
+			etime,
+			maxspeed,
+			speedtime,
+			ylat,
+			ylng,
+			radius,
+			latlt,
+			lnglt,
+			latrb,
+			lngrb,
+			latsrt,
+			lngsrt,
+			carnumber,
+			opertype,
+			seq,
+			result,
+			areaid,
+			data,
+			createtime
+        )values(
+	        #blocid#,
+			#userid#,
+			#areatype#,
+			#areaname#,
+			#attr0#,
+			#attr1#,
+			#attr2#,
+			#attr3#,
+			#attr4#,
+			#attr5#,
+			#attr6#,
+			#attr7#,
+			
+			#attr8#,
+            #attr9#,
+            #ddalertinfo#,
+            #driveralertinfo#,
+			
+			to_date(#stime#,'yyyy-mm-dd hh24:mi:ss'),
+			to_date(#etime#,'yyyy-mm-dd hh24:mi:ss'),
+			#maxspeed#,
+			#speedtime#,
+			#ylat#,
+			#ylng#,
+			#radius#,
+			#latlt#,
+			#lnglt#,
+			#latrb#,
+			#lngrb#,
+		    #latsrt#,
+			#lngsrt#,
+			#carnumber#,
+			#opertype#,
+			#seq#,
+			#result#,
+			#areaid#,
+			#data#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_AREA_RECORD_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     
+     <select id="getCarnumberByTer" resultClass="String" parameterClass="String">
+           select carnumber from to_car_info where terminal = #terminal#
+     </select>
+     
+     
+     <!-- 增加车辆区域 -->
+     <insert id="insertAreaCar" parameterClass="areaCar">
+     <![CDATA[ 
+        insert into TO_CAR_AREA(
+			blocid,
+			userid,
+			carnumber,
+			areaid,
+			createtime,
+			seq,
+			result
+        )values(
+	        #blocid#,
+			#userid#,
+			#carnumber#,
+			#areaid#,
+			to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+			#seq#,
+			#result#
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_AREA_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     
+     <!-- 查询系统区域是否存在-->
+	<select id="queryAreaCarIsExist" resultClass="int" parameterClass="areaCar">
+           select count(*) from TO_CAR_AREA t
+           where 1=1 
+           <dynamic>
+			    <isNotEmpty prepend="and" property="carnumber">
+					 t.carnumber = #carnumber#
+			    </isNotEmpty>
+			    <isNotEmpty prepend="and" property="areaid">
+					 t.areaid =#areaid#
+			    </isNotEmpty>
+		  </dynamic>
+        
+     </select>
+     
+     <!-- 查看系统区域-->
+	<select id="getAreaSetDetail" resultClass="areaSet" parameterClass="int">
+       
+           select 
+            s.areatype,
+            s.ylat,
+			s.ylng,
+			s.radius,
+			s.latlt,
+			s.lnglt,
+			s.latrb,
+			s.lngrb,
+			s.latsrt,
+			s.lngsrt,
+			s.id areaid
+           from to_area_system s 
+           where s.id = #id#
+          
+     </select>
+	
+</sqlMap>
+

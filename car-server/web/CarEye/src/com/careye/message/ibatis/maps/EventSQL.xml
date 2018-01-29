@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-eventSQL">
+
+	<typeAlias alias="eventSystem" type="com.careye.message.domain.EventSystem" />
+	<typeAlias alias="eventCar" type="com.careye.message.domain.EventCar" />
+	<typeAlias alias="eventSendRecord" type="com.careye.message.domain.EventSendRecord" />
+	
+	<!-- id查询系统事件 -->
+	<select id="selectEventSystemById" resultClass="eventSystem" parameterClass="int">
+           select * from to_event_system t  where t.id = #id#
+     </select>
+	
+	<!-- 通过eventid查询车辆事件 -->
+	<select id="selectEventSystemByEventId" resultClass="eventSystem" parameterClass="int">
+           select * from to_event_car t  where t.eventid = #eventid#
+     </select>
+	
+	<select id="selectEventCarById" resultClass="eventCar" parameterClass="int">
+                    select t.id,
+					       t.blocid,
+					       t.userid,
+					       t.content,
+					       t.carnumber,
+					       t.eventid,
+					       t.seq,
+					       t.result,
+					       r.devicenumber,
+					       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+					  from to_event_car t, to_car_info r
+					 where t.carnumber = r.carnumber
+					 and t.id=#id#
+					 order by t.id desc
+     </select>
+     
+	
+	<!-- 删除系统事件时查看车辆事件中是否已存在-->
+	<select id="queryEventCarIsExist" resultClass="Integer" parameterClass="int">
+		select count(*) from to_event_car  where eventid=#eventid#
+	</select>
+	
+	 <!-- 查询件下发记录列表数量-->
+	<select id="selectEventSendRecordCount" resultClass="int" parameterClass="eventSendRecord">
+                    select count(*)
+					  from to_event_send_record t, to_bloc r, to_bloc_user e
+					 where t.blocid = r.id
+					   and t.userid = e.id
+
+				<dynamic>
+				<isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+		   	    	<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="opertype">
+					 		 t.opertype=#opertype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+     </select>
+	 <!--  查询事件下发记录列表-->
+	<select id="selectCheckEventSendRecord" resultClass="eventSendRecord" parameterClass="eventSendRecord">
+                    select t.id,
+					       t.blocid,
+					       r.bloc_name blocname,
+					       t.userid,
+					       e.user_name username,
+					       t.content,
+					       t.carnumber,
+					       t.eventid,
+					       t.seq,
+					       t.result,
+					       t.opertype,
+					       t.data,
+					       t.report,
+					       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+					  from to_event_send_record t, to_bloc r, to_bloc_user e
+					 where t.blocid = r.id
+					   and t.userid = e.id
+
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+		   	    	<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="opertype">
+					 		 t.opertype=#opertype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+					 order by t.id desc
+     </select>
+     
+      <!-- 通 过   车牌号   查询车辆事件列表数量-->
+	<select id="selectEventCarByCarNumberCount" resultClass="int" parameterClass="eventCar">
+                    select count(*)
+					  from to_event_car t
+					 where 1=1
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+		   	    	<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		 t.carnumber=#carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+     </select>
+     
+     
+     <!-- 通 过   车牌号   查询车辆事件列表-->
+	<select id="selectCheckeventCarByCarNumber" resultClass="eventCar" parameterClass="eventCar">
+                    select t.id,
+                    	   t.id as careventid,
+					       t.blocid,
+					       t.userid,
+					       t.content,
+					       t.carnumber,
+					       t.eventid,
+					       t.seq,
+					       t.result,
+				           r.devicenumber,
+				           t.report,
+					       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+					  from to_event_car t, to_car_info r
+					 where t.carnumber = r.carnumber
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+		   	    	<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		 t.carnumber=#carnumber#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     <!-- 查询系统事件数量 -->
+	<select id="selectEventSystem" resultClass="int" parameterClass="eventSystem">
+       
+           select count(*) from to_event_system t 
+				 where 1=1
+           <dynamic>
+           		 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+		  </dynamic>
+     </select>
+     
+	<!-- 查询系统事件列表-->
+	<select id="selectCheckEventSystem" resultClass="eventSystem" parameterClass="eventSystem">
+                 select t.id,
+				        t.blocid,
+				        t.userid,
+				        t.content,
+				        to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				   from to_event_system t
+				  where 1=1
+				<dynamic>
+				<isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     
+     <!--   删除系统事件 -->
+     <delete id="deleteEventSystem">
+        <![CDATA[
+		    delete from  to_event_system  WHERE id = #id#
+		]]>	
+     </delete>
+      <!--  删除车辆事件 -->
+     <delete id="deleteEventCar" parameterClass="eventCar">
+		    delete from  to_event_car  WHERE 1=1
+		    <isNotEmpty prepend="and" property="carnumber">
+					carnumber = #carnumber#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="eventid">
+					eventid = #eventid#
+			</isNotEmpty>
+     </delete>
+     
+      <!-- 增加系统事件 -->
+     <insert id="insertEventSystem" parameterClass="eventSystem">
+     <![CDATA[ 
+        insert into to_event_system(
+	        blocid,
+		    userid,
+	        content,
+	        createtime
+        )values(
+	        #blocid#,
+	        #userid#,
+	        #content#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_EVENT_SYSTEM_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新系统事件 -->
+     <update id="updateEventSystem" parameterClass="eventSystem">
+         update to_event_system
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="blocid" >
+		        blocid = #blocid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        userid = #userid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="content" >
+		        content = #content#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+	
+	
+	  <!-- 增加车辆事件 -->
+     <insert id="insertEventCar" parameterClass="eventCar">
+     <![CDATA[ 
+        insert into to_event_car(
+	        blocid,
+		    userid,
+		    content,
+		    carnumber,
+			eventid,
+	        seq,
+	        result,
+	        createtime
+        )values(
+	        #blocid#,
+	        #userid#,
+	        #content#,
+	        #carnumber#,
+	        #eventid#,
+	        #seq#,
+	        #result#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_EVENT_CAR_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新增加车辆事件 -->
+     <update id="updateEventCar" parameterClass="eventCar">
+         update to_event_car
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="blocid" >
+		        blocid = #blocid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        userid = #userid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="content" >
+		        content = #content#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="carnumber" >
+		        carnumber = #carnumber#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="eventid" >
+		        eventid = #eventid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="seq" >
+		        seq = #seq#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="result" >
+		        result = #result#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+	
+		
+	
+	  <!-- 增加事件发送记录 -->
+     <insert id="insertEventSendRecord" parameterClass="eventCar">
+     <![CDATA[ 
+        insert into to_event_send_record(
+	        blocid,
+		    userid,
+		    content,
+		    carnumber,
+			eventid,
+			opertype,
+	        seq,
+	        result,
+	        data,
+	        createtime
+        )values(
+	        #blocid#,
+	        #userid#,
+	        #content#,
+	        #carnumber#,
+	        #eventid#,
+	        #opertype#,
+	        #seq#,
+	        #result#,
+	        #data#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_EVENT_SEND_RECORD_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新事件发送记录 -->
+     <update id="updateEventSendRecord" parameterClass="eventCar">
+         update to_event_send_record
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="blocid" >
+		        blocid = #blocid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        userid = #userid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="content" >
+		        content = #content#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="carnumber" >
+		        carnumber = #carnumber#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="eventid" >
+		        eventid = #eventid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="opertype" >
+		        opertype = #opertype#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="seq" >
+		        seq = #seq#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="result" >
+		        result = #result#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="data" >
+		        data = #data#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+     
+     
+    <!-- 根据流水号修改事件处理结果 -->
+	<update id="updateEventResult" parameterClass="eventCar">
+		<![CDATA[
+			UPDATE to_event_send_record SET result = #result#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber#
+	</update>
+	
+	<!-- 更新事件报告 -->
+	<update id="updateEventReport" parameterClass="eventCar">
+		<![CDATA[
+			UPDATE to_event_send_record SET result = #result#,report = #report#
+		 ]]>	
+			where eventid = #eventid# and carnumber = #carnumber#
+	</update>
+	
+	<update id="updateEventCarReport" parameterClass="eventCar">
+		<![CDATA[
+			UPDATE to_event_car SET result = #result#,report = #report#
+		 ]]>	
+			where eventid = #eventid# and carnumber = #carnumber#
+	</update>
+	
+</sqlMap>

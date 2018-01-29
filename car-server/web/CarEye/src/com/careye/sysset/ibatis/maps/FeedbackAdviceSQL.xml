@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sqlMap namespace="oracle-FeedbackAdviceSQL">
+	<typeAlias alias="advice" type="com.careye.sysset.domain.FeedbackAdvice" />
+	<!-- 查询密钥列表 -->
+	<select id="findPageFeedbackAdviceList" resultClass="advice"
+		parameterClass="advice">
+		select t.id ,
+		to_char(t.createtime,'yyyy-mm-dd
+		hh24:mi:ss') createtime,
+		t.version,
+		t.typeid,
+		t.feedbackcontent,
+		t.userid,
+		t.dealcontent,
+		t.status,
+		y.typename,
+		p.versionname,
+		u.LOGIN_NAME creater
+		from FEEDBACK_ADVICE
+		t,TO_BLOC_USER u ,VERSION_TYPE y,VERSION_CONTROL p
+		where
+		t.userid=u.id(+)
+		and t.typeid=y.id(+) and t.version=p.version
+		<dynamic>
+			<isNotEmpty prepend="AND" property="typeid">
+				t.typeid=#typeid#
+		</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+					t.createtime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.createtime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.id desc
+	</select>
+	<!-- 获取密钥数量 -->
+	<select id="findPageFeedbackAdviceListCount" resultClass="int"
+		parameterClass="advice">
+		select count(*)
+		from FEEDBACK_ADVICE t
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="typeid">
+				t.typeid=#typeid#
+		</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+					t.createtime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					t.createtime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 处理意见反馈-->
+	<update id="disposeAdvice" parameterClass="advice">
+		update FEEDBACK_ADVICE set status=2,
+				dealcontent = #dealcontent#
+		WHERE id =#id#
+	</update>
+	<!-- 删除意见反馈-->
+	<update id="deleteAdvice">
+		delete from FEEDBACK_ADVICE WHERE id =#id#
+	</update>
+</sqlMap>

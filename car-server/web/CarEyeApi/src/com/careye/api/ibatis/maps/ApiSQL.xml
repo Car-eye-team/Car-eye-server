@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sqlMap namespace="oracle-apiSQL">
+
+    <typeAlias alias="apiKey" type="com.careye.api.domain.ApiKey" />
+    <typeAlias alias="versionControl" type="com.careye.api.domain.VersionControl" />
+    <typeAlias alias="adviceFeedBack" type="com.careye.api.domain.AdviceFeedBack" />
+    <typeAlias alias="weatherInfo" type="com.careye.api.domain.WeatherInfo" />
+	<typeAlias alias="weatherForcast" type="com.careye.api.domain.WeatherForcast" />
+	<typeAlias alias="complaintType" type="com.careye.api.domain.ComplaintType" />
+	<typeAlias alias="complaintInfo" type="com.careye.api.domain.ComplaintInfo" />
+	<typeAlias alias="complaintTmp" type="com.careye.api.domain.ComplaintTmp" />
+	<typeAlias alias="advertContentDd" type="com.careye.api.domain.AdvertContentDd" />
+	<typeAlias alias="advertContentHzp" type="com.careye.api.domain.AdvertContentHzp" />
+	
+	<typeAlias alias="appUserInfo" type="com.careye.api.domain.AppUserInfo" />
+	<typeAlias alias="appUserInvite" type="com.careye.api.domain.AppUserInvite" />
+	<typeAlias alias="inviteList" type="com.careye.api.domain.InviteList" />
+	<typeAlias alias="appUserFriends" type="com.careye.api.domain.AppUserFriends" />
+	<typeAlias alias="friendsList" type="com.careye.api.domain.FriendsList" />
+	
+	
+	<typeAlias alias="authCompanyCode" type="com.careye.api.domain.AuthCompanyCode" />
+	
+     
+     <!-- 查看API密钥信息名是否存在 -->
+	<select id="apikeyIsExist" parameterClass="apiKey" resultClass="int">
+		select	count(*)
+		from API_KEYS where key=#key#
+		<dynamic>
+			<isNotEmpty prepend="and" property="typeid">
+				<![CDATA[
+					typeid = #typeid#
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="requestcount">
+				<![CDATA[
+					status = #requestcount#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 更新API密钥状态，请求次数 -->
+	<update id="updateApiKeyByIdKey" parameterClass="apiKey">
+		update API_KEYS set requestcount = requestcount+ 1 where key=#key#
+	</update>
+   
+   
+   <!-- 根据API密钥或ID获取APP版本最新详细信息 -->
+	<select id="getApiKeyControlInfo" parameterClass="int" resultClass="versionControl">
+		<![CDATA[ 
+			select t.version,
+			       t.versionname,
+			       t.downloadaddr,
+			       t.upgradecontent,
+			       to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+			  from version_control t 
+			  where t.id = (select max(s.id) from version_control s where s.typeid = #typeid#)
+		]]>
+	</select>
+	
+	<!-- 添加意见反馈 -->
+	<insert id="addAdviceFeedBack" parameterClass="adviceFeedBack" >
+		<![CDATA[
+			insert into FEEDBACK_ADVICE
+			  (
+			    version,
+				typeid,
+				feedbackcontent,
+				userid,
+				dealcontent,
+				status,
+			    createtime
+			   )
+			values
+			  (
+			   #version#,
+			   #typeid#,
+			   #feedbackcontent#,
+			   #userid#,
+			   #dealcontent#,
+			   #status#,
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+			  )
+			]]>
+			
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT FEEDBACK_ADVICE_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	 <!-- 获取天气预报当天详情-->
+     <select id="getWeatherToday" parameterClass="java.util.HashMap" resultClass="weatherInfo">
+           select 
+                 t.id,
+                 t.cityid,
+                 t.cityname,
+                 t.citycode,
+                 t.hightemp,
+                 t.fengxiang,
+                 t.curTemp,
+                 t.lowtemp,
+                 t.aqi,
+                 t.fengli,
+                 to_char(t.datetime,'yyyy-mm-dd hh24:mi:ss') datetime,
+                 t.type,
+                 to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+                 from WEATHER_INFO t  where 1=1
+              <dynamic>
+				<isNotEmpty prepend="and" property="cityname">
+					<![CDATA[
+						t.cityname = #cityname#
+				    ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="datetime">
+					<![CDATA[
+						t.datetime = to_date(#datetime#,'yyyy-mm-dd')
+				    ]]>
+				</isNotEmpty>
+			</dynamic>             
+     </select>
+     
+     <!-- 获取天气预报未来详情-->
+     <select id="getWeatherForcastList" parameterClass="java.util.HashMap" resultClass="weatherForcast">
+           select 
+                 t.hightemp,
+                 t.fengxiang,
+                 t.lowtemp,
+                 t.fengli,
+                 to_char(t.datetime,'yyyy-mm-dd') datetime,
+                 t.type,
+                 t.week
+                 from WEATHER_INFO t  where 1=1
+              <dynamic>
+				<isNotEmpty prepend="and" property="cityname">
+					<![CDATA[
+						t.cityname = #cityname#
+				    ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="citycode">
+					<![CDATA[
+						t.citycode = #citycode#
+				    ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="stime">
+					<![CDATA[
+						t.datetime > to_date(#stime#,'yyyy-mm-dd')
+				    ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="etime">
+					<![CDATA[
+						t.datetime <= to_date(#etime#,'yyyy-mm-dd')
+				    ]]>
+				</isNotEmpty>
+			</dynamic>             
+     </select>
+     
+      <!-- 获取投诉类型列表-->
+     <select id="getComplaintTypeList" resultClass="complaintType">
+           select 
+                 t.type,
+                 t.typename
+                 from TO_COMPLAINT_TYPE t  
+                 order by t.type          
+     </select>
+     
+     <!-- 添加投诉信息 -->
+	<insert id="addComplaintInfo" parameterClass="complaintInfo" >
+		<![CDATA[
+			insert into TO_COMPLAINT_INFO
+			  (
+			    phone,
+				passengerphone,
+				passengername,
+				driverphone,
+				carnumber,
+				type,
+				remark,
+				orderid,
+				dealstatus,
+			    complainttime
+			   )
+			values
+			  (
+			   #phone#,
+			   #passengerphone#,
+			   #passengername#,
+			   #driverphone#,
+			   #carnumber#,
+			   #type#,
+			   #remark#,
+			   #orderid#,
+			   #dealstatus#,
+			   to_date(#complainttime#,'yyyy-mm-dd hh24:mi:ss')
+			  )
+			]]>
+			
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_COMPLAINT_INFO_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	 <!-- 获取投诉信息列表-->
+     <select id="getComplaintInfoList" resultClass="complaintTmp" parameterClass="String">
+           select 
+                 t.id,
+                 t.carnumber,
+                 t.driverphone,
+                 (select max(d.drivername) from TO_CAR_DRIVER_INFO d,TO_CAR_INFO ci where d.phone=t.driverphone 
+                 	and ci.flag=1 and d.carid = ci.id and ci.carnumber = t.carnumber ) drivername,
+                 t.dealstatus,
+                 to_char(t.complainttime,'yyyy/mm/dd') complaintdate,
+                 to_char(t.complainttime,'hh24:mi') complainttime
+                 from TO_COMPLAINT_INFO t
+                 where t.phone = #phone#
+                 order by t.dealstatus,t.complainttime desc        
+     </select>
+     
+     <!-- 获取投诉信息列表总条数-->
+     <select id="getComplaintInfoListCount" resultClass="int" parameterClass="String">
+           select 
+                 count(t.id)
+                 from TO_COMPLAINT_INFO t  where phone = #phone#         
+     </select>
+     
+     <!-- 获取投诉信息详情-->
+     <select id="getComplaintInfo" resultClass="complaintInfo" parameterClass="String">
+           select 
+                 t.id,
+                 to_char(t.complainttime,'yyyy/mm/dd') complaintdate,
+                 to_char(t.complainttime,'hh24:mi') complainttime,
+                 t.phone,
+                 t.passengerphone,
+                 t.passengername,
+                 t.driverphone,
+                 (select d.drivername from TO_CAR_DRIVER_INFO d,TO_CAR_INFO ci where d.phone=t.driverphone 
+                 	and ci.flag=1 and d.carid = ci.id and ci.carnumber = t.carnumber ) drivername,
+                 (select tb.bloc_name from TO_BLOC tb, TO_CAR_INFO ci 
+                 	where tb.id = ci.blocid and ci.carnumber = t.carnumber) blocname,
+                 t.carnumber,
+                 t.type,
+                 COMPLAINT_TYPE(t.type) typename,
+                 t.remark,
+                 t.orderid,
+                 t.dealstatus,
+                 to_char(t.dealtime,'yyyy/mm/dd') dealdate,
+                 to_char(t.dealtime,'hh24:mi') dealtime,
+                 (select bu.user_name from to_bloc_user bu where bu.id = t.dealman) dealman,
+                 t.dealcontent
+                 from TO_COMPLAINT_INFO t
+                 where  t.id = #id#
+     </select>
+	
+	<!-- 根据设备号获取当前里程-->
+     <select id="getNowMileByTerminal" resultClass="Double" parameterClass="String">
+           select round(a.mileage,2) mile
+           from (select 
+                 t.mileage
+                 from TO_CAR_POSITION_INFO t  where t.terminal = #terminal#
+                 order by t.createtime desc) a where rownum = 1         
+     </select>
+     
+     <!-- 获取广告类型版本号-->
+     <select id="getVeridByPositionid" resultClass="String" parameterClass="String">
+           select max(av.verid) from TO_ADVERT_VERSION av 
+                 	where av.auditstatus = 1 and av.onstatus = 1 and av.positionid = #positionid#
+                    
+     </select>
+     
+      <!-- 获取顶灯广告列表-->
+     <select id="getAdvertContentDdList" resultClass="advertContentDd" parameterClass="String">
+     	<![CDATA[
+           select 
+                 t.id,
+                 t.connumber||t.con1||t.con2||'P'||t.con3||'R'||t.con4||':'||t.remark content
+                 from TO_ADVERT_CONTENT t, TO_ADVERT_VERSION tv
+                 where t.versionid = tv.id 
+                 and (to_char(sysdate,'yyyy-mm-dd') <= to_char(t.dtime,'yyyy-mm-dd') or t.dtime is null)
+                 and (to_char(sysdate,'yyyy-mm-dd') <= to_char(tv.dtime,'yyyy-mm-dd') or tv.dtime is null)
+                 and tv.verid in (select max(av.verid) from TO_ADVERT_VERSION av 
+                 	where av.auditstatus = 1 and av.onstatus = 1 and av.positionid = #positionid#)
+                 and tv.positionid = #positionid#
+                 order by t.connumber  
+         ]]>        
+     </select>
+     
+      <!-- 获取后枕屏广告列表-->
+     <select id="getAdvertContentHzpList" resultClass="advertContentHzp" parameterClass="String">
+          <![CDATA[
+           select 
+                 t.id,
+                 (case t.typeid when 31 then 1 when 36 then 2 when 41 then 3 end) type, 
+                 (select tat.typename from TO_ADVERT_TYPE tat where tat.id=t.typeid)typename,
+                 t.adname,
+                 t.linkpath,
+                 t.path,
+                 t.remark,
+                 to_char(t.dtime,'yyyy-mm-dd') dtime,
+                 to_char(t.reltime,'yyyy-mm-dd') reltime
+                 from TO_ADVERT_CONTENT t, TO_ADVERT_VERSION tv
+                 where t.versionid = tv.id 
+                 and (to_char(sysdate,'yyyy-mm-dd') <= to_char(t.dtime,'yyyy-mm-dd') or t.dtime is null)
+                 and (to_char(sysdate,'yyyy-mm-dd') <= to_char(tv.dtime,'yyyy-mm-dd') or tv.dtime is null)
+                 and tv.verid in (select max(av.verid) from TO_ADVERT_VERSION av 
+                 	where av.auditstatus = 1 and av.onstatus = 1 and av.positionid = #positionid#)
+                 and tv.positionid = #positionid#
+                 order by t.reltime desc  
+          ]]>                  
+     </select>
+     
+     
+     <!-- 添加邀请信息 -->
+     <insert id="addAppUserInvite" parameterClass="appUserInvite">
+     <![CDATA[ 
+        insert into TO_CAR_USER_INVITE(
+		    userid,
+		    vid,
+	        invitetime,
+	        agreedtime,
+	        isagree,
+	        remark
+        )values(
+	        #userid#,
+		    #vid#,
+		    to_date(#invitetime#,'yyyy-mm-dd hh24:mi:ss'),
+	        to_date(#agreedtime#,'yyyy-mm-dd hh24:mi:ss'),
+	        #isagree#,
+	        #remark#
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_USER_INVITE_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     <!-- 同意/拒绝邀请 -->
+	<update id="updateAppUserInvite" parameterClass="appUserInvite">
+		 <![CDATA[ 
+	        update TO_CAR_USER_INVITE set
+	        	isagree = #isagree#,
+			    agreedtime = to_date(#agreedtime#,'yyyy-mm-dd hh24:mi:ss')
+			where userid = #userid# and vid = #vid#
+         ]]> 
+	</update>
+	
+	<!-- 根据id获取邀请信息 -->
+	<select id="getAppUserInviteById" resultClass="appUserInvite" parameterClass="String">
+	    <![CDATA[
+		    select
+		    	t.id,
+		    	t.userid,
+		    	t.vid,
+		    	t.remark,
+		    	to_char(t.invitetime,'yyyy-mm-dd hh24:mi:ss') invitetime
+		    from TO_CAR_USER_INVITE t where   id = #id#
+	     ]]>
+	</select>
+	
+	<!-- 获取邀请信息列表 -->
+	<select id="getAppUserInviteList" resultClass="inviteList" parameterClass="java.util.HashMap">
+	    <![CDATA[
+		    select
+		    	t.id,
+		    	t.userid,
+		    	t.vid,
+		    	t.remark,
+		    	f.carnumber,
+		    	f.terminal,
+		    	to_char(t.invitetime,'yyyy-mm-dd hh24:mi:ss') invitetime
+		    from TO_CAR_USER_INVITE t,TO_CAR_INFO f where t.vid = f.id
+		      and isagree is null 
+			  and t.userid = #userid#
+		   order by t.invitetime desc
+	     ]]>
+	</select>
+	
+	<!-- 添加车友信息 -->
+     <insert id="addAppUserFriends" parameterClass="appUserFriends">
+     <![CDATA[ 
+        insert into TO_CAR_USER_FRIENDS(
+		    userid,
+		    vid,
+	        createtime
+        )values(
+	        #userid#,
+		    #vid#,
+		    to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CAR_USER_FRIENDS_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     <!-- 查询车友是否已存在 -->
+	<select id="isExistFriends" resultClass="Integer" parameterClass="appUserFriends">
+	    <![CDATA[
+	    	select count(*) from TO_CAR_USER_FRIENDS t where t.vid = #vid# and t.userid = #userid#
+	     ]]>
+	</select>
+	
+	<!-- 删除车友信息 -->
+     <delete id="deleteAppUserFriends" parameterClass="appUserFriends">
+     <![CDATA[ 
+        delete from TO_CAR_USER_FRIENDS where userid = #userid# and vid = #vid#
+         ]]> 
+     </delete>
+	
+	<!-- 车友列表 -->
+	<select id="getAppUserFriendsList" resultClass="friendsList" parameterClass="java.util.HashMap">
+	    <![CDATA[
+		    select
+		    	t.userid,
+		    	t.vid,
+		    	f.carnumber,
+		    	f.terminal
+		    from TO_CAR_USER_FRIENDS t,TO_CAR_INFO f where t.vid = f.id
+	     ]]>
+	      <dynamic prepend="">
+	      		<isNotEmpty prepend="AND" property="userid">
+					t.userid = #userid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="searchtext">
+					f.carnumber  like '%'||#searchtext#||'%' 
+	            </isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 车友列表数量 -->
+	<select id="getAppUserFriendsListCount" resultClass="Integer" parameterClass="java.util.HashMap">
+	    <![CDATA[
+	    	select count(*) from TO_CAR_USER_FRIENDS t,TO_CAR_INFO f where t.vid = f.id
+	     ]]>
+	     <dynamic prepend="">
+	     		<isNotEmpty prepend="AND" property="userid">
+					t.userid = #userid#
+	            </isNotEmpty>
+				<isNotEmpty prepend="AND" property="searchtext">
+					f.carnumber  like '%'||#searchtext#||'%' 
+	            </isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 根据车牌号获取车辆id-->
+	<select id="getCaridByCarnumber" resultClass="String" parameterClass="String">
+	    <![CDATA[
+		    select
+		    	t.id
+		    from TO_CAR_INFO t where t.carnumber = #carnumber#
+	     ]]>
+	</select>
+	
+	
+	<!-- 鉴权码是否存在-->
+	<select id="authcodeIsExistByAuthCode" parameterClass="java.util.HashMap" resultClass="authCompanyCode">
+		<![CDATA[
+		    select
+		    	t.id,
+		    	t.authcode,
+				t.status,
+				t.companyid
+		    from TB_AUTH_CODE_MANAGE t,TB_AUTH_COMPANY ac 
+		    where t.companyid = ac.id(+) 
+		    and t.authcode = #authcode# 
+		    and ac.appid = #appid#
+		    and ac.secretKey = #secretKey#
+	     ]]>
+	</select>
+	
+	
+	<!-- IEMI号和ICCID号是否存在-->
+	<select id="imeiAndIccidIsExist" parameterClass="java.util.HashMap" resultClass="Integer">
+		<![CDATA[
+		    select count(*) from TB_AUTH_CODE_MANAGE t
+		    where  t.imei = #imei# 
+		    and t.authcode = #authcode#
+		    and t.companyid = #companyid#
+	     ]]>
+	</select>
+	
+	<!-- 更新状态  -->
+	<update id="updateAuthCodeStatus" parameterClass="java.util.HashMap">
+		update TB_AUTH_CODE_MANAGE set
+				imei=#imei#,
+				iccid=#iccid#,
+				status=#status#,
+				usetime=to_date(#usetime#,'yyyy-mm-dd hh24:mi:ss')
+		where id=#id# and authcode=#authcode#
+	</update>
+	
+</sqlMap>
+
+

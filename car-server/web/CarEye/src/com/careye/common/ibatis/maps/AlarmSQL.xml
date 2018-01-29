@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-alarmSQL">
+
+	<typeAlias alias="alarmType" type="com.careye.common.domain.AlarmType" />
+	
+	
+	<!-- 报警类型列表-->
+	<select id="selectAlarmTypeList" resultClass="alarmType">
+		select t.alarmkey,t.alarmname from to_alarm_type t order by t.id desc
+	</select>
+	
+	<!-- 删除-->
+	<select id="deleteInfo">
+		delete from to_alarm_type where id=#id#
+	</select>
+</sqlMap>
+
+
+
+
+
+

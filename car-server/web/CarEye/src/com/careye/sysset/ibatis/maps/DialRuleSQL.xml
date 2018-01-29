@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-dialRuleSQL">
+
+	<typeAlias alias="dialRule" type="com.careye.sysset.domain.DialRule" />
+	<typeAlias alias="lastDialRule" type="com.careye.sysset.domain.LastDialRule" />
+
+	<!-- 获取历史电召参数设置分页列表  -->
+	<select id="findRecordList" resultClass="dialRule"
+		parameterClass="dialRule">
+		select
+		t.id,
+		t.type,
+		t.radius,
+		t.cartype,
+		t.carcount,
+		t.carstatus,
+		t.zkstate,
+		t.assigncount,
+		t.assignmin,
+		t.effectmin,
+		to_char(t.effecttime,
+		'yyyy-MM-dd HH24:mi:ss') effecttime,
+		t.totalassigncount,
+		t.aheadassignmin,
+		t.immassigncount,
+		t.assignwaitmin,
+		t.traincount,
+		to_char(t.stime, 'yyyy-MM-dd HH24:mi:ss') stime,
+		to_char(t.etime,
+		'yyyy-MM-dd HH24:mi:ss') etime,
+		t.principle,
+		t.userid,
+		t.arrearage,
+		t.breach,
+		t.blacklist,
+		to_char(t.createtime, 'yyyy-MM-dd HH24:mi:ss') createtime
+		from
+		TO_DIAL_HISTORY_STRATEGY t
+		where t.type=#type#
+		<dynamic>
+			<isNotEmpty property="searchstime" prepend="and">
+			 <![CDATA[ t.createtime >=to_date(#searchstime#,'yyyy-MM-dd HH24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty property="searchetime" prepend="and">
+			 <![CDATA[ t.createtime <=to_date(#searchetime#,'yyyy-MM-dd HH24:mi:ss')]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.id desc
+	</select>
+
+	<!--获取历史电召参数设置分页列表数量  -->
+	<select id="findRecordListCount" resultClass="int"
+		parameterClass="dialRule">
+		select count(*)
+		from TO_DIAL_HISTORY_STRATEGY t
+		where t.type=#type#
+		<dynamic>
+			<isNotEmpty property="searchstime" prepend="and">
+			 <![CDATA[ t.createtime >=to_date(#searchstime#,'yyyy-MM-dd HH24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty property="searchetime" prepend="and">
+			 <![CDATA[ t.createtime <=to_date(#searchetime#,'yyyy-MM-dd HH24:mi:ss')]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 获取电召参数最新设置 -->
+	<select id="findLastDialRule" resultClass="lastDialRule"
+		parameterClass="lastDialRule" remapResults="true">
+		select
+				t.id,
+				to_char(t.effecttime,
+				'yyyy-MM-dd HH24:mi:ss') effecttime,
+			<!-- 即时订单 -->
+			<isEqual property="dr_type" compareValue="1">
+				t.radius jsdd_radius,
+				t.cartype jsdd_cartype,
+				t.carcount jsdd_carcount,
+				t.carstatus jsdd_carstatus,
+				t.zkstate jsdd_zkstate,
+				t.assigncount jsdd_assigncount,
+				t.assignmin jsdd_assignmin,
+				t.effectmin jsdd_effectmin,
+				to_char(t.effecttime,
+				'yyyy-MM-dd HH24:mi:ss') jsdd_effecttime,
+				t.arrearage jsdd_arrearage,
+				t.breach jsdd_breach,
+				t.blacklist jsdd_blacklist, 
+			</isEqual>
+			<isEqual property="dr_type" compareValue="2">
+				t.cartype yydd_cartype,
+				t.radius yydd_radius,
+				t.carcount yydd_carcount,
+				t.carstatus yydd_carstatus,
+				t.zkstate yydd_zkstate ,
+				t.effectmin yydd_effectmin,
+				to_char(t.effecttime,
+				'yyyy-MM-dd HH24:mi:ss') yydd_effecttime,
+				t.totalassigncount yydd_totalassigncount,
+				t.assignmin yydd_assignmin,
+				t.aheadassignmin yydd_aheadassignmin,
+				t.immassigncount yydd_immassigncount,
+				t.arrearage yydd_arrearage,
+				t.breach yydd_breach,
+				t.blacklist yydd_blacklist, 
+			</isEqual>
+			<isEqual property="dr_type" compareValue="3">
+				t.radius zpms_radius,
+				t.carcount zpms_carcount,
+				t.carstatus zpms_carstatus,
+				t.zkstate zpms_zkstate,
+				t.assignmin zpms_assignmin,
+				t.effectmin zpms_effectmin,
+				to_char(t.effecttime,
+				'yyyy-MM-dd HH24:mi:ss') zpms_effecttime,
+				t.assignwaitmin zpms_assignwaitmin,
+				t.arrearage zpms_arrearage,
+				t.breach zpms_breach,
+				t.blacklist zpms_blacklist, 
+			</isEqual>
+			<isEqual property="dr_type" compareValue="4">
+				t.traincount zdd_traincount,
+				to_char(t.stime, 'yyyy-MM-dd HH24:mi:ss') zdd_stime,
+				to_char(t.etime,
+				'yyyy-MM-dd HH24:mi:ss') zdd_etime,
+				t.principle zdd_principle, 
+			</isEqual>
+				t.type dr_type
+				from
+				TO_DIAL_LAST_STRATEGY t where t.type=#dr_type#
+	</select>
+	<!-- 增加历史电召调度规则 -->
+	<insert id="addHistoryDialRule" parameterClass="dialRule">
+		insert into TO_DIAL_HISTORY_STRATEGY(
+		type,
+		radius,
+		cartype,
+		carcount,
+		carstatus,
+		zkstate,
+		assigncount,
+		assignmin,
+		effectmin,
+		effecttime,
+		totalassigncount,
+		aheadassignmin,
+		immassigncount,
+		assignwaitmin,
+		traincount,
+		stime,
+		etime,
+		principle,
+		userid,
+		arrearage,
+		breach,
+		blacklist,
+		createtime
+		)
+		select 
+		t.type,
+		t.radius,
+		t.cartype,
+		t.carcount,
+		t.carstatus,
+		t.zkstate,
+		t.assigncount,
+		t.assignmin,
+		t.effectmin,
+		t.effecttime,
+		t.totalassigncount,
+		t.aheadassignmin,
+		t.immassigncount,
+		t.assignwaitmin,
+		t.traincount,
+		t.stime,
+		t.etime,
+		t.principle,
+		t.userid,
+		t.arrearage,
+		t.breach,
+		t.blacklist,
+		t.createtime 
+		from 
+		TO_DIAL_LAST_STRATEGY t where t.type=#type#
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_DIAL_HISTORY_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	<!-- 删除最新电召规则 -->
+	<delete id="delLastDialRule" parameterClass="int">
+		 delete from TO_DIAL_LAST_STRATEGY where  type=#type#
+	</delete>
+	<!-- 增加最新电召调度规则 -->
+	<insert id="addLastDialRule" parameterClass="dialRule">
+
+		insert into TO_DIAL_LAST_STRATEGY(
+		type,
+		radius,
+		cartype,
+		carcount,
+		carstatus,
+		zkstate,
+		assigncount,
+		assignmin,
+		effectmin,
+		<dynamic>
+			<isNotNull property="effecttime" prepend="">
+				effecttime,
+			</isNotNull>
+		</dynamic>
+		totalassigncount,
+		aheadassignmin,
+		immassigncount,
+		assignwaitmin,
+		traincount,
+		<dynamic>
+			<isNotNull property="stime" prepend="">
+				stime,
+				</isNotNull>
+			<isNotNull property="etime" prepend="">
+				etime,
+				</isNotNull>
+		</dynamic>
+		principle,
+		userid,
+		arrearage,
+		breach,
+		blacklist,
+		createtime
+		)values(
+		#type#,
+		#radius#,
+		#cartype#,
+		#carcount#,
+		#carstatus#,
+		#zkstate#,
+		#assigncount#,
+		#assignmin#,
+		#effectmin#,
+		<dynamic>
+			<isNotNull property="effecttime" prepend="">
+				to_date(#effecttime#,'yyyy-mm-dd hh24:mi:ss'),
+				</isNotNull>
+		</dynamic>
+		#totalassigncount#,
+		#aheadassignmin#,
+		#immassigncount#,
+		#assignwaitmin#,
+		#traincount#,
+		<dynamic>
+			<isNotEmpty property="stime" prepend="">
+				to_date(#stime#,'yyyy-mm-dd hh24:mi:ss'),
+				</isNotEmpty>
+			<isNotEmpty property="etime" prepend="">
+				to_date(#etime#,'yyyy-mm-dd hh24:mi:ss'),
+				</isNotEmpty>
+		</dynamic>
+		#principle#,
+		#userid#,
+		#arrearage#,
+		#breach#,
+		#blacklist#,
+		to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		)
+
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_DIAL_LAST_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+</sqlMap>
+
+

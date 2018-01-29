@@ -1,0 +1,123 @@
+#fileInputUploader{
+	margin-left: 250px;
+}
+.uploadifyQueueItem {
+	font: 11px Verdana, Geneva, sans-serif;
+	border: 1px solid #E5E5E5;
+	background-color: #F5F5F5;
+	margin-top: 0px;
+	padding: 0px;
+	width: 388px;
+}
+.uploadifyError {
+	border: 1px solid #FBCBBC !important;
+	background-color: #FDE5DD !important;
+}
+.uploadifyQueueItem .cancel {
+	float: right;
+}
+
+.uploadifyProgress {
+	background-color: #FFFFFF;
+	border-top: 1px solid #808080;
+	border-left: 1px solid #808080;
+	border-right: 1px solid #C5C5C5;
+	border-bottom: 1px solid #C5C5C5;
+	margin-top: 5px;
+	width: 100%;
+}
+.uploadifyProgressBar {
+	background-color: #0099FF;
+	width: 1px;
+	height: 3px;
+}
+
+#fileQueue {
+	height: 100px;
+    width: 400px;
+}
+
+#photosrc {
+    border: 1px solid #D1D1D1;
+    height: 90px;
+    margin-top: 10px;
+    width: 95px;
+    margin:3px;
+    padding:2px;
+}
+
+.closeWrapper {
+    height: 12px;
+}
+
+.wrapper {
+	width: 720px;
+	padding: 0 0 10px 10px;
+	margin: 0 auto;
+	margin-top: 10px;
+	overflow: hidden;
+
+}
+.block {
+	width: 140px;
+	border : 1px solid #d1d1d1;
+	float: left;
+	margin:9px;
+	padding:4px;
+	padding-top: 0px;
+	
+}
+.block img {
+	width: 130px;
+	height: 100px;
+	margin-bottom: 5px;
+	border: none;
+	
+}
+.block span {
+	line-height: 16px;
+}
+
+.addAreaWrapper {
+	overflow: hidden;
+	position:relative;
+	padding:0 15px 10px 0;
+	height: 32px;
+	line-height: 32px;
+}
+.addAreaWrapper .bg {
+	margin-left: -50px;
+	
+}
+a.click_btn {
+	height:22px;
+	line-height: 22px;
+	margin-top: 5px;
+	margin-right: 10px;
+}
+.addImg {
+	color:#ff6600;
+	margin: 0 5px;
+}
+.close {
+	display:block;
+	float:right;
+	width:13px;
+	height:10px;
+}
+.clear {
+	clear: both;
+}
+.closeWrapper {
+	height: 12px;
+}
+.imgGallery {
+
+}
+
+div.changeBorder {
+	border: 1px solid #317ee7;
+}
+	
+
+

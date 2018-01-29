@@ -1,0 +1,136 @@
+.pagebox {
+	line-height: 20px;
+	height: 20px;
+	width: 700px;
+	margin-right: auto;
+	margin-left: auto;
+}
+.pagebox ul li {
+	float: left;
+	height: 20px;
+	width: auto;
+	margin-right: 5px;
+	margin-left: 5px;
+	display: inline;
+}
+.pagebox ul li span {
+	color: #F00;
+	height: 20px;
+	width: auto;
+	margin-right: 5px;
+	margin-left: 5px;
+}
+.pagebox ul li a {
+	color: #000;
+}
+.pagebox ul li a:hover {
+	color: #F00;
+}
+.pagebox ul li b {
+	font-weight: normal;
+	color: #999;
+}
+
+.pageboxlist {
+	height: 22px;
+	width: auto;
+	color: #005AA0;
+	float: right;
+	font-size: 14px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.pageboxlist a {
+	height: 14px;
+	width: auto;
+	padding-right: 8px;
+	padding-left: 8px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	border: 1px solid #CCCCCC;
+	color: #005AA0;
+	font-size: 14px;
+	text-align: center;
+	display: inline;
+	margin-left: 2px;
+	margin-right: 2px;
+	text-decoration: none;
+}
+.pageboxlist a:hover {
+	color: #FFF;
+	background-color: #005AA0;
+}
+.pageboxlist span {
+	height: 14px;
+	width: auto;
+	padding-right: 5px;
+	padding-left: 5px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	margin-left: 2px;
+	margin-right: 2px;
+	color: #FF6400;
+}
+.pageboxlist_page_prev {
+	background-image: url(../images/pageboxlist_page_prev.png);
+	background-repeat: no-repeat;
+	background-position: 2px center;
+	height: 30px;
+	width: 44px;
+	padding-right: 10px;
+	padding-left: 10px;
+	border: 1px solid #CCCCCC;
+	color: #CCCCCC;
+}
+.pageboxlist_page_prev_1 {
+	background-image: url(../images/pageboxlist_page_prev_1.png);
+	background-repeat: no-repeat;
+	background-position: 2px center;
+	height: 30px;
+	width: 44px;
+	padding-right: 10px;
+	padding-left: 10px;
+	color: #CCCCCC;
+	border: 1px solid #CCCCCC;
+}
+.pageboxlist_page_next {
+	background-image: url(../images/pageboxlist_page_next.png);
+	background-position: 50px center;
+	height: 30px;
+	width: 44px;
+	padding-right: 10px;
+	padding-left: 10px;
+	background-repeat: no-repeat;
+	border: 1px solid #CCCCCC;
+}
+.pageboxlist_page_next_1 {
+	background-image: url(../images/pageboxlist_page_next_1.png);
+	background-position: 56px center;
+	height: 30px;
+	width: 44px;
+	padding-right: 10px;
+	padding-left: 10px;
+	background-repeat: no-repeat;
+	color: #CCCCCC;
+	border: 1px solid #CCCCCC;
+}
+.pageboxlist dt {
+	height: 30px;
+	width: 44px;
+	padding-right: 10px;
+	padding-left: 10px;
+	border: 1px solid #CCCCCC;
+	color: #CCCCCC;
+	line-height: 30px;
+}
+#pageNumber {
+	border: 1px solid #CCCCCC;
+	height: 20px;
+	width: 30px;
+	line-height: 20px;
+	text-align:center;
+
+}
+
+

@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-textInfoQL">
+
+	<typeAlias alias="textInfo" type="com.careye.message.domain.TextInfo" />
+	<typeAlias alias="sendRecord" type="com.careye.message.domain.SendRecord" />
+	
+	<!-- id查询文本信息 -->
+	<select id="selectTextInfoById" resultClass="textInfo" parameterClass="int">
+           select * from to_text_info t  where t.id = #id#
+     </select>
+
+     
+     <!-- 查询发送记录列表数量 -->
+	<select id="selectTextInfoSendRecord" resultClass="int" parameterClass="sendRecord">
+           select count(*)
+				  from to_text_info_send_record t ,to_bloc r,to_bloc_user e
+				 where t.blocid=r.id and t.userid=e.id
+           <dynamic>
+           		 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="opertype">
+					 		t.opertype = #opertype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		  </dynamic>
+        
+     </select>
+     
+     <!-- 查询发送记录列表-->
+	<select id="selectCheckTextInfoSendRecord" resultClass="sendRecord" parameterClass="sendRecord">
+                select t.id,
+				       t.blocid,
+				       r.bloc_name blocname,
+				       t.userid,
+				       e.user_name username,
+				       t.emergency,
+				       t.lcd,
+				       t.tts,
+				       t.adv,
+				       t.action,
+				       t.dist,
+				       t.content,
+				       t.time,
+				       t.carnumber,
+				       t.opertype,
+				       t.seq,
+				       t.result,
+				       t.data,
+				       to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+				  from to_text_info_send_record t ,to_bloc r,to_bloc_user e
+				 where t.blocid=r.id and t.userid=e.id
+
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select blocid from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="carnumber">
+					 		t.carnumber like '%'||#carnumber#||'%'
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="opertype">
+					 		t.opertype = #opertype#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     	
+	<!-- 查询文本信息数量 -->
+	<select id="selectTextInfo" resultClass="int" parameterClass="textInfo">
+       
+           select count(*)
+		           from to_text_info t, to_bloc_user r,to_text_info_type tit
+		          where t.userid = r.id
+		          and t.textinfotype = tit.textinfotype
+           <dynamic>
+           		 <isNotNull prepend="and" property="userid" >
+					  t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+					
+					<isNotEmpty prepend="and" property="textinfotype">
+					 		t.textinfotype = #textinfotype#
+					</isNotEmpty>
+		  </dynamic>
+        
+     </select>
+     
+	<!-- 查询文本信息列表-->
+	<select id="selectCheckTextInfo" resultClass="textInfo" parameterClass="textInfo">
+                  select t.id,
+		                t.blocid,
+		                t.userid,
+		                t.emergency,
+		                t.lcd,
+		                t.tts,
+		                t.adv,
+		                t.action,
+		                t.dist,
+		                t.content,
+		                t.time,
+		                to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+		                r.user_name username,
+		                t.textinfotype,
+		                tit.textinfoname
+		           from to_text_info t, to_bloc_user r,to_text_info_type tit
+		          where t.userid = r.id
+		          and t.textinfotype = tit.textinfotype
+
+				<dynamic>
+				 <isNotNull prepend="and" property="userid" >
+					 t.blocid in (SELECT id FROM to_bloc  START WITH id = 
+						(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	    </isNotNull>
+					<isNotEmpty prepend="and" property="content">
+					 		t.content like '%'||#content#||'%'
+					</isNotEmpty>
+					
+					<isNotEmpty prepend="and" property="textinfotype">
+					 		t.textinfotype = #textinfotype#
+					</isNotEmpty>
+		        </dynamic>
+		  order by t.id desc
+     </select>
+     
+     
+     <!--   删除文本信息 -->
+     <delete id="deleteTextInfo">
+        <![CDATA[
+		    delete from  to_text_info  WHERE id = #id#
+		]]>	
+     </delete>
+     
+     
+      <!-- 增加文本信息 -->
+     <insert id="insertTextInfo" parameterClass="textInfo">
+     <![CDATA[ 
+        insert into to_text_info(
+	        blocid,
+		    userid,
+		    emergency,
+			lcd,
+			tts,
+			adv,
+			action,
+			dist,
+	        content,
+	        time,
+	        textinfotype,
+	        createtime
+        )values(
+	        #blocid#,
+	        #userid#,
+	        #emergency#,
+			#lcd#,
+			#tts#,
+			#adv#,
+			#action#,
+			#dist#,
+	        #content#,
+	        #time#,
+	        #textinfotype#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_TEXT_INFO_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新文本信息 -->
+     <update id="updateTextInfo" parameterClass="textInfo">
+         update to_text_info
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="blocid" >
+		        blocid = #blocid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        userid = #userid#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="emergency" >
+		        emergency = #emergency#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="lcd" >
+		        lcd = #lcd#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="tts" >
+		        tts = #tts#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="adv" >
+		        adv = #adv#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="dist" >
+		        dist = #dist#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="action" >
+		        action = #action#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="content" >
+		        content = #content#
+		      </isNotEmpty>
+		      <isNotEmpty prepend="," property="textinfotype" >
+		        textinfotype = #textinfotype#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+	
+	
+	  <!-- 增加文本信息发送记录 -->
+     <insert id="insertTextInfoSendRecord" parameterClass="sendRecord">
+     <![CDATA[ 
+        insert into to_text_info_send_record(
+	        blocid,
+		    userid,
+		    emergency,
+			lcd,
+			tts,
+			adv,
+			action,
+			dist,
+	        content,
+	        time,
+	        carnumber,
+	        opertype,
+	        seq,
+	        result,
+	        data,
+	        createtime
+        )values(
+	        #blocid#,
+	        #userid#,
+	        #emergency#,
+			#lcd#,
+			#tts#,
+			#adv#,
+			#action#,
+			#dist#,
+	        #content#,
+	        #time#,
+	        #carnumber#,
+	        #opertype#,
+	        #seq#,
+	        #result#,
+	        #data#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_TEXT_INFO_SEND_RECORD_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新文本信息发送记录 -->
+     <update id="updateTextInfoSendRecord" parameterClass="sendRecord">
+         update to_text_info_send_record
+         <dynamic prepend="set" >
+            <isNotEmpty prepend="," property="blocid" >
+		        blocid = #blocid#
+		      </isNotEmpty>
+		     <isNotEmpty prepend="," property="userid" >
+		        id = #userid#
+		      </isNotEmpty>
+		        <isNotEmpty prepend="," property="emergency" >
+		        emergency = #emergency#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="lcd" >
+		        lcd = #lcd#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="tts" >
+		        tts = #tts#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="adv" >
+		        adv = #adv#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="dist" >
+		        dist = #dist#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="action" >
+		        action = #action#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="content" >
+		        content = #content#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="time" >
+		        time = #time#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="carnumber" >
+		        carnumber = #carnumber#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="opertype" >
+		        opertype = #opertype#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="seq" >
+		        seq = #seq#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="result" >
+		        result = #result#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="data" >
+		        data = #data#
+		      </isNotEmpty>
+		       <isNotEmpty prepend="," property="createtime" >
+		       createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		      </isNotEmpty>
+		      WHERE id = #id#
+         </dynamic>
+     </update>
+     
+     
+     <!-- 根据流水号修改文本信息发送结果 -->
+	<update id="updateTextInfoResule" parameterClass="sendRecord">
+		<![CDATA[
+			UPDATE to_text_info_send_record SET result = #result#
+		 ]]>	
+			where seq = #seq# and carnumber = #carnumber#
+	</update>
+	
+	 <!-- 获取文本信息类型列表 -->
+	<select id="getTextInfoTypeList" resultClass="textInfo">
+           select t.textinfotype,t.textinfoname from to_text_info_type t
+     </select>
+	
+	
+	   
+	<!-- 查询文本信息列表-->
+	<select id="getTextInfoById" resultClass="textInfo" parameterClass="int">
+                  select t.id,
+		                t.blocid,
+		                t.userid,
+		                t.emergency,
+		                t.lcd,
+		                t.tts,
+		                t.adv,
+		                t.action,
+		                t.dist,
+		                t.content,
+		                t.time,
+		                to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+		                t.textinfotype
+		           from to_text_info t
+		           where t.id=#id#
+     </select>
+     
+	
+</sqlMap>

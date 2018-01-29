@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="poiinfojson" extends="qhtaxijson" namespace="/poiinfojson">
+	
+	<!-- 发送poi信息 -->
+	<action name="sendPoiInfo" method="sendPoiInfo"
+			class="com.careye.car.action.PoiInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- 发送poi记录列表 -->
+	<action name="queryPoiInfoRecordList" method="queryPoiInfoRecordList"
+			class="com.careye.car.action.PoiInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- 删除记录列表 -->
+	<action name="deleteRecord" method="deleteRecord"
+			class="com.careye.car.action.PoiInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	
+	<!--根据城市内检索请求地址-->
+	<action name="getResultByCity" method="getResultByCity" 
+			class="com.careye.car.action.PoiInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+		
+	
+	
+	<!-- 根据距离经纬度条件查询车辆信息 查询数据库-->
+	<action name="queryCarInfoList" method="queryCarInfoList" 
+			class="com.careye.car.action.PoiInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- 根据距离经纬度条件查询车辆信息 查询mongo-->
+	<action name="queryCarInfoListByMongo" method="queryCarInfoListByMongo" 
+			class="com.careye.car.action.PoiInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- Excel导出 -->
+	<action name="exportPoiInfoRecordExcel" method="exportPoiInfoRecordExcel"
+			class="com.careye.car.action.PoiInfoAction">
+	</action>
+	
+	<!-- 参数设置车辆列表 -->
+	<action name="queryDsobdParamSetList" method="queryDsobdParamSetList"
+			class="com.careye.car.action.PoiInfoAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+		
+	</package>
+	
+</struts>

@@ -1,0 +1,26 @@
+{
+	"text" : "下发指令类型",
+	"children" : [{
+				"text" : "多媒体下发",
+				"children" : [{
+							"text" : "多媒体检索下发",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "11",
+							"parentId" : "1"
+						},{
+							"text" : "多媒体上传下发",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "12",
+							"parentId" : "1"
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "1",
+				"parentId" : "0"
+			}],
+	"leaf" : false,
+	"expanded" : true,
+	"id" : "0"
+}

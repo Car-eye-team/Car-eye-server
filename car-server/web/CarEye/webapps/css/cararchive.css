@@ -1,0 +1,35 @@
+
+.carArchiveDetails{
+    background: none repeat scroll 0% 0% #f7f7f7;
+    border: 1px solid rgb(205, 205, 205);
+    padding: 10px;
+    width: 742px;
+    margin: 20 auto;
+}
+.carArchiveDetails #carArchive{
+	margin-right:50px;
+	width:740px;
+}
+
+.toptitle{
+	font-size: 16px !important;
+}
+.carArchiveDetails tr td{
+	font-size: 13px;
+}
+
+.carArchiveDetails tr {
+	height:25px;
+	font-size: 13px;
+}
+
+.carArchiveDetails .title{
+   font-weight: bold;
+    text-align: right;
+    width: 130px;
+}
+
+
+
+
+

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="userjson" extends="qhtaxijson" namespace="/system/userjson">
+	
+	<!-- 用户信息-->
+		<action name="loadUserContact" method="loadUserContact"
+			class="com.careye.system.action.UserAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+		</action>
+	
+		<action name="*" method="{1}"
+			class="com.careye.system.action.UserAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+		</action>
+		
+		<!-- 用户导出列表-->
+        <action name="loginLogExport" method="loginLogExport" class="com.careye.system.action.UserAction">
+		   <result name="success" type="stream">
+		    <param name="inputName">downloadFile</param>
+		    <param name="contentType">application/vnd.ms-excel;charset=uft-8</param>
+		    <param name="contentDisposition">attachment;filename="${fileName}"</param>
+		    <param name="bufferSize">2048</param>
+		   </result>
+        </action> 
+		
+	</package>
+	
+</struts>

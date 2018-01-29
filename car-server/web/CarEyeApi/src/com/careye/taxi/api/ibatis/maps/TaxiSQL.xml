@@ -1,0 +1,952 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-TaxiSQL">
+
+	<typeAlias alias="transaction" type="com.careye.taxi.domain.Transaction" />
+	<typeAlias alias="vehicleInfo" type="com.careye.taxi.domain.VehicleInfo" />
+	<typeAlias alias="driverInfo" type="com.careye.taxi.domain.DriverInfo" />
+	<typeAlias alias="tranCustomerCancel" type="com.careye.taxi.domain.TranCustomerCancel" />
+	<typeAlias alias="transactionDetails" type="com.careye.taxi.domain.TransactionDetails" />
+	 <typeAlias alias="customerEvaluation" type="com.careye.api.domain.CustomerEvaluation" />
+	 <typeAlias alias="driverData" type="com.careye.taxi.domain.DriverData" />
+	 <typeAlias alias="shunfengOrder" type="com.careye.taxi.domain.ShunfengOrder" />
+	 <typeAlias alias="shunfengPassengers" type="com.careye.taxi.domain.ShunfengPassengers" />
+	 <typeAlias alias="car_Status" type="com.careye.taxi.domain.CarStatus" />
+	 <typeAlias alias="serviceLicense" type="com.careye.taxi.domain.ServiceLicense" />
+	 <typeAlias alias="multiMedia" type="com.careye.taxi.domain.MultiMedia" />
+	 <typeAlias alias="carInfo" type="com.careye.taxi.domain.CarInfo" />
+	 <typeAlias alias="driverListInfo" type="com.careye.taxi.domain.DriverListInfo" />
+
+	<insert id="addTransaction" parameterClass="transaction">
+		<![CDATA[ 
+		INSERT INTO TO_TRANSACTION_INFO(
+			orderid,
+			cid, 
+			source, 
+			typeid, 
+			phone, 
+			username, 
+			saddress, 
+			slat, 
+			slng, 
+			eaddress, 
+			elat, 
+			elng, 
+			status, 
+			tratype, 
+			carid, 
+			answertime, 
+			starttime, 
+			endtime, 
+			userid, 
+			remark,
+			sex,
+			calltype,
+			filepath,
+			usetime,
+			appointmenttime,
+			createtime
+         ) VALUES (
+			#orderid#, 
+			#cid#, 
+			#source#, 
+			#typeid#, 
+			#phone#, 
+			#usernametwo#, 
+			#saddress#, 
+			#slat#, 
+			#slng#, 
+			#eaddress#, 
+			#elat#, 
+			#elng#, 
+			#status#, 
+			#tratype#, 
+			#carid#, 
+			#answertime#, 
+			to_date(#starttime#,'yyyy-mm-dd hh24:mi:ss'),
+			to_date(#endtime#,'yyyy-mm-dd hh24:mi:ss'),
+			#userid#, 
+			#remark#,
+			#sex#,
+			#calltype#,
+			#filepath#,
+			to_date(#usetime#,'yyyy-mm-dd hh24:mi:ss'),
+			to_date(#appointmenttime#,'yyyy-mm-dd hh24:mi:ss'),
+			to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+		]]>
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_TRANSACTION_INFO_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+
+	</insert>
+	
+	
+	<!-- 获取订单详情--> 
+	<select id="getOrderdetail" resultClass="transaction" parameterClass="String">
+		select t.id,
+		       t.orderid,
+		       t.username,
+		       t.phone,
+		       t.sex,
+		       t.pay,
+		       t.carpool,
+		       t.carpoolpersonnum,
+		       t.saddress,
+		       t.eaddress,
+		       t.slat,
+		       t.slng,
+		       t.resstatus,
+		       t.tratype,
+		       t.status,
+		       t.callfee,
+		       tc.carnumber,
+		       tc.terminal,
+		       t.elat,
+		       t.elng,
+		       t.filepath,
+		       tcp.blng lng,
+		       tcp.blat lat,
+		       t.isup,
+		       
+		       t.isappraise,
+		       t.iscomplaint,
+		       
+		       to_char(t.usetime, 'yyyy-mm-dd hh24:mi') usetime,
+		       nvl(t.callfee, 0.0) callfee,
+		       to_char(t.createtime, 'yyyy-mm-dd hh24:mi') createtime,
+		       to_char(t.answertime, 'yyyy-mm-dd hh24:mi') answertime,
+		       t.processstatus,
+	           tcd.drivername,
+	           tcd.phone driverphone
+	           
+	      from TO_TRANSACTION_INFO t,TO_CAR_INFO tc,to_car_position_info tcp, TO_CAR_DRIVER_INFO tcd
+	       where t.carid = tc.id(+) 
+	       and tc.id = tcp.carid(+)
+	       and tc.drivercode = tcd.drivercode(+)
+		   and orderid=#orderid#
+	</select>
+	
+	<select id="getSimbleOrderdetail" resultClass="transaction" parameterClass="String">
+		select t.id,
+		       di.sscno drivercode,
+		       t.processstatus,
+		       (select count(s.id) from TO_DRIVER_EVALUATION s
+ 				where s.sscno =di.sscno and s.carnumber =tc.carnumber and s.drivername =di.drivername) praise
+		  from TO_TRANSACTION_INFO t,TO_CAR_INFO tc,TO_CAR_DRIVER_INFO di,to_car_position_info tcp
+		   where t.carid = tc.id(+) 
+		   and tc.SHIFTDRIVERID = di.id(+)
+		   and tc.carnumber = tcp.carnumber(+)
+		   and orderid=#orderid#
+	</select>
+	
+     
+	<!-- 根据距离经纬度条件查询车辆信息-->
+	<select id="queryVehicleInfo" resultClass="vehicleInfo" parameterClass="java.util.HashMap">
+			  select rownum,
+			         c.carnumber,
+			         c.color,
+			         t.altitude head,
+			         tb.bloc_name corpname,
+			         t.speed,
+			         t.direction,
+			         t.blng lng,
+			         t.blat lat,
+			         (select drivername from TO_CAR_DRIVER_INFO where carid = c.id and id = 
+			         	(select max(id) from TO_CAR_DRIVER_INFO where carid = c.id)) cname,
+			         (select phone from TO_CAR_DRIVER_INFO where carid = c.id and id = 
+			         	(select max(id) from TO_CAR_DRIVER_INFO where carid = c.id)) driverphone,
+			         c.remark typedesc
+			    from TO_CAR_POSITION_INFO t, TO_CAR_INFO c, TO_BLOC tb,TO_CAR_STATE cs
+			   where t.carid = c.id
+			     and c.blocid = tb.id
+			     and c.id = cs.carid
+				<dynamic>
+					<isNotEmpty prepend="" property="lng">
+					 		<isNotEmpty prepend="" property="lat">
+					 			<isNotEmpty prepend="and" property="mileage">
+					 				<![CDATA[GETDISTANCE(t.blat,t.blng,#lat#,#lng#) <= #mileage#]]>	
+					 			</isNotEmpty>
+							</isNotEmpty>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="maxList">
+			 			<![CDATA[rownum <= #maxList#]]>	
+					</isNotEmpty>
+		        </dynamic>
+		        and cs.carstatus in (4,5,6,7,8)
+	  			 and cs.kzstate = 0
+			     and c.flag = 1
+     </select>
+     
+     <!-- 根据订单号更新订单状态--> 
+	<update id="updateTransactionStatus" parameterClass="transaction">
+		update TO_TRANSACTION_INFO 
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="status">
+			    status = #status#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="resstatus">
+			    resstatus = #resstatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="callfee">
+			    callfee = #callfee#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="isappraise">
+			    isappraise = #isappraise#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="iscomplaint">
+			    iscomplaint = #iscomplaint#
+			</isNotEmpty>
+		</dynamic>
+		where orderid=#orderid# 
+	</update>
+     
+	<!-- 根据车牌号获取驾驶员信息-->
+	<select id="queryDriverInfo" resultClass="driverInfo" parameterClass="String">
+			  select td.id,
+			         td.drivername cname,
+			         (case td.sex when 1 then 'MALE' when 2 then 'FEMALE' end) sex,
+			         td.phone cellphone,
+			         t.carnumber,
+			         t.phone,
+			         t.terminal,
+			         td.drivercode,
+			         tb.bloc_name blocname,
+			         to_char(ts.fztime,'yyyy-mm-dd') fztime,
+			         ts.starlevel,
+			         ts.validity,
+			         ts.picturepath,
+			         ts.version
+			    from TO_CAR_INFO t, TO_CAR_DRIVER_INFO td, TO_SERVICE_LICENSE ts, TO_BLOC tb
+			   where t.id = td.carid and td.blocid = tb.id(+) and td.id = ts.driverid(+)
+			    and t.drivercode = td.drivercode
+			    and t.carnumber = #carnumber#
+				
+     </select>
+     
+     <!-- 根据驾驶员id查询服务证信息 -->
+	<select id="findServiceLicenseByDriverid" resultClass="serviceLicense" parameterClass="string">
+		select 
+				t.id,
+				t.driverid,
+				t.name,
+				to_char(t.registtime,'yyyy-mm-dd') registtime,
+				t.picturepath,
+				t.servicenumber,
+				c.carnumber,
+				to_char(t.fztime,'yyyy-mm-dd') fztime,
+				t.zjstatus,
+				t.starlevel,
+				t.version,
+				t.validity,
+				t.carid,
+				to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		from TO_SERVICE_LICENSE t, to_car_info c  
+		where t.carid = c.id(+) and  t.driverid = #driverid#
+     </select>
+     
+	<!-- 根据车牌号、司机手机号获取驾驶员信息-->
+	<select id="queryDriverInfoByMap" resultClass="driverInfo" parameterClass="java.util.HashMap">
+			select       
+		       tc.drivername cname,
+               t.carnumber,
+               tc.drivecrednum,
+               tb.bloc_name blocname
+               
+          from TO_CAR_INFO t, TO_CAR_DRIVER_INFO tc,TO_BLOC tb 
+         where t.onedriverid = tc.id 
+          and t.blocid = tb.id
+          and tc.phone = #phone#
+          and rownum = 1
+				
+     </select>
+     
+	<!-- 更新订单信息 -->
+	<update id="updateTransaction" parameterClass="transaction">
+		update TO_TRANSACTION_INFO 
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="callfee">
+			    callfee = #callfee#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="status">
+			    status = #status#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="isup">
+			    isup = #isup#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="pay">
+			    pay = #pay#
+			</isNotEmpty>
+		</dynamic>
+		where orderid=#orderid# 
+	</update>
+	
+	
+	<!-- 根据车牌号获取车载手机号码-->
+	<select id="getPhoneByCarnumber" resultClass="String" parameterClass="String">
+		 select  t.phone from TO_CAR_INFO t where  t.carnumber = #carnumber#
+     </select>
+	
+	
+    <!-- 判断订单id是否存在-->
+	<select id="isTcCancelExitsOrderid" resultClass="Integer" parameterClass="String">
+		 select  count(t.id) from TO_TRAN_CUSTOMER_CANCEL t where  t.orderid = #orderid#
+     </select>
+	
+	<select id="getDrivercodeByCarnumber" resultClass="String" parameterClass="String">
+		 select  drivercode from TO_CAR_INFO t where  t.carnumber = #carnumber#
+     </select>
+	
+	
+	<!-- 添加到约车业务乘客取消信息 -->
+	<insert id="addTranCustomerCancel" parameterClass="tranCustomerCancel">
+		<![CDATA[ 
+		INSERT INTO TO_TRAN_CUSTOMER_CANCEL(
+			orderid, 
+			username, 
+			phone, 
+			wy, 
+			remark, 
+			canceltime
+         ) VALUES (
+			#orderid#, 
+			#username#, 
+			#phone#, 
+			#wy#, 
+			#remark#, 
+			to_date(#canceltime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+		]]>
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_TRAN_CUSTOMER_CANCEL_ID_SEQ.NEXTVAL AS  FROM DUAL]]>
+		</selectKey>
+
+	</insert>
+	
+     
+     <!-- 终端号码是否已存在-->
+	<select id="queryTerminalIsExist" resultClass="Integer" parameterClass="String">
+		select count(*) from TO_CAR_INFO  where flag=1 and terminal=#phone#
+	</select>
+	
+     <!-- 司机手机号是否已存在-->
+	<select id="queryPhoneIsExist" resultClass="Integer" parameterClass="String">
+		select max(id) from TO_CAR_DRIVER_INFO  where phone=#phone#
+	</select>
+	
+	<!-- 根据条件得到所有的约车信息calltype=1文本  calltype=2语音-->
+	<select id="getTransactionList" resultClass="transactionDetails"
+		parameterClass="java.util.HashMap">
+		 SELECT
+        a.id, 
+		a.cid, 
+		a.source, 
+		a.phone, 
+		a.username usernametwo, 
+		a.saddress, 
+		a.slat, 
+		a.slng,
+		a.eaddress,
+		a.elat, 
+		a.elng, 
+		a.status, 
+		a.tratype, 
+		a.resstatus, 
+		a.carid, 
+		to_char(a.answertime,'yyyy-mm-dd hh24:mi:ss') answertime,
+		to_char(a.starttime,'yyyy-mm-dd hh24:mi:ss') starttime,
+		to_char(a.endtime,'yyyy-mm-dd hh24:mi:ss') endtime,
+		a.remark,
+		a.callbackphone,
+		a.carpool,
+		a.carpoolpersonnum,
+		decode(a.tratype,'1',to_char(a.appointmenttime,'yyyy-mm-dd hh24:mi:ss') ,'') appointmenttime,
+		a.callfee,
+		a.sex,
+		a.orderid,
+		t.typename,
+		cui.cname,
+		ci.carnumber,
+        to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+        u.user_name  username,
+        a.filepath
+      from TO_TRANSACTION_INFO a,to_bloc_user u,TO_TRANSACTION_TYPE t,to_customer_info cui,to_car_info ci
+      where 1=1
+      <dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="terminal">
+				ci.terminal =#terminal#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="drivercode">
+				a.drivercode =#drivercode#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				a.status =#status#
+			</isNotEmpty>
+			<isEmpty prepend="and" property="status">
+				(a.status = 3 or a.status = 8)
+			</isEmpty>
+		</dynamic> 
+      and  a.userid=u.id(+)
+      and  a.typeid=t.id(+)
+      and  a.cid=cui.id(+)
+      and  a.carid=ci.id(+)
+      order by a.createtime
+      desc 
+	</select>
+
+	<!--  根据条件得到所有的约车信息 数量-->
+	<select id="getTransactionListCount" resultClass="int"
+		parameterClass="java.util.HashMap">
+	  SELECT
+      count(a.id) 
+            from TO_TRANSACTION_INFO a,to_bloc_user u,TO_TRANSACTION_TYPE t,to_customer_info cui,to_car_info ci
+      where 1=1
+      <dynamic>
+           <isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="terminal">
+				ci.terminal =#terminal#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="drivercode">
+				a.drivercode =#drivercode#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				a.status =#status#
+			</isNotEmpty>
+			<isEmpty prepend="and" property="status">
+				(a.status = 3 or a.status = 8)
+			</isEmpty>
+		</dynamic>
+      and  a.userid=u.id(+)
+      and  a.typeid=t.id(+)
+      and  a.cid=cui.id(+)
+      and  a.carid=ci.id(+)
+	</select>
+	
+	<!-- 添加客户评价 -->
+	<insert id="addCustomerEvaluation" parameterClass="customerEvaluation" >
+		<![CDATA[
+			insert into TO_CUSTOMER_EVALUATION
+			  (
+			    orderid,
+				slevel,
+				evalevel,
+				content,
+				createtime
+			   )
+			values
+			  (
+			   #orderid#,
+			   #slevel#,
+			   #evalevel#,
+			   #content#,
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+			  )
+			]]>
+			
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_CUSTOMER_EVALUATION_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!--  根据条件得到服务次数-->
+	<select id="getServiceCount" resultClass="int"
+		parameterClass="java.util.HashMap">
+	  SELECT
+      		count(t.id) servicecount   
+            from TO_TRANSACTION_INFO t, TO_CAR_DRIVER_INFO d
+      where t.drivercode = d.drivercode and d.phone = #cellphone#
+	</select>
+	
+	<!--  根据条件得到好评次数-->
+	<select id="getGoodCount" resultClass="int"
+		parameterClass="java.util.HashMap">
+	  SELECT
+      		count(e.id) goodcount     
+            from  TO_TRANSACTION_INFO t, TO_CAR_DRIVER_INFO d, TO_CUSTOMER_EVALUATION e 
+      where e.orderid in (select id from TO_TRANSACTION_INFO ti where ti.drivercode in 
+      	(select drivercode from TO_CAR_DRIVER_INFO di where di.phone= #cellphone#))
+      	and e.evalevel = 1
+	</select>
+	
+	<!--  根据条件得到司机评价信息-->
+	<select id="getLevel" resultClass="driverData"
+		parameterClass="java.util.HashMap">
+	  SELECT
+      		t.slevel,
+      		t.evalevel
+            from  TO_CUSTOMER_EVALUATION t 
+      where t.orderid = #orderid#
+	</select>
+	
+	<!--  根据条件得到司机评价信息-->
+	<select id="getDriverDataList" resultClass="customerEvaluation"
+		parameterClass="java.util.HashMap">
+	  SELECT
+	  		e.id,
+	  		e.orderid,
+      		e.slevel,
+      		e.evalevel,
+      		e.content,
+      		c.carnumber,
+      		d.drivername,
+      		d.drivercode,
+      		to_char(e.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+            from  TO_TRANSACTION_INFO t, TO_CAR_DRIVER_INFO d, TO_CUSTOMER_EVALUATION e ,TO_CAR_INFO c
+      where e.orderid in (select orderid from TO_TRANSACTION_INFO ti where ti.drivercode in 
+      	(select drivercode from TO_CAR_DRIVER_INFO di where di.phone= #cellphone#))
+      	and e.orderid = t.orderid  and  t.drivercode = d.drivercode  and d.carid = c.id
+	</select>
+	
+	<!--  根据条件得到司机评价信息-->
+	<select id="getDriverDataListCount" resultClass="int"
+		parameterClass="java.util.HashMap">
+	  SELECT
+	  		count(e.id)
+             from  TO_TRANSACTION_INFO t, TO_CAR_DRIVER_INFO d, TO_CUSTOMER_EVALUATION e ,TO_CAR_INFO c
+      where e.orderid in (select orderid from TO_TRANSACTION_INFO ti where ti.drivercode in 
+      	(select drivercode from TO_CAR_DRIVER_INFO di where di.phone= #cellphone#))
+      	and e.orderid = t.orderid  and  t.drivercode = d.drivercode  and d.carid = c.id
+	</select>
+	
+	<!--  根据条件得到客户评价信息-->
+	<select id="getCustomerDataList" resultClass="customerEvaluation"
+		parameterClass="java.util.HashMap">
+	  SELECT
+	  		e.id,
+	  		e.orderid,
+      		e.slevel,
+      		e.evalevel,
+      		e.content,
+      		c.carnumber,
+      		d.drivername,
+      		d.drivercode,
+      		to_char(e.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+            from  TO_TRANSACTION_INFO t, TO_CAR_DRIVER_INFO d, TO_CUSTOMER_EVALUATION e ,TO_CAR_INFO c
+      where e.orderid in (select orderid from TO_TRANSACTION_INFO ti where ti.phone= #phone#)
+      	and e.orderid = t.orderid  and  t.drivercode = d.drivercode  and d.carid = c.id
+      	order by e.createtime desc
+	</select>
+	
+	<!--  根据条件得到客户评价信息总条数-->
+	<select id="getCustomerDataListCount" resultClass="int"
+		parameterClass="java.util.HashMap">
+	  SELECT
+	  		count(e.id)
+             from  TO_TRANSACTION_INFO t, TO_CAR_DRIVER_INFO d, TO_CUSTOMER_EVALUATION e ,TO_CAR_INFO c
+      where e.orderid in (select orderid from TO_TRANSACTION_INFO ti where ti.phone= #phone#)
+      	and e.orderid = t.orderid  and  t.drivercode = d.drivercode  and d.carid = c.id
+	</select>
+	
+	
+	<!--  根据设备号查询车辆id-->
+	<select id="getCaridByTerminal" resultClass="int" parameterClass="String">
+	  SELECT  id  from TO_CAR_INFO where terminal = #terminal#
+	</select>
+	<!--  根据车牌号查询车辆id-->
+	<select id="getCaridByCarnumber" resultClass="int" parameterClass="String">
+	  SELECT  id  from TO_CAR_INFO where carnumber = #carnumber#
+	</select>
+	
+	<!-- 添加顺风车订单 -->
+	<insert id="addShunfengOrder" parameterClass="shunfengOrder" >
+		<![CDATA[
+			insert into TO_SHUNFENG_ORDER
+			  (
+			    carid,
+				remark,
+				orderid,
+				saddress,
+				slat,
+				slng,
+				eaddress,
+				elat,
+				elng,
+				stime,
+				etime,
+				summile,
+				totalfee,
+				ordersatus,
+				createtime
+			   )
+			values
+			  (
+			   #carid#,
+			   #remark#,
+			   #orderid#,
+			   #saddress#,
+			   #slat#,
+			   #slng#,
+			   #eaddress#,
+			   #elat#,
+			   #elng#,
+			   to_date(#stime#,'yyyy-mm-dd hh24:mi:ss'),
+			   to_date(#etime#,'yyyy-mm-dd hh24:mi:ss'),
+			   #summile#,
+			   #totalfee#,
+			   #ordersatus#,
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+			  )
+			]]>
+			
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_SHUNFENG_ORDER_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 添加拼车乘客 -->
+	<insert id="addShunfengPassengers" parameterClass="shunfengPassengers" >
+		<![CDATA[
+			insert into TO_SHUNFENG_PASSENGERS
+			  (
+			    seq,
+				remark,
+				orderid,
+				saddress,
+				slat,
+				slng,
+				eaddress,
+				elat,
+				elng,
+				stime,
+				etime,
+				summile,
+				totalfee,
+				ordersatus,
+				createtime,
+				passagename,
+				phone
+			   )
+			values
+			  (
+			   #seq#,
+			   #remark#,
+			   #orderid#,
+			   #saddress#,
+			   #slat#,
+			   #slng#,
+			   #eaddress#,
+			   #elat#,
+			   #elng#,
+			   to_date(#stime#,'yyyy-mm-dd hh24:mi:ss'),
+			   to_date(#etime#,'yyyy-mm-dd hh24:mi:ss'),
+			   #summile#,
+			   #totalfee#,
+			   #ordersatus#,
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+			   #passagename#,
+			   #phone#
+			  )
+			]]>
+			
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_SHUNFENG_PASSENGERS_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	 <!-- 查询拼车乘客是否存在 -->
+	<select id="shunfengPassengersIsExist" parameterClass="shunfengPassengers" resultClass="int">
+		select	count(*)
+		from TO_SHUNFENG_PASSENGERS 
+		where orderid=#orderid# and seq = #seq#
+	</select>
+	
+	<!-- 修改拼车乘客--> 
+	<update id="updateShunfengPassengers" parameterClass="shunfengPassengers">
+		update TO_SHUNFENG_PASSENGERS set  
+				seq = #seq#,
+				remark = #remark#,
+				orderid = #orderid#,
+				saddress = #saddress#,
+				slat = #slat#,
+				slng = #slng#,
+				eaddress = #eaddress#,
+				elat = #elat#,
+				elng = #elng#,
+				stime = to_date(#stime#,'yyyy-mm-dd hh24:mi:ss'),
+				etime = to_date(#etime#,'yyyy-mm-dd hh24:mi:ss'),
+				summile = #summile#,
+				totalfee = #totalfee#,
+				ordersatus = #ordersatus#,
+				createtime = to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+				passagename = #passagename#,
+				phone = #phone#
+		where orderid=#orderid# and seq=#seq# 
+	</update>
+	
+	<!-- 历史订单列表-->
+	<select id="getHistoryOrderList" resultClass="shunfengOrder" parameterClass="java.util.HashMap">
+		select
+			  id,
+			  remark,
+			  orderid,
+			  saddress,
+			  slat,
+			  slng,
+			  eaddress,
+			  elat,
+			  elng,
+			  to_char(stime,'yyyy-mm-dd hh24:mi:ss') stime,
+			  to_char(etime,'yyyy-mm-dd hh24:mi:ss') etime,
+			  summile,
+			  totalfee,
+			  ordersatus,
+			  to_char(createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		from TO_SHUNFENG_ORDER  
+		where ordersatus = 2 and carid = #carid#
+		<dynamic>
+           <isNotEmpty prepend="and" property="stime">
+				<![CDATA[
+					createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+				<![CDATA[
+					createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		order by createtime desc
+	</select>
+	
+	<!-- 历史订单列表总条数-->
+	<select id="getHistoryOrderListCount" resultClass="int" parameterClass="java.util.HashMap">
+		select
+			  count(id)
+		from TO_SHUNFENG_ORDER  
+		where ordersatus = 2 and carid = #carid#
+		<dynamic>
+           <isNotEmpty prepend="and" property="stime">
+				<![CDATA[
+					createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+				<![CDATA[
+					createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 订单乘客列表-->
+	<select id="getOrderPassengersList" resultClass="shunfengPassengers" parameterClass="java.util.HashMap">
+		select
+			  id,
+			  seq,
+			  remark,
+			  orderid,
+			  saddress,
+			  slat,
+			  slng,
+			  eaddress,
+			  elat,
+			  elng,
+			  to_char(stime,'yyyy-mm-dd hh24:mi:ss') stime,
+			  to_char(etime,'yyyy-mm-dd hh24:mi:ss') etime,
+			  summile,
+			  totalfee,
+			  ordersatus,
+			  to_char(createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+			  passagename,
+			  phone
+		from TO_SHUNFENG_PASSENGERS  
+		where  orderid = #orderid#
+		order by seq
+	</select>
+	
+	<select id="findCarTrackPointList" parameterClass="java.util.HashMap" resultClass="car_Status">
+		<![CDATA[
+		
+		 select 
+		 	   t.carnumber,  
+		       t.blng lng,
+		       t.blat lat,
+		       round(t.speed,2) speed,
+		       t.direction,
+		       t.terminal,
+		       t.carstatus,
+		       t.address,
+		       round(t.mileage,2) mileage,
+		       round(t.summileage,2) summileage,
+		       t.reserve2 alarmname,
+		       t.reserve3 alarmtype,
+		       t.gpstime createtime
+		  from $positiontable$ t
+		 where  blng is not null
+		   and blat is not null
+		   and blng <> 0
+		   and blat <> 0
+		   and gpstime is not null
+		
+		]]>
+		
+	     <isNotEmpty prepend="and" property="stime">
+			 <![CDATA[
+			 t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			 ]]>
+		 </isNotEmpty>
+		<isNotEmpty prepend="and" property="etime">
+			 <![CDATA[
+			 t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+			 ]]>
+		</isNotEmpty>
+		
+		order by t.gpstime desc
+	
+	</select>
+	
+	<!--  根据订单号查询车辆id-->
+	<select id="getCaridByOrderid" resultClass="int" parameterClass="String">
+	  SELECT  carid  from TO_SHUNFENG_ORDER where orderid = #orderid#
+	</select>
+	
+	<!-- 获取车辆信息 -->
+	<select id="getCarInfo" resultClass="carInfo" parameterClass="java.util.HashMap">
+		select t.id,
+				t.blocid,
+				t.userid,
+				t.terminal,
+				t.carnumber,
+				tas.carstatus,
+				tas.dispaterstatus,
+				dt.usertype devicetype,
+				tb.bloc_name blocname
+				from to_car_info t, to_car_state tas, to_car_device_type dt, to_bloc tb
+		where t.id = tas.carid(+)
+			and t.devicetype = dt.typeid(+)
+			and t.blocid = tb.id(+)
+			and t.terminal = #terminal#
+			and dt.usertype = #devicetype#		
+	</select>
+	
+	<!-- 添加多媒体数据 -->
+	<insert id="addMultiMedia" parameterClass="multiMedia">
+		INSERT INTO TO_MULTIMEDIA_INFO
+	      (
+	        blocid,
+			userid,
+			terminal,
+			carid,
+			dataid,
+			mediatype,
+			format,
+			eventcode,
+			accessid,
+			multimediapath,
+			data,
+			msid,
+			mediaid,
+			blng,
+			blat,
+			address,
+			speed,
+			altitude,
+			direction,
+			gpstime,
+	        createtime
+	       )
+	    VALUES
+	      (
+	        #blocid#,
+			#userid#,
+			#terminal#,
+			#carid#,
+			#dataid#,
+			#mediatype#,
+			#format#,
+			#eventcode#,
+			#accessid#,
+			#multimediapath#,
+			#data#,
+			#msid#,
+			#mediaid#,
+			#blng#,
+			#blat#,
+			#address#,
+			#speed#,
+			#altitude#,
+			#direction#,
+			to_date(#gpstime#,'yyyy-mm-dd hh24:mi:ss'),
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+	       )
+	       
+	   	<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_MULTIMEDIA_INFO_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	
+	</insert>
+	
+	
+	<!-- 根据车牌号获取司机信息列表-->
+	<select id="findDriverInfoList" resultClass="driverListInfo" parameterClass="String">
+			  select td.id,
+			         td.drivername cname,
+			         (case td.sex when 1 then 'MALE' when 2 then 'FEMALE' end) sex,
+			         td.phone cellphone,
+			         t.carnumber,
+			         t.phone,
+			         t.terminal,
+			         td.drivercode,
+			         tb.bloc_name blocname,
+			         to_char(ts.fztime,'yyyy-mm-dd') fztime,
+			         ts.starlevel,
+			         ts.validity,
+			         ts.picturepath,
+			         ts.version,
+			         (select count(*) from TO_CAR_INFO t1, TO_CAR_DRIVER_INFO td1 
+			         		where t1.id = td1.carid and t1.drivercode = td1.drivercode 
+			         		and td1.drivercode = td.drivercode and t1.carnumber = #carnumber#) isduty
+			    from TO_CAR_INFO t, TO_CAR_DRIVER_INFO td, TO_SERVICE_LICENSE ts, TO_BLOC tb
+			   where t.id = td.carid and td.blocid = tb.id(+) and td.id = ts.driverid(+)
+			    and t.carnumber = #carnumber#
+				
+     </select>
+     
+     <!-- 根据车牌号查询司机是否存在-->
+	<select id="isExistDriver" resultClass="int" parameterClass="driverListInfo">
+			  select count(*) from TO_CAR_INFO t, TO_CAR_DRIVER_INFO td 
+			         		where t.id = td.carid and td.drivercode = #drivercode#
+			         		and t.carnumber = #carnumber#
+     </select>
+     
+     <!-- 修改当班司机--> 
+	<update id="updateDutyDriver" parameterClass="driverListInfo">
+		update TO_CAR_INFO set  
+				drivercode = #drivercode#
+		where carnumber = #carnumber#
+	</update>
+	
+</sqlMap>
+
+
+
+
+
+
+
+
+

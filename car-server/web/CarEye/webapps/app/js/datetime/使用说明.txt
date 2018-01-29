@@ -1,0 +1,11 @@
+只需要直接引用四个js文件 不过需要按照顺序去引用
+<script type="text/javascript" src="datetime/UX_TimePickerField.js"></script>
+
+<script type="text/javascript" src="datetime/UX_DateTimePicker.js"></script>
+
+<script type="text/javascript" src="datetime/UX_DateTimeMenu.js"></script>
+
+<script type="text/javascript" src="datetime/UX_DateTimeField.js"></script>
+
+
+然后需要将时间的xtype 改为datetimefield

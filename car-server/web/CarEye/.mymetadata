@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="CarEye"
+  id="myeclipse.1401102620765"
+  context-root="/CarEye"
+  j2ee-spec="5.0"
+  archive="CarEye.war">
+  <attributes>
+    <attribute name="webrootdir" value="/webapps" />
+  </attributes>
+</project-module>
+

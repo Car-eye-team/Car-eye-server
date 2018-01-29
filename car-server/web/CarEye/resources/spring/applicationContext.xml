@@ -1,0 +1,367 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:properties/jdbc.properties" />
+	</bean>
+
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<!-- 连接池中可同时连接的最大的连接数，为0则表示没有限制，默认为8 -->
+		<property name="maxActive" value="20" />
+		<!-- 连接池启动时创建的初始化连接数量（默认值为0） -->
+		<property name="initialSize" value="10" />
+		<!-- 超过时间会丟出错误信息 最大等待时间(单位为 ms) 
+		<property name="maxWait" value="60000" />-->
+		<!-- 连接池中最大的空闲的连接数（默认为8,设 0 为没有限制）,超过的空闲连接将被释放，如果设置为负数表示不限制 -->
+		<property name="maxIdle" value="10" />
+		<!-- 连接池中最小的空闲的连接数（默认为0，一般可调整5），低于这个数量会被创建新的连接（该参数越接近maxIdle，性能越好，因为连接的创建和销毁，都是需要消耗资源的；但是不能太大，因为在机器很空闲的时候，也会创建低于minidle个数的连接 -->
+		<property name="minIdle" value="5" />
+		<!-- 超过removeAbandonedTimeout时间后，是否进行没用连接的回收（默认为false) -->
+		<property name="removeAbandoned" value="true" />
+		<!-- 超过时间限制，回收五用的连接（默认为 300秒），removeAbandoned 必须为 true -->
+		<property name="removeAbandonedTimeout" value="180" />
+		 <property name="testOnBorrow" value="true"/>
+         <property name="testWhileIdle" value="true"/> 
+		 <property name="validationQuery" value="select 1 from dual"/> 
+	</bean>
+	
+	<bean id="dataSource1" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName1}" />
+		<property name="url" value="${jdbc.url1}" />
+		<property name="username" value="${jdbc.username1}" />
+		<property name="password" value="${jdbc.password1}" />
+		<!-- 连接池中可同时连接的最大的连接数，为0则表示没有限制，默认为8 -->
+		<property name="maxActive" value="20" />
+		<!-- 连接池启动时创建的初始化连接数量（默认值为0） -->
+		<property name="initialSize" value="10" />
+		<!-- 超过时间会丟出错误信息 最大等待时间(单位为 ms) 
+		<property name="maxWait" value="60000" />-->
+		<!-- 连接池中最大的空闲的连接数（默认为8,设 0 为没有限制）,超过的空闲连接将被释放，如果设置为负数表示不限制 -->
+		<property name="maxIdle" value="10" />
+		<!-- 连接池中最小的空闲的连接数（默认为0，一般可调整5），低于这个数量会被创建新的连接（该参数越接近maxIdle，性能越好，因为连接的创建和销毁，都是需要消耗资源的；但是不能太大，因为在机器很空闲的时候，也会创建低于minidle个数的连接 -->
+		<property name="minIdle" value="5" />
+		<!-- 超过removeAbandonedTimeout时间后，是否进行没用连接的回收（默认为false) -->
+		<property name="removeAbandoned" value="true" />
+		<!-- 超过时间限制，回收五用的连接（默认为 300秒），removeAbandoned 必须为 true -->
+		<property name="removeAbandonedTimeout" value="180" />
+		 <property name="testOnBorrow" value="true"/>
+         <property name="testWhileIdle" value="true"/> 
+		 <property name="validationQuery" value="select 1 from dual"/> 
+	</bean>
+	
+	<bean id="dataSource2" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName2}" />
+		<property name="url" value="${jdbc.url2}" />
+		<property name="username" value="${jdbc.username2}" />
+		<property name="password" value="${jdbc.password2}" />
+		<!-- 连接池中可同时连接的最大的连接数，为0则表示没有限制，默认为8 -->
+		<property name="maxActive" value="20" />
+		<!-- 连接池启动时创建的初始化连接数量（默认值为0） -->
+		<property name="initialSize" value="10" />
+		<!-- 超过时间会丟出错误信息 最大等待时间(单位为 ms) 
+		<property name="maxWait" value="60000" />-->
+		<!-- 连接池中最大的空闲的连接数（默认为8,设 0 为没有限制）,超过的空闲连接将被释放，如果设置为负数表示不限制 -->
+		<property name="maxIdle" value="10" />
+		<!-- 连接池中最小的空闲的连接数（默认为0，一般可调整5），低于这个数量会被创建新的连接（该参数越接近maxIdle，性能越好，因为连接的创建和销毁，都是需要消耗资源的；但是不能太大，因为在机器很空闲的时候，也会创建低于minidle个数的连接 -->
+		<property name="minIdle" value="5" />
+		<!-- 超过removeAbandonedTimeout时间后，是否进行没用连接的回收（默认为false) -->
+		<property name="removeAbandoned" value="true" />
+		<!-- 超过时间限制，回收五用的连接（默认为 300秒），removeAbandoned 必须为 true -->
+		<property name="removeAbandonedTimeout" value="180" />
+		 <property name="testOnBorrow" value="true"/>
+         <property name="testWhileIdle" value="true"/> 
+		 <property name="validationQuery" value="select 1 from dual"/> 
+	</bean>
+	
+	<bean id="dataSource3" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName3}" />
+		<property name="url" value="${jdbc.url3}" />
+		<property name="username" value="${jdbc.username3}" />
+		<property name="password" value="${jdbc.password3}" />
+		<!-- 连接池中可同时连接的最大的连接数，为0则表示没有限制，默认为8 -->
+		<property name="maxActive" value="20" />
+		<!-- 连接池启动时创建的初始化连接数量（默认值为0） -->
+		<property name="initialSize" value="10" />
+		<!-- 超过时间会丟出错误信息 最大等待时间(单位为 ms) 
+		<property name="maxWait" value="60000" />-->
+		<!-- 连接池中最大的空闲的连接数（默认为8,设 0 为没有限制）,超过的空闲连接将被释放，如果设置为负数表示不限制 -->
+		<property name="maxIdle" value="10" />
+		<!-- 连接池中最小的空闲的连接数（默认为0，一般可调整5），低于这个数量会被创建新的连接（该参数越接近maxIdle，性能越好，因为连接的创建和销毁，都是需要消耗资源的；但是不能太大，因为在机器很空闲的时候，也会创建低于minidle个数的连接 -->
+		<property name="minIdle" value="5" />
+		<!-- 超过removeAbandonedTimeout时间后，是否进行没用连接的回收（默认为false) -->
+		<property name="removeAbandoned" value="true" />
+		<!-- 超过时间限制，回收五用的连接（默认为 300秒），removeAbandoned 必须为 true -->
+		<property name="removeAbandonedTimeout" value="180" />
+		 <property name="testOnBorrow" value="true"/>
+         <property name="testWhileIdle" value="true"/> 
+		 <property name="validationQuery" value="select 1 from dual"/> 
+	</bean>
+	
+	<bean id="dataSource4" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName4}" />
+		<property name="url" value="${jdbc.url4}" />
+		<property name="username" value="${jdbc.username4}" />
+		<property name="password" value="${jdbc.password4}" />
+	</bean>
+	
+	<!-- 配置ibatis的配置文件 -->
+	<bean id="sqlMapClient"
+		class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation"
+			value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="sqlMapClient1"
+		class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation"
+			value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource1" />
+	</bean>
+	
+	<bean id="sqlMapClient2"
+		class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation"
+			value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource2" />
+	</bean>
+	
+	<bean id="sqlMapClient3"
+		class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation"
+			value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource3" />
+	</bean>
+	
+	<bean id="sqlMapClient4"
+		class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation"
+			value="classpath:sqlMapConfig.xml" />
+		<property name="dataSource" ref="dataSource4" />
+	</bean>
+	
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="txManager1"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource1" />
+	</bean>
+	
+	<bean id="txManager2"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource2" />
+	</bean>
+	
+	 <!-- 配置事务属性 -->  
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<tx:advice id="txAdvice1" transaction-manager="txManager1">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<tx:advice id="txAdvice2" transaction-manager="txManager2">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:advisor pointcut="execution(* com.careye..*ServiceImpl.*(..))" advice-ref="txAdvice"/>
+		<aop:advisor pointcut="execution(* com.careye.dssservice.*.*(..))" advice-ref="txAdvice1" />
+		<aop:advisor pointcut="execution(* com.careye..*ServiceImpl.*(..))" advice-ref="txAdvice2"/>
+	</aop:config>
+	
+	
+	<!-- 子系统配置文件 -->
+	
+	<!-- 系统定时任务-->
+	<import resource="classpath:spring/applicationContext-job.xml" /> 
+	
+	<!-- mysql鉴权库 -->
+	<!--<import resource="classpath:spring_common/applicationContext-mysql-dssservice.xml" />-->
+	<!-- oracle鉴权库 -->
+	<import resource="classpath:spring_common/applicationContext-oracle-dssservice.xml" />
+	
+	<!-- 公共模块 -->
+	<!-- 菜单树加载 -->
+	<import resource="classpath:spring_common/applicationContext-common.xml" />
+	
+	<!-- 系统管理  -->
+	<!-- 用户组管理  -->
+	<import resource="classpath:spring_system/applicationContext-usergroup.xml" />
+	 <!--系统功能管理 -->
+	<import resource="classpath:spring_system/applicationContext-systemfunction.xml" />
+	 <!--用户管理  -->
+	<import resource="classpath:spring_system/applicationContext-user.xml" />
+	<!-- 用户组管理   -->
+	<import resource="classpath:spring_system/applicationContext-usergroup.xml" />
+	<!-- 组织机构管理 -->
+	<import resource="classpath:spring_system/applicationContext-orgazicationdept.xml" />
+	<!--  权限管理  -->
+	<import resource="classpath:spring_system/applicationContext-authority.xml" />
+	
+	<!-- 车辆管理 start-->
+	<!-- 车辆信息管理 -->
+	<import resource="classpath:spring_car/applicationContext-car.xml" />
+	<!-- 司机信息管理 -->
+	<import resource="classpath:spring_car/applicationContext-cardriver.xml" />
+	<!-- POI管理 -->
+	<import resource="classpath:spring_car/applicationContext-poiinfo.xml" />
+	<!-- 区域管理 -->
+	<import resource="classpath:spring_car/applicationContext-areaset.xml" />
+	<!-- 车辆信息统计 -->
+	<import resource="classpath:spring_car/applicationContext-carcondition.xml" />
+	<!-- 考勤信息 -->
+	<import resource="classpath:spring_car/applicationContext-clock.xml" />
+	<!-- 车辆管理 end-->
+	
+	
+	<!-- 系统设置start -->
+	<!--车辆类型  -->
+	<import resource="classpath:spring_sysset/applicationContext-cartype.xml" />
+	<!--车辆用途  -->
+	<import resource="classpath:spring_sysset/applicationContext-caruse.xml" />
+	<!--类型设置  -->
+	<import resource="classpath:spring_sysset/applicationContext-set.xml" />
+	<!--行政区划管理  -->
+	<import resource="classpath:spring_sysset/applicationContext-region.xml" />
+	<!--电召费用设置  -->
+	<import resource="classpath:spring_sysset/applicationContext-dialfeeset.xml" />
+	<!--电召规则设置  -->
+	<import resource="classpath:spring_sysset/applicationContext-dialrule.xml" />
+	
+	<!--手机客户端设置  -->
+    <!-- 版本管理 -->
+     <import resource="classpath:spring_sysset/applicationContext-appmanage.xml" />
+      <!-- 密钥管理 -->
+     <import resource="classpath:spring_sysset/applicationContext-key.xml" />
+     <!-- 意见反馈 -->
+     <import resource="classpath:spring_sysset/applicationContext-feedbackadvice.xml" />
+     <!-- 视频参数设置 -->
+     <import resource="classpath:spring_sysset/applicationContext-videoparamset.xml" />
+	
+    <!-- 系统设置end -->
+	
+	<!-- 报警信息管理 -->
+	<import resource="classpath:spring_reportforms/applicationContext-alarm.xml" />
+	
+	<!-- 信息管理 start -->
+	<!-- 一键导航 -->
+	<import resource="classpath:spring_message/applicationContext-textinfo.xml" />
+	<import resource="classpath:spring_message/applicationContext-event.xml" />
+	<import resource="classpath:spring_message/applicationContext-question.xml" />
+	
+	<!-- 信息管理 end -->
+	
+	
+	
+	<!-- 客户管理 start -->
+	<!-- 客户信息管理 -->
+	<import resource="classpath:spring_customer/applicationContext-customer.xml" />
+	<!-- 客户来电管理 -->
+	<import resource="classpath:spring_customer/applicationContext-customerinbound.xml" />
+	<!-- 投诉管理 -->
+	<import resource="classpath:spring_customer/applicationContext-complaint.xml" />
+	<!-- 客户管理  end -->
+	
+	<!-- 约车业务管理 start -->
+	<!-- 约车业务信息管理 -->
+	<import resource="classpath:spring_transaction/applicationContext-transaction.xml" />
+	<!-- 乘客人数统计 -->
+	<import resource="classpath:spring_transaction/applicationContext-passagestatistic.xml" />
+	<!-- 司机评价客户 -->
+	<import resource="classpath:spring_transaction/applicationContext-driverevaluation.xml" />
+	<!-- 客户评价 -->
+	<import resource="classpath:spring_transaction/applicationContext-customerevaluation.xml" />
+	
+	
+	<!-- 统计评价 -->
+	<import resource="classpath:spring_transaction/applicationContext-evaluatecount.xml" />
+	
+	<!-- 约车业务管理  end -->
+	
+	
+	<!-- 顺风车订单-->
+	<import resource="classpath:spring_transaction/applicationContext-rideorder.xml" />
+	<!-- 对讲管理-->
+	<import resource="classpath:spring_transaction/applicationContext-intercom.xml" />
+	
+	
+	<!-- 报表管理 start -->
+	<!-- 报表管理 -->
+	<import resource="classpath:spring_statement/applicationContext-statement.xml" />
+	<!-- 多区域管理 -->
+	<import resource="classpath:spring_statement/applicationContext-areamore.xml" />
+	
+	<!-- 电召start -->
+	<!-- 电召业务统计管理 -->
+	<import resource="classpath:spring_statement/applicationContext-transtatement.xml" />
+	<!-- 电召统计 -->
+	<import resource="classpath:spring_statement_oncalltransaction/applicationContext-oncallcount.xml" />
+	<!-- 抢答统计 -->
+	<import resource="classpath:spring_statement_oncalltransaction/applicationContext-answercount.xml" />
+	<!-- 电召end -->
+	
+	<!-- 报表管理  end -->
+	
+	
+	<!-- 监控调度 start -->
+	<!-- 远程控制记录 -->
+	<import resource="classpath:spring_monitor/applicationContext-remotecontrolrecord.xml" />
+	<!-- 调度记录 -->
+	<import resource="classpath:spring_monitor/applicationContext-dispactherrecord.xml" />
+	<!-- 多媒体管理 -->
+	<import resource="classpath:spring_monitor/applicationContext-multimedia.xml" />
+	<!-- 下发日志列表 -->
+	<import resource="classpath:spring_monitor/applicationContext-commondlog.xml" />
+	<!-- 新车上线监控-->
+	<import resource="classpath:spring_monitor/applicationContext-onlinereport.xml" />
+	<!-- 营运信息-->
+	<import resource="classpath:spring_monitor/applicationContext-operatedata.xml" />
+	<!-- 车辆在线率分析-->
+	<import resource="classpath:spring_monitor/applicationContext-onlinerate.xml" />
+	
+	<!-- 监控调度  end -->
+	
+	<!-- 电话管理 -->
+	<!-- 电话回拨管理 -->
+	<import resource="classpath:spring_tel/applicationContext-telcall.xml" />
+	<!-- 设置电话本 -->
+	<import resource="classpath:spring_tel/applicationContext-telbook.xml" />
+	
+	<!-- 行业功能 -->
+    <!-- 广告类型管理 -->
+    <import resource="classpath:spring_advert/applicationContext-adverttype.xml" />
+    <!-- 后枕屏广告-->
+    <import resource="classpath:spring_advert/applicationContext-advertmanage.xml" />
+    <!-- 顶灯广告-->
+    <import resource="classpath:spring_advert/applicationContext-toplight.xml" />
+    <!-- 主机广告-->
+    <import resource="classpath:spring_advert/applicationContext-host.xml" />
+	
+	</beans>

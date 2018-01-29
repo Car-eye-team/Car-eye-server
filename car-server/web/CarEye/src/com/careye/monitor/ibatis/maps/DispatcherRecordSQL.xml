@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-dispatcherRecordSQL">
+
+	<typeAlias alias="dispatcherRecord" type="com.careye.monitor.domain.DispatcherRecord" />
+	<typeAlias alias="dispatcherInfo" type="com.careye.monitor.domain.DispatcherInfo" />
+	<typeAlias alias="carinfo" type="com.careye.car.domain.CarInfo" />
+	
+     
+     <!-- 查询调度记录-->
+	<select id="queryDispatcherRecord" resultClass="dispatcherRecord" parameterClass="dispatcherRecord">
+     select 
+		dr.id, 
+		dr.carnumber, 
+		dr.status, 
+		dr.userid, 
+		to_char(dr.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+		dr.remark, 
+		dr.emergency, 
+        dr.lcd, 
+        dr.tts, 
+        dr.adv, 
+        dr.action,
+		b.bloc_name blocname,
+		ci.blocid,
+		ci.terminal,
+		u.user_name username
+	from  to_dispatcher_record dr,to_car_info ci, to_bloc_user u,to_bloc b
+	where 1=1
+	<dynamic>
+	           <isNotEmpty prepend="and" property="blocid">
+	                     ci.blocid in (SELECT t.id FROM TO_BLOC t 
+	                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+	            </isNotEmpty>  
+	            <isNotNull prepend="and" property="userid" >
+	                     ci.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+	                        (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+	            </isNotNull>  
+				<isNotEmpty property="stime" prepend="and">
+					<![CDATA[ 
+					dr.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+					]]> 
+				</isNotEmpty>
+				<isNotEmpty property="etime" prepend="and">
+					<![CDATA[ 
+					dr.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+					]]> 
+				</isNotEmpty>
+				<isNotEmpty property="carnumber" prepend="and">
+					dr.carnumber like '%'||#carnumber#||'%'
+				</isNotEmpty>
+				<isNotNull property="status" prepend="and">
+					dr.status=#status#
+				</isNotNull>
+	</dynamic>
+	and dr.userid=u.id(+)
+	and dr.carnumber=ci.carnumber(+)
+	and ci.blocid=b.id(+)
+	order by dr.id desc
+    </select>
+     
+    <!-- 查询调度记录数量-->
+	<select id="queryDispatcherRecordCount" resultClass="int" parameterClass="dispatcherRecord">
+    select count(dr.id)
+    from  to_dispatcher_record dr,to_car_info ci, to_bloc_user u,to_bloc b
+	where 1=1
+	<dynamic>
+	           <isNotEmpty prepend="and" property="blocid">
+	                     ci.blocid in (SELECT t.id FROM TO_BLOC t 
+	                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+	            </isNotEmpty>  
+	            <isNotNull prepend="and" property="userid" >
+	                     ci.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+	                        (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+	            </isNotNull>  
+				<isNotEmpty property="stime" prepend="and">
+					<![CDATA[ 
+					dr.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+					]]> 
+				</isNotEmpty>
+				<isNotEmpty property="etime" prepend="and">
+					<![CDATA[ 
+					dr.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+					]]> 
+				</isNotEmpty>
+				<isNotEmpty property="carnumber" prepend="and">
+					dr.carnumber like '%'||#carnumber#||'%'
+				</isNotEmpty>
+				<isNotNull property="status" prepend="and">
+					dr.status=#status#
+				</isNotNull>
+	</dynamic>
+	and dr.userid=u.id(+)
+	and dr.carnumber=ci.carnumber(+)
+	and ci.blocid=b.id(+)
+    </select>
+     
+    
+     <!-- 增加调度信息 -->
+     <insert id="insertDispatcherRecord" parameterClass="dispatcherRecord">
+     <![CDATA[ 
+        insert into TO_DISPATCHER_RECORD(
+			carnumber, 
+			status, 
+			userid, 
+			createtime, 
+			remark, 
+			emergency, 
+			lcd, 
+			tts, 
+			adv, 
+			seq, 
+			action
+        )values(
+			#carnumber#, 
+			#status#, 
+			#userid#, 
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+			#remark#, 
+			#emergency#, 
+			#lcd#, 
+			#tts#, 
+			#adv#, 
+			#seq#, 
+			#action#
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_DISPATCHER_RECORD_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     
+     <!--   **********************  调度信息  ****************************     -->
+     
+     
+      <!-- 查询调度信息-->
+	<select id="queryDispatcherInfo" resultClass="dispatcherInfo" parameterClass="dispatcherInfo">
+	select 
+	di.id, 
+	di.type, 
+	di.userid, 
+	to_char(di.createtime,'yyyy-mm-dd hh24:mi:ss') createtime, 
+	di.remark, 
+	di.emergency, 
+	di.lcd, 
+	di.tts, 
+	di.adv, 
+	di.action,
+	u.user_name username
+	from  to_dispatcher_info di,to_bloc_user u
+	where di.userid=u.id(+)
+	order by di.id desc
+    </select>
+     
+    <!-- 查询调度信息数量-->
+	<select id="queryDispatcherInfoCount" resultClass="int" parameterClass="dispatcherInfo">
+    	select 
+	count(di.id) 
+	from  to_dispatcher_info di,to_bloc_user u
+	where di.userid=u.id(+)
+    </select>
+     
+      <!-- 增加调度信息 -->
+     <insert id="insertDispatcherInfo" parameterClass="dispatcherInfo">
+     <![CDATA[ 
+        insert into TO_DISPATCHER_INFO(
+			type, 
+			userid, 
+			createtime, 
+			remark, 
+			emergency, 
+			lcd, 
+			tts, 
+			adv, 
+			action
+        )values(
+            #type#, 
+			#userid#, 
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+			#remark#, 
+			#emergency#, 
+			#lcd#, 
+			#tts#, 
+			#adv#, 
+			#action#
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_DISPATCHER_INFO_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	 <!-- 更新调度信息 -->
+     <update id="updateDispatcherInfo" parameterClass="dispatcherInfo">
+         update TO_DISPATCHER_RECORD set 
+		            type=#type#, 
+					remark=#remark#, 
+					emergency=#emergency#, 
+					lcd=#lcd#, 
+					tts=#tts#, 
+					adv=#adv#, 
+					action=#action#
+		      WHERE id = #id#
+     </update>
+     
+     <!-- 查询车辆 -->
+     <select id="selectCarInfo" resultClass="carinfo"  parameterClass="java.util.List">
+         select carnumber,terminal from to_car_info  where 
+         <iterate property="" conjunction="," open="id in (" close=")">#list[]#
+		</iterate>
+	</select>
+	
+	 <!-- 判断是否存在的数量 -->
+	 <select id="getJudgeDispatcherInfoCount" resultClass="int" parameterClass="dispatcherInfo">
+        select count(id) from  to_dispatcher_info where  1=1
+                                                     and  emergency=ltrim(rtrim(#emergency#))
+                                                     and  lcd=ltrim(rtrim(#lcd#))
+                                                     and  tts=ltrim(rtrim(#tts#)) 
+                                                     and  adv=ltrim(rtrim(#adv#))
+                                                     and  action=ltrim(rtrim(#action#))
+    </select>
+</sqlMap>

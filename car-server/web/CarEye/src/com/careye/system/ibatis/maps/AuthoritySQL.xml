@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-authoritySQL">
+
+	<typeAlias alias="blocAuthority" type="com.careye.system.domain.BlocAuthority" />
+	<typeAlias alias="menuTree" type="com.careye.common.domain.MenuTree" />
+	
+	<!-- 删除用户组下面所有菜单 -->
+	<delete id="delUserGroupMenu" parameterClass="int">
+		<![CDATA[
+		    delete from  TO_BLOC_AUTHORITY  WHERE BLOC_GROUP_ID = #blocgroupid#
+		]]>
+	</delete>
+	
+	<!-- 删除默认权限表 -->
+	<delete id="delAuthorityMenu">
+		<![CDATA[
+		    delete from  TO_BLOC_DEFAULT_AUTHORITY  
+		]]>
+	</delete>
+	
+	<!-- 添加用户组菜单 -->
+	<insert id="addUserGroupMenu" parameterClass="java.util.List" >
+		<![CDATA[
+			insert into TO_BLOC_AUTHORITY
+			  (BLOC_GROUP_ID,
+			   MENU_ID,
+			   CREATE_TIME,
+			   TYPE
+			   )
+		]]>
+			
+		<iterate conjunction="union all" property="">
+		      <![CDATA[
+		          select
+		              #list[].blocgroupid#,
+		              #list[].menuid#,
+		              to_date(#list[].createtime#, 'yyyy-mm-dd hh24:mi:ss'),
+		              #list[].type#
+		          from dual 
+		      ]]>
+		 </iterate>
+	</insert>
+	
+	<!-- 添加默认权限 -->
+	<insert id="addAuthorityMenu" parameterClass="java.util.List">
+		<![CDATA[ 
+			insert into TO_BLOC_DEFAULT_AUTHORITY
+			  (
+			   MENU_ID,
+			   create_time
+			   )
+		]]>
+		<iterate conjunction="union all" property="">
+		      <![CDATA[
+		          select
+		              #list[].menuid#,
+		              to_date(#list[].createtime#, 'yyyy-mm-dd hh24:mi:ss')
+		          from dual 
+		      ]]>
+		 </iterate>
+	</insert>
+	
+	<!-- 所有菜单树列表 -->
+	<select id="allMenuList" resultClass="menuTree">
+         select  m.menu_id id,
+                  m.PARENT_MENUID parentId,
+                  m.menu_name text,
+                  m.ME_DE_TYPE leaftype
+            from TB_SYS_FUNCTION_MENU m
+           where m.IF_ACTIVATE = 1
+     	  order by id asc,menu_sort asc
+	
+	</select>
+	
+	<!-- 获取父节点下面的子节点 -->
+	<select id="getChildrenMenuId" resultClass="int" parameterClass="int">
+		select menu_id menuid from TB_SYS_FUNCTION_MENU where PARENT_MENUID = #menuid#
+	</select>
+	
+	<!-- 得到用户组的菜单id -->
+	<select id="getUserGroupMenuId" resultClass="int" parameterClass="int">
+		select menu_id menuid from TO_BLOC_AUTHORITY where BLOC_GROUP_ID = #usergroupid#
+	</select>
+	
+	<!-- 得到默认权限菜单 -->
+	<select id="getAuthorityMenuId" resultClass="int" >
+		select menu_id menuid from TO_BLOC_DEFAULT_AUTHORITY 
+	</select>
+	
+	<!-- 按钮菜单列表 -->
+	<select id="getMenuidList" resultClass="Integer" parameterClass="Integer">
+    	  select  m.menu_id 
+            from TB_SYS_FUNCTION_MENU m
+           where m.IF_ACTIVATE = 1  and  m.MENU_TYPE = 1
+           <isNotNull prepend="AND" property="value" >
+		  	   m.menu_id in (select menu_id from TO_BLOC_AUTHORITY where BLOC_GROUP_ID=#usergroupid#)
+  		   </isNotNull>
+		   
+	</select>
+	
+</sqlMap>
+
+
+
+
+
+
+
+
+
+

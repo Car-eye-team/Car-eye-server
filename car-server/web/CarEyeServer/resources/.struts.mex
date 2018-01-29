@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Struts2Diagram version="2.0">
+  <package name="qhtaxi" location="0,0" size="0,0" />
+  <package name="qhtaxijson" location="0,0" size="0,0" />
+  <include file="struts-userLogin.xml" location="0,0" size="0,0" />
+  <include file="struts_system/struts-systemfunction.xml" location="0,0" size="0,0" />
+</Struts2Diagram>
+

@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-MenuTreeSQL">
+
+	<typeAlias alias="menuTree" type="com.careye.common.domain.MenuTree" />
+	<typeAlias alias="menuEntry" type="com.careye.common.domain.MenuEntry" />
+	<typeAlias alias="bloc" type="com.careye.system.domain.Bloc" />
+	<typeAlias alias="baseDomain" type="com.careye.base.action.TreeDomain" />
+	
+	
+	<!-- 实时车辆加载所有车辆树形列表，搜索条件不带车牌号 -->
+	<select id="allCarTreeList" resultClass="menuTree" parameterClass="baseDomain">
+ 	select m.id,
+       m.text,
+       m.parentid,
+       m.carstatus,
+       m.total,
+       m.inline,
+       m.longoffline,
+       (case (select count(*)
+            from (select '' || t.id id, t.bloc_name text, t.parent_id parentid
+                    from TO_BLOC t
+                  union all
+                  select 'C' || c.id id, c.carnumber text, c.blocid parentid
+                    from TO_CAR_INFO c where c.flag=1) n
+           where '' || n.parentid = m.id)
+         WHEN 0 THEN
+          1
+         ELSE
+          0
+       END) leaftype
+    from (select '' || t.id id, t.bloc_name text, t.parent_id parentid,
+    	 (select null from dual) carstatus,
+    	 
+    	  	t.total,
+	 	   (t.total - t.caroffline - t.longoffline) inline,
+		 	t.longoffline
+ 			
+          from TO_BLOC t where 1=1
+          <isNotNull prepend="and" property="userid" >
+			 t.id in (SELECT id FROM TO_BLOC  START WITH id = 
+				(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+   	      </isNotNull>
+   		  <isNotNull prepend="and" property="querydeptid" >
+			  t.id in (SELECT id FROM TO_BLOC  START WITH id = #querydeptid# CONNECT BY PRIOR  parent_id = id ) or
+			  t.id in (SELECT id FROM TO_BLOC  START WITH id = #querydeptid# CONNECT BY PRIOR  id = parent_id )
+   		  </isNotNull>
+        union all
+        select 'C' || c.id id, c.carnumber text, c.blocid parentid , s.carstatus,
+        	(select null from dual) total,
+        	(select null from dual) inline,
+        	(select null from dual) longoffline
+        from TO_CAR_INFO c,TO_CAR_STATE s where c.id = s.carid and c.flag=1
+       	 <isNotNull prepend="and" property="userid" >
+			 c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+				(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+   		  </isNotNull>
+   		  <isNotNull prepend="and" property="querydeptid" >
+			  c.blocid = #querydeptid#
+   		  </isNotNull>
+   		  <isNotNull prepend="and" property="devicetype" >
+			  c.devicetype = #devicetype#
+   		  </isNotNull>
+        ) m
+		order by m.carstatus desc
+	</select>
+	
+	<!-- 实时车辆加载所有车辆树形列表,搜索条件带车牌号 -->
+	<select id="allCarTreeByCarnumberList" resultClass="menuTree" parameterClass="baseDomain">
+ 	select m.id,
+       m.text,
+       m.parentid,
+       m.carstatus,
+       m.total,
+       m.inline,
+       m.longoffline,
+       (case (select count(*)
+            from (select '' || t.id id, t.bloc_name text, t.parent_id parentid
+                    from TO_BLOC t
+                  union all
+                  select 'C' || c.id id, c.carnumber text, c.blocid parentid
+                    from TO_CAR_INFO c where c.flag=1) n
+           where '' || n.parentid = m.id)
+         WHEN 0 THEN
+          1
+         ELSE
+          0
+       END) leaftype
+    from (select '' || t.id id, t.bloc_name text, t.parent_id parentid,
+    	 (select null from dual) carstatus,
+    	 
+    	    (select count(*) from TO_CAR_INFO c where c.flag=1 and c.blocid in 
+		 		(SELECT id FROM TO_BLOC  START WITH id = t.id CONNECT BY PRIOR  id = parent_id )
+					and c.carnumber like '%'||#carnumber#||'%'
+	 		) carcount,
+    	 
+    	  	t.total,
+	 	   (t.total - t.caroffline - t.longoffline) inline,
+		 	t.longoffline
+ 			
+          from TO_BLOC t where 1=1
+          <isNotNull prepend="and" property="userid" >
+			 t.id in (SELECT id FROM TO_BLOC  START WITH id = 
+				(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+   	      </isNotNull>
+   		  <isNotNull prepend="and" property="querydeptid" >
+			  t.id in (SELECT id FROM TO_BLOC  START WITH id = #querydeptid# CONNECT BY PRIOR  parent_id = id ) or
+			  t.id in (SELECT id FROM TO_BLOC  START WITH id = #querydeptid# CONNECT BY PRIOR  id = parent_id )
+   		  </isNotNull>
+        union all
+        select 'C' || c.id id, c.carnumber text, c.blocid parentid , s.carstatus,
+        	(select null from dual) total,
+        	(select null from dual) inline,
+        	(select null from dual) longoffline,
+        	(select null from dual) carcount
+        from TO_CAR_INFO c,TO_CAR_STATE s where c.id = s.carid and c.flag=1
+       	 <isNotNull prepend="and" property="userid" >
+			 c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+				(select BLOC_ID from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+   		  </isNotNull>
+   		  <isNotNull prepend="and" property="querydeptid" >
+			  c.blocid = #querydeptid#
+   		  </isNotNull>
+   		  <isNotNull prepend="and" property="devicetype" >
+			  c.devicetype = #devicetype#
+   		  </isNotNull>
+   		   and c.carnumber like '%'||#carnumber#||'%'
+        ) m
+         where m.carstatus is not null or m.carcount > 0
+		order by m.carstatus desc
+	</select>
+	
+	<!-- 实时车辆树形列表 -->
+	<select id="carTreeList" resultClass="menuTree" parameterClass="baseDomain">
+	
+		<isNull prepend="" property="blocid" >
+		 	select ''||t.id id, t.bloc_name text, t.parent_id parentid,
+		 	(select 0 from dual) leaftype ,
+		 	(select null from dual) carstatus,
+		 	
+			 	t.total,
+		 	   (t.total - t.caroffline - t.longoffline) inline,
+			 	t.longoffline
+	 		
+		          from TO_BLOC t
+		           <isNotNull prepend="and" property="userid" >
+					 t.id in (SELECT id FROM TO_BLOC  START WITH id = 
+						(select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+		   	      </isNotNull>
+		   		  
+		   		  union all
+		   		  
+		   		  select 'C' || c.id id, c.carnumber text, c.blocid parentid ,
+		   		  (select 1 from dual) leaftype,
+		   		   s.carstatus,
+        	(select null from dual) total,
+        	(select null from dual) inline,
+        	(select null from dual) longoffline
+           from TO_CAR_INFO c,TO_CAR_STATE s where c.id = s.carid and c.flag=1
+	        and c.blocid in (select t.id  from TO_BLOC t where 
+	         ((select count(*)
+	           from TO_BLOC
+	          where parent_id = t.id) > 0 
+	          and (select count(*)
+	           from TO_CAR_INFO
+	          where flag=1 and blocid = t.id) >0 ))
+	        
+	    </isNull>
+		
+		<isNotNull prepend="" property="blocid" >
+		select ''||t.id id, t.bloc_name text, t.parent_id parentid,(select null from dual) carstatus,
+		 	(select 0 from dual) leaftype,
+		 	
+		 		t.total,
+		 	   (t.total - t.caroffline - t.longoffline) inline,
+			 	t.longoffline
+		 	
+		 	
+		          from TO_BLOC t
+					 where t.id in (SELECT id FROM TO_BLOC  START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id ) and t.id != #blocid# 
+		   		  union all
+	        select 'C' || c.id id, c.carnumber text, c.blocid parentid , c.carstatus,
+		        (select 1 from dual) leaftype,
+		       (select null from dual) total,
+	            (select null from dual) inline,
+	            (select null from dual) longoffline
+	        from 
+	        (select c.id ,c.carnumber,c.blocid ,s.carstatus from TO_CAR_INFO c,TO_CAR_STATE s where c.flag=1 and c.id = s.carid and 
+	        c.blocid in (SELECT id FROM TO_BLOC  START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id )
+            )  c where 1=1
+		    order by carstatus desc
+		</isNotNull>
+	</select>
+	
+	<!-- 组织机构树形列表 -->
+	<select id="deptTreeList" resultClass="menuTree" parameterClass="bloc">
+ 	 select t.id,t.bloc_name text,t.parent_id parentid,
+    (case (select count(*) from  TO_Bloc where parent_id = t.id) WHEN 0 THEN 1  ELSE 0 END ) leaftype
+     from TO_Bloc  t WHERE 1=1
+            <isNotNull prepend="AND" property="userid" >
+			   t.id in (SELECT id FROM TO_Bloc  START WITH id = 
+				(select bloc_id from  to_bloc_user where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+   		    </isNotNull>
+		    <isNotNull prepend="AND" property="blocname" >
+			   t.bloc_name like '%'||#blocname#||'%'
+   		    </isNotNull>
+   order by t.id 
+	</select>
+	
+	<!-- 按钮菜单列表 -->
+	<select id="getMenuidList" resultClass="Integer" parameterClass="Integer">
+    	  select  m.menu_id
+            from TB_SYS_FUNCTION_MENU m
+           where m.IF_ACTIVATE = 1  and  m.MENU_TYPE = 1
+           <isNotNull prepend="AND" property="value" >
+		  	   m.menu_id in (select menu_id from TO_BLOC_AUTHORITY where BLOC_GROUP_ID=#usergroupid#)
+  		   </isNotNull>
+		   
+	</select>
+	<!-- 菜单下拉列表 -->
+	<select id="getMenuList" resultClass="menuEntry" parameterClass="Integer">
+    	  select  m.menu_id id,
+                  m.parent_menuid parentId,
+                  m.menu_name text,
+                  m.menu_addr hrefTarget
+            from TB_SYS_FUNCTION_MENU m
+           where m.IF_ACTIVATE = 1  and m.MENU_TYPE = 0
+           <dynamic>
+				<isNotEmpty prepend="AND" property="value">
+					m.menu_id in (select menu_id from TO_BLOC_AUTHORITY where BLOC_GROUP_ID=#usergroupid#)
+				</isNotEmpty>
+		   </dynamic>
+     	  order by menu_level asc,menu_sort asc
+	</select>  
+	
+	<!-- 权限下菜单列表 -->
+	<select id="getAuthorityMenu" resultClass="menuEntry" parameterClass="Integer">
+    	  select  m.menu_id id,
+                  m.parent_menuid parentId,
+                  m.menu_name text,
+                  m.menu_addr hrefTarget
+            from TB_SYS_FUNCTION_MENU m
+           where m.IF_ACTIVATE = 1  
+           <dynamic>
+				<isNotEmpty prepend="AND" property="value">
+					m.menu_id in (select menu_id from TO_BLOC_AUTHORITY where BLOC_GROUP_ID=#usergroupid#)
+				</isNotEmpty>
+		   </dynamic>
+     	  order by menu_level asc,menu_sort asc
+	</select>  
+	
+	
+	<!-- 提醒类型树列表 -->
+	<select id="remindTreeList" resultClass="menuTree" >
+    	 select t.ALARMKEY id,t.ALARMNAME text,(select 1 from dual) parentid,(select 1 from dual) leaftype
+     		 from TO_ALARM_TYPE t
+	</select>
+	
+	<!-- 用户下面关闭提醒类型树列表 -->
+	<select id="getRemindCheckedList" resultClass="String" parameterClass="int">
+    	 select category||'' id from TO_ALARM_PROMPT t WHERE userid = #assignuserid# and (category = 3 or category = 4)
+    	 union
+    	 select type id from TO_ALARM_PROMPT t WHERE userid = #assignuserid# and (category = 1 or category = 2)
+	</select>
+	
+	<!-- 得到组织机构根节点 -->
+	<select id="getRootDeptid" resultClass="Integer" >
+    	 select id from TO_BLOC c where c.PARENT_ID = 0
+	</select>
+	
+	<!-- 根据组织机构模糊名得到组织机构id -->
+	<select id="getDeptidByName" resultClass="Integer" parameterClass="String">
+    	 select max(id) from TO_BLOC c where c.bloc_name like '%'||#deptname#||'%'
+	</select>
+	
+	<!-- 统计组织机构下面车辆总数 -->
+	<select id="getTotalCars" resultClass="Integer" parameterClass="baseDomain">
+     select count(*) from TO_CAR_INFO c where flag=1
+ 		<isNotNull prepend="and" property="blocid" >
+			  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+				#blocid# CONNECT BY PRIOR  id = parent_id )
+   		</isNotNull>
+	</select>
+	
+	<!-- 统计组织机构下面车辆在线总数 -->
+	<select id="getInlineCars" resultClass="Integer" parameterClass="baseDomain">
+    <![CDATA[
+     select count(*) from TO_CAR_INFO c,TO_CAR_STATE cs where flag=1 and c.id = cs.carid
+     and cs.carstatus <> 2 and cs.carstatus <> 1
+     ]]>
+ 		<isNotNull prepend="and" property="blocid" >
+			  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+				#blocid# CONNECT BY PRIOR  id = parent_id )
+   		</isNotNull>
+	</select>
+	
+	<!-- 统计组织机构下面车辆长期离线总数 -->
+	<select id="getLongOfflineCars" resultClass="Integer" parameterClass="baseDomain">
+    <![CDATA[
+     select count(*) from TO_CAR_INFO c,TO_CAR_STATE cs where flag=1 and c.id = cs.carid
+     and  cs.carstatus = 1
+     ]]>
+ 		<isNotNull prepend="and" property="blocid" >
+			  c.blocid in (SELECT id FROM TO_BLOC  START WITH id = 
+				#blocid# CONNECT BY PRIOR  id = parent_id )
+   		</isNotNull>
+	</select>
+	
+</sqlMap>
+
+

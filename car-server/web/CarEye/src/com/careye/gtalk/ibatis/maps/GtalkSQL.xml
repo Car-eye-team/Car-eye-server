@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-gtalkSQL">
+
+	<typeAlias alias="gtalkInfo" type="com.careye.gtalk.domain.GtalkInfo" />
+	
+	<select id="getOfuserCount" resultClass="Integer" parameterClass="String">
+	    <![CDATA[
+	    	select count(*) from ofuser t where t.username = #username#
+	     ]]>
+	</select>
+	
+	<!-- 添加用户 -->
+	<insert id="addOfuser" parameterClass="gtalkInfo">
+		<![CDATA[
+			insert into ofuser
+		      (
+		       username,
+		       name,
+		       encryptedPassword,
+		       creationDate,
+		       modificationDate
+		       )
+		    values
+		      (
+		       #username#,
+		       #name#,
+		       #encryptedPassword#,
+		       #creationDate#,
+		       #modificationDate#)
+	       ]]>
+
+	</insert>
+	
+</sqlMap>

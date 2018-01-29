@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-dialFeeSetSQL">
+
+    <typeAlias alias="dialfeeSet" type="com.careye.sysset.domain.DialfeeSet" />
+
+	<!-- 获取电召费用设置分页列表  -->
+	<select id="findPageDialfeeSetList"  resultClass="dialfeeSet" parameterClass="dialfeeSet">
+			  select   t.dialfee, 
+			       t.oilcost, 
+                   t.discount,
+                   to_char(t.effecttime, 'yyyy-MM-dd HH24:mi:ss') effecttime, 
+                   t.userid, 
+                   u.user_name username,
+               to_char(t.createtime, 'yyyy-MM-dd HH24:mi:ss') createtime
+          from TO_DIALFEE_SET t ,to_bloc_user u
+          where  1=1
+          and t.userid=u.id(+)
+		 <dynamic>
+		  </dynamic>
+				 order by t.id desc
+	</select>
+	
+	  <!--获取电召费用设置分页列表数量  -->
+	<select id="findPageDialfeeSetListCount"  resultClass="int" parameterClass="dialfeeSet">
+			select count(*)  
+	         from TO_DIALFEE_SET t ,to_bloc_user u
+	         where  1=1
+	         and t.userid=u.id(+)
+		 <dynamic>
+		  </dynamic>
+	</select>
+	
+	
+	 <!-- 增加电召费用设置信息 -->
+     <insert id="insertDialfeeSet" parameterClass="dialfeeSet">
+     <![CDATA[ 
+        insert into TO_DIALFEE_SET(
+              dialfee, 
+              oilcost, 
+              discount, 
+              effecttime, 
+              userid, 
+              createtime
+        )values(
+	        #dialfee#,
+	        #oilcost#, 
+            #discount#, 
+			to_date(#effecttime#,'yyyy-mm-dd hh24:mi:ss'),
+			#userid#,
+	        to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+         ]]> 
+         <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_DIALFEE_SET_ID_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+     
+     
+     
+     <!-- 获取电召费用设置最新一条记录-->
+	<select id="getDialfeeSetMaxId"  resultClass="dialfeeSet">
+	  select a.id,a.dialfee,a.oilcost,a.discount,to_char(a.effecttime, 'yyyy-MM-dd HH24:mi:ss') effecttime　
+           from (select a.*,row_number()over(order by id desc) rn  
+             from TO_DIALFEE_SET a ) a where rn=1
+	</select>
+</sqlMap>
+
+

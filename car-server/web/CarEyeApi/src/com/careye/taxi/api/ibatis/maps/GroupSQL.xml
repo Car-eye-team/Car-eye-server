@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-GroupSQL">
+
+	 <typeAlias alias="intercomGroup" type="com.careye.taxi.domain.IntercomGroup" />
+	 <typeAlias alias="intercomGroupMember" type="com.careye.taxi.domain.IntercomGroupMember" />
+	 <typeAlias alias="myGroup" type="com.careye.taxi.domain.MyGroup" />
+	 <typeAlias alias="intercomGroupInvite" type="com.careye.taxi.domain.IntercomGroupInvite" />
+	<typeAlias alias="intercomGroupSearch" type="com.careye.taxi.domain.IntercomGroupSearch" />
+	 <typeAlias alias="groupMember" type="com.careye.taxi.domain.GroupMember" />
+
+	
+	<!-- 添加对讲组 -->
+	<insert id="addIntercomGroup" parameterClass="intercomGroup" >
+		<![CDATA[
+			insert into TO_INTERCOM_GROUP
+			  (
+			    carid,
+				name,
+				remark,
+				createtime,
+				lng,
+				lat,
+				blng,
+				blat,
+				baddress,
+				province,
+				city,
+				district
+			   )
+			values
+			  (
+			   #carid#,
+			   #name#,
+			   #remark#,
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss'),
+			   #lng#,
+			   #lat#,
+			   #blng#,
+			   #blat#,
+			   #baddress#,
+			   #province#,
+			   #city#,
+			   #district#
+			  )
+			]]>
+			
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_INTERCOM_GROUP_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!--  删除对讲组 -->
+	<delete id="delIntercomGroup" parameterClass="String">
+		<![CDATA[
+     		DELETE FROM  TO_INTERCOM_GROUP where id = #id#
+     	]]>
+    </delete> 
+    
+	<!--  删除对讲组成员 -->
+	<delete id="deleteIntercomGroupMember" parameterClass="intercomGroupMember">
+		<![CDATA[
+     		DELETE FROM  TO_INTERCOM_GROUP_MEMBER where gid = #gid# and carid = #carid#
+     	]]>
+    </delete> 
+    
+    <!-- 添加对讲组成员 -->
+	<insert id="addIntercomGroupMember" parameterClass="intercomGroupMember" >
+		<![CDATA[
+			insert into TO_INTERCOM_GROUP_MEMBER
+			  (
+			    gid,
+				carid,
+				isadmin,
+				createtime
+			   )
+			values
+			  (
+			   #gid#,
+			   #carid#,
+			   #isadmin#,
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+			  )
+			]]>
+			
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_INTERCOM_GROUP_MEMBER_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!--  根据对讲组id删除对讲组所有成员 -->
+	<delete id="delAllIntercomGroupMember" parameterClass="String">
+		<![CDATA[
+     		DELETE FROM  TO_INTERCOM_GROUP_MEMBER where gid = #id#
+     	]]>
+    </delete> 
+	
+	<!-- 获取我加入的对讲组 -->
+	<select id="myAddGroup" resultClass="myGroup" parameterClass="Integer">
+	    <![CDATA[
+		    select
+		    	t1.name,
+				t1.remark,
+				t2.gid,
+		    	to_char(t2.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		    from TO_INTERCOM_GROUP t1 ,TO_INTERCOM_GROUP_MEMBER t2
+		    where t1.id = t2.gid
+			  and t2.carid = #carid#
+		   order by t2.createtime desc
+	     ]]>
+	</select>
+	
+	<!-- 获取接收申请列表 -->
+	<select id="myInvite" resultClass="intercomGroupInvite" parameterClass="java.util.HashMap">
+	    select
+	    	t1.name,
+			t1.remark,
+			t2.id,
+			t2.gid,
+			t2.carid,
+			(select ci.carnumber from TO_CAR_INFO ci where ci.id=t2.carid) carnumber,
+			t2.isagree,
+	    	to_char(t2.invitetime,'yyyy-mm-dd hh24:mi:ss') invitetime,
+	    	to_char(t2.agreedtime,'yyyy-mm-dd hh24:mi:ss') agreedtime
+	    from TO_INTERCOM_GROUP t1 ,TO_INTERCOM_GROUP_INVITE t2
+	    where t1.id = t2.gid
+		  and t1.carid = #carid#
+		  <isNotEmpty prepend="and" property="isagree">
+ 			isagree = #isagree#
+		  </isNotEmpty>
+	   order by isagree desc ,t2.invitetime desc
+	</select>
+	
+	<!-- 获取组人员信息 -->
+	<select id="getGroupMember" resultClass="groupMember" parameterClass="Integer">
+	    <![CDATA[
+		    select
+		        tc.terminal,
+		        tc.carnumber,
+		        td.drivername,
+		        td.phone driverphone,
+				t.gid,
+				t.carid,
+		    	to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		    from TO_INTERCOM_GROUP_MEMBER t ,TO_CAR_INFO tc,TO_CAR_DRIVER_INFO td
+		    where t.carid = tc.id
+		      and tc.drivercode = td.drivercode(+)
+			  and t.gid = #gid#
+		   order by t.createtime asc
+	     ]]>
+	</select>
+	
+	<!-- 添加对讲组申请信息 -->
+	<insert id="addIntercomGroupInvite" parameterClass="intercomGroupInvite" >
+		<![CDATA[
+			insert into TO_INTERCOM_GROUP_INVITE
+			  (
+			    gid,
+				carid,
+				isagree,
+				remark,
+				invitetime
+			   )
+			values
+			  (
+			   #gid#,
+			   #carid#,
+			   #isagree#,
+			   #remark#,
+			   to_date(#invitetime#,'yyyy-mm-dd hh24:mi:ss')
+			  )
+			]]>
+			
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_INTERCOM_GROUP_INVITE_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+	<!-- 根据组名称搜索对讲组列表 -->
+	<select id="getIntercomGroupList" resultClass="intercomGroupSearch" parameterClass="intercomGroupSearch">
+	    select
+	    	t.id,
+	    	t.carid,
+	    	t.name,
+	    	t.remark,
+	    	(select count(gm.id) from TO_INTERCOM_GROUP_MEMBER gm where gm.gid = t.id and gm.carid = #carid#) isMember,
+	    	to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+	    from TO_INTERCOM_GROUP t 
+	    where 1=1
+		  <isNotEmpty prepend="and" property="name">
+ 			t.name like '%'||#name#||'%'
+		  </isNotEmpty>
+	   order by id
+	</select>
+	
+	<!-- 根据组名称搜索对讲组列表总条数 -->
+	<select id="getIntercomGroupListCount" resultClass="int" parameterClass="intercomGroupSearch">
+	    select
+	    	count(t.id)
+	    from TO_INTERCOM_GROUP t 
+	    where 1=1
+		  <isNotEmpty prepend="and" property="name">
+ 			t.name like '%'||#name#||'%'
+		  </isNotEmpty>
+	</select>
+	
+	<!-- 获取我创建的组 -->
+	<select id="myCreateGroup" resultClass="myGroup" parameterClass="String">
+	    <![CDATA[
+		    select
+		    	t.id gid,
+		    	t.name,
+				t.remark,
+		    	to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		    from TO_INTERCOM_GROUP t
+		    where t.carid = #carid#
+		   order by t.createtime desc
+	     ]]>
+	</select>
+	
+	<!-- 根据设备传入的经纬度、范围（米）搜索周边组接口 -->
+	<select id="getAroundIntercomGroupList" resultClass="intercomGroupSearch" parameterClass="java.util.HashMap">
+	    select
+	    	t.id,
+	    	t.carid,
+	    	(select ci.carnumber from TO_CAR_INFO ci where ci.id=t.carid) carnumber,
+	    	t.name,
+	    	t.remark,
+	    	(select count(gm.id) from TO_INTERCOM_GROUP_MEMBER gm where gm.gid = t.id and gm.carid = #carid#) isMember,
+	    	to_char(t.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,
+	    	t.lng,
+	    	t.lat
+	    from TO_INTERCOM_GROUP t 
+	    where 1=1
+		  <isNotEmpty prepend="and" property="mile">
+			<![CDATA[GETDISTANCE(t.lat,t.lng,#lat#,#lng#) <= #mile#]]>	
+		  </isNotEmpty>
+	   order by id desc
+	</select>
+	
+	<!-- 根据设备传入的经纬度、范围（米）搜索周边组接口 -->
+	<select id="getAroundIntercomGroupListCount" resultClass="int" parameterClass="java.util.HashMap">
+	    select
+	    	count(t.id)
+	    from TO_INTERCOM_GROUP t 
+	    where 1=1
+		  <isNotEmpty prepend="and" property="mile">
+			<![CDATA[GETDISTANCE(t.lat,t.lng,#lat#,#lng#) <= #mile#]]>	
+		  </isNotEmpty>
+	</select>
+	
+	<!-- 查看组成员是否存在 -->
+	<select id="isExistGroupMember" resultClass="int" parameterClass="intercomGroupMember">
+	    select
+	    	count(id)
+	    from TO_INTERCOM_GROUP_MEMBER 
+	    where gid=#gid# and carid=#carid# 
+	</select>
+	
+	 <!-- 修改申请--> 
+	<update id="updateIntercomGroupInvite" parameterClass="intercomGroupInvite">
+		update TO_INTERCOM_GROUP_INVITE set id=#id# 
+		<isNotEmpty prepend="," property="agreedtime">
+		    agreedtime = to_date(#agreedtime#,'yyyy-mm-dd hh24:mi:ss')
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="isagree">
+		    isagree = #isagree#
+		</isNotEmpty>
+		where gid=#gid# and carid=#carid# and id=#id# 
+	</update>
+	
+	<!-- 根据申请id获取对讲组信息 -->
+	<select id="getIntercomGroupDetail" resultClass="intercomGroup" parameterClass="Integer">
+	    <![CDATA[
+		    select
+		    	t.id gid,
+		    	t.name,
+		    	tc.terminal,
+		    	tci.carnumber,
+				t.remark
+		    from TO_INTERCOM_GROUP t,TO_INTERCOM_GROUP_INVITE t1,TO_CAR_INFO tc,TO_CAR_INFO tci
+		    where t.id = t1.gid
+		    and t.carid= tc.id
+		    and t1.carid= tci.id
+		    and t1.id=#inviteid#
+	     ]]>
+	</select>
+	
+</sqlMap>
+
+
+
+
+
+
+
+
+

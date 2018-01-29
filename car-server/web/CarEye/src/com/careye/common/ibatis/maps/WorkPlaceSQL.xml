@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-workplaceSQL">
+
+	<typeAlias alias="workPlace" type="com.careye.common.domain.WorkPlace" />
+
+	
+	<!-- 加载基础数据 -->
+	<select id="loadBasicData" resultClass="workPlace" parameterClass="java.util.HashMap">
+		
+	<![CDATA[
+		select t1.bloccount,t2.carcount,t3.drivercount 
+		  from
+			(select count(*) bloccount from to_bloc c where c.id in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and c.create_time < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+			            ) t1,
+			            
+			(select count(*) carcount from TO_CAR_INFO c where c.blocid in
+				 (SELECT id FROM to_bloc START WITH id =
+				         (select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id = parent_id)
+				   		and c.createtime < to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+			            ) t2,
+			            
+			(select count(*) drivercount from TO_CAR_DRIVER_INFO c where c.blocid in
+				 (SELECT id FROM to_bloc START WITH id =
+				         (select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id = parent_id)
+				   		and c.createtime < to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss')
+			            ) t3
+		]]>	
+	</select>
+	
+	
+	
+	<!-- 加载在线统计 -->
+	<select id="loadOnlineSta" resultClass="workPlace" parameterClass="java.util.HashMap">
+		
+	<![CDATA[
+		select t1.onlinecar,t2.unonlinecar,t3.zhongcar,t4.kongcar
+		  from
+			(select count(*) onlinecar from TO_CAR_STATE c,TO_CAR_INFO tci where c.carid = tci.id(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and tci.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') and c.carstatus in (3,4,5,6,7,8)
+			            ) t1,
+			            
+			(select count(*) unonlinecar from TO_CAR_STATE c,TO_CAR_INFO tci where c.carid = tci.id(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and tci.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') and c.carstatus in (1,2)
+			            ) t2,
+			            
+			(select count(*) zhongcar from TO_CAR_STATE c,TO_CAR_INFO tci where c.carid = tci.id(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and tci.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') and c.kzstate = 1
+			            ) t3,
+			            
+			(select count(*) kongcar from TO_CAR_STATE c,TO_CAR_INFO tci where c.carid = tci.id(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and tci.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') and c.kzstate = 0
+			            ) t4
+		]]>	
+	</select>
+	
+	
+	
+	<!-- 加载营运统计 -->
+	<select id="loadOperationSta" resultClass="workPlace" parameterClass="java.util.HashMap">
+		
+	<![CDATA[
+		select t1.dialordercount,t2.custelcount,t3.operaincome,t4.cashpaycount,t5.cashpaymoney
+		  from
+			(select count(*) dialordercount  from TO_TRANSACTION_INFO a,to_bloc_user u,TO_TRANSACTION_TYPE t,to_customer_info cui,to_car_info ci
+		      where a.userid=u.id(+)
+		      and  a.typeid=t.id(+)
+		      and  a.cid=cui.id(+)
+		      and  a.carid=ci.id(+)
+		      and a.userid = #userid#
+			  and a.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') 
+			            ) t1,
+			            
+			(select count(*) custelcount from TO_CUSTOMER_INBOUND c,TO_BLOC_USER tbu where c.userid = tbu.id(+)
+			            and c.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')  and c.userid = #userid#
+			            ) t2,
+			            
+			(select sum(nvl(income,0)) operaincome from TO_OVERHEADS_STATISTIC c,TO_CAR_INFO tci where c.carid = tci.id(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and tci.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') 
+			            ) t3,
+			            
+			(select count(*) cashpaycount from TO_OPERATE_DATA c,TO_CAR_INFO tci where c.carid = tci.id(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and c.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') 
+			            and c.tradetype in (0,192)
+			            ) t4,
+			            
+			(select nvl(sum(tradeamount),0) cashpaymoney from TO_OPERATE_DATA c,TO_CAR_INFO tci where c.carid = tci.id(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and c.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') 
+			            and c.tradetype in (0,192) 
+			            ) t5
+		]]>	
+	</select>
+	
+	
+	
+	<!-- 加载营运统计 dsocs 数据库部分-->
+	<select id="loadOperationStaForOcs" resultClass="workPlace" parameterClass="java.util.HashMap">
+		
+	<![CDATA[
+		select t1.alipaymoney,t2.alipaycount,t3.weixinmoney,t4.weixincount
+		  from
+		  (select nvl(sum(TOTAL_FEE),0) alipaymoney
+			          from ALIPAY_PRE_PLACE_ORDER_DETAILS c
+			 where c.createtime < to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss') 
+			 and c.TRADE_STATUS  in ('TRADE_SUCCESS','TRADE_FINISHED')
+			            ) t1,
+			            
+			(select count(*) alipaycount
+			          from ALIPAY_PRE_PLACE_ORDER_DETAILS c
+			 where c.createtime < to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss') 
+			 and c.TRADE_STATUS  in ('TRADE_SUCCESS','TRADE_FINISHED')
+
+			            ) t2,
+			            
+			(select nvl(sum(total_fee),0) weixinmoney
+				  from WX_UNIFIEDORDER_DETAILS c
+				 where c.createtime < to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss') 
+				 and c.trade_state  in ('SUCCESS','CLOSED')
+			            ) t3,
+			            
+			(select count(*) weixincount
+				  from WX_UNIFIEDORDER_DETAILS c
+				 where c.createtime < to_date(#createtime#, 'yyyy-mm-dd hh24:mi:ss') 
+				 and c.trade_state  in ('SUCCESS','CLOSED')
+			            ) t4
+		]]>	
+	</select>
+	
+	
+	
+	<!-- 加载服务质量 -->
+	<select id="loadServiceQuality" resultClass="workPlace" parameterClass="java.util.HashMap">
+		
+	<![CDATA[
+		select t1.complaintcount,t2.cusgoodcount,t3.cussecondarycount,t4.cuspoorcount
+		  from
+			(select count(*) complaintcount from TO_COMPLAINT_INFO c,TO_CAR_INFO tci where c.carnumber = tci.carnumber(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and tci.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+			            ) t1,
+			            
+			(select count(*) cusgoodcount from TO_CUSTOMER_EVALUATION c,TO_TRANSACTION_INFO tat,TO_CAR_INFO tci
+ 			where c.orderid = tat.orderid and tat.carid = tci.id(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and c.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') and  c.evalevel = 1
+			            ) t2,
+			            
+			(select count(*) cussecondarycount from TO_CUSTOMER_EVALUATION c,TO_TRANSACTION_INFO tat,TO_CAR_INFO tci
+ 			where c.orderid = tat.orderid and tat.carid = tci.id(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and c.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') and  c.evalevel not in (1,2)
+			            ) t3,
+			            
+			(select count(*) cuspoorcount from TO_CUSTOMER_EVALUATION c,TO_TRANSACTION_INFO tat,TO_CAR_INFO tci
+ 			where c.orderid = tat.orderid and tat.carid = tci.id(+)
+			and tci.blocid in 
+				(SELECT id FROM to_bloc   START WITH id = 
+			            (select bloc_id from  TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR  id = parent_id )
+			            and c.createtime < to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss') and  c.evalevel = 2
+			            ) t4
+		]]>	
+	</select>
+	
+	
+</sqlMap>

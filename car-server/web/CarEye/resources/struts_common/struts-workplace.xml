@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- JSON -->
+		<package name="workplacejson" namespace="/workplacejson" extends="qhtaxijson">
+		<!-- 工作台 -->
+		<!-- 加载全部数据 -->
+		<action name="loadMyData" method="loadMyData" class="com.careye.common.action.WorkPlaceAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+		</action>
+		<!-- 加载基础数据 -->
+		<action name="loadBasicData" method="loadBasicData" class="com.careye.common.action.WorkPlaceAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+		</action>
+		
+		<!-- 加载在线统计-->
+		<action name="loadOnlineSta" method="loadOnlineSta" class="com.careye.common.action.WorkPlaceAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+		</action>
+		
+		<!-- 加载营运统计-->
+		<action name="loadOperationSta" method="loadOperationSta" class="com.careye.common.action.WorkPlaceAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+		</action>
+		
+		<!-- 加载服务质量-->
+		<action name="loadServiceQuality" method="loadServiceQuality" class="com.careye.common.action.WorkPlaceAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+		</action>
+		
+		
+		<!-- 加载运营统计dsocs数据库部分-->
+		<action name="loadOperationStaForOcs" method="loadOperationStaForOcs" class="com.careye.common.action.WorkPlaceAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,data.*</param>
+			</result>
+		</action>
+		
+	</package>
+</struts>

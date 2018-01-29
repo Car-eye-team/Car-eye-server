@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="statementjson" extends="qhtaxijson" namespace="/statement/statementjson">
+	<!-- 统计报表 -->
+	<action name="*" method="{1}"
+			class="com.careye.statement.action.StateMentAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	<!-- Excel报表 -->
+	<action name="exportCheckCarKilo" method="exportCheckCarKilo"
+			class="com.careye.statement.action.StateMentAction">
+	</action>
+	<!-- Excel报表 (ACC状态)-->
+	<action name="exportAccStatus" method="exportAccStatus"
+			class="com.careye.statement.action.StateMentAction">
+	</action>
+	</package>
+	
+</struts>

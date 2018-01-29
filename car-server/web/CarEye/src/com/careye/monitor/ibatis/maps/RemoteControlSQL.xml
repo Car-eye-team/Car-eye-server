@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-remoteControlRecordSQL">
+
+	<typeAlias alias="remoteControl" type="com.careye.monitor.domain.RemoteControl" />
+	<typeAlias alias="terminalSet" type="com.careye.monitor.domain.TerminalSet" />
+	
+     <!-- 添加远程控制记录 -->
+	<insert id="addRemoteControl" parameterClass="remoteControl">
+		<![CDATA[ 
+		insert into TO_REMOTE_CONTROL_RECORD
+		  (
+		   carnumber,
+		   status,
+		   userid,
+		   remark,
+		   type,
+		   seq,
+		   createtime
+		   )
+		values
+		  (
+		   #carnumber#,
+		   #status#,
+		   #userid#,
+		   #remark#,
+		   #type#,
+		   #seq#,
+		   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		  )
+		]]>
+		
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_TERMINAL_PARAM_RECORD_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+     
+     
+       <!-- 查询远程控制记录-->
+	<select id="queryPageRemoteControlRecord" resultClass="remoteControl" parameterClass="remoteControl">
+			select t.id id,t.carnumber carnumber,t.status status,t.userid userid,to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,t.remark remark,t.type type,u.login_name loginname
+			   from TO_REMOTE_CONTROL_RECORD t left join to_bloc_user u on u.id=t.userid
+			 where  1=1
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]> 
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]> 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carnumber like '%'||#carnumber#||'%'
+			</isNotEmpty>
+			<isNotNull property="type" prepend="and">
+				t.type like '%'||#type#||'%'
+			</isNotNull>
+			<isNotNull property="status" prepend="and">
+				t.status=#status#
+			</isNotNull>
+		</dynamic>
+		order by t.id desc
+     </select>
+     
+    <!-- 远程控制记录count-->
+	<select id="queryRemoteControlRecordCount" resultClass="int" parameterClass="remoteControl">
+		<![CDATA[
+			select count(t.id)
+			  from TO_REMOTE_CONTROL_RECORD t
+			 where  1=1
+		]]> 
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]> 
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]> 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carnumber like '%'||#carnumber#||'%'
+			</isNotEmpty>
+			<isNotNull property="type" prepend="and">
+				t.type like '%'||#type#||'%'
+			</isNotNull>
+			<isNotNull property="status" prepend="and">
+				t.status=#status#
+			</isNotNull>
+		</dynamic>
+		order by t.id desc
+     </select>
+     <!-- 添加终端参数设置记录 -->
+	<insert id="addTerminalSet" parameterClass="terminalSet">
+		<![CDATA[ 
+		insert into TO_TERMINAL_PARAM_RECORD
+		  (
+		   carnumber,
+		   status,
+		   userid,
+		   remark,
+		   type,
+		   seq,
+		   createtime
+		   )
+		values
+		  (
+		   #carnumber#,
+		   #status#,
+		   #userid#,
+		   #remark#,
+		   #type#,
+		   #seq#,
+		   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+		  )
+		]]>
+		
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_TERMINAL_PARAM_RECORD_SEQ.NEXTVAL AS id FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+     
+     
+       <!-- 查询终端参数设置记录-->
+	<select id="queryPageTerminalSetRecord" resultClass="terminalSet" parameterClass="terminalSet">
+			select t.id id,t.carnumber carnumber,t.status status,t.userid userid,to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,t.remark remark,t.type type,u.login_name loginname
+			   from TO_TERMINAL_PARAM_RECORD t left join to_bloc_user u on u.id=t.userid
+			 where  1=1
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]> 
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]> 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carnumber like '%'||#carnumber#||'%'
+			</isNotEmpty>
+			<isNotNull property="type" prepend="and">
+				t.type like '%'||#type#||'%'
+			</isNotNull>
+			<isNotNull property="status" prepend="and">
+				t.status=#status#
+			</isNotNull>
+		</dynamic>
+		order by t.id desc
+     </select>
+     
+    <!-- 终端参数设置记录count-->
+	<select id="queryTerminalSetRecordCount" resultClass="int" parameterClass="terminalSet">
+		<![CDATA[
+			select count(t.id)
+			  from TO_TERMINAL_PARAM_RECORD t
+			 where  1=1
+		]]> 
+		<dynamic>
+			<isNotEmpty property="stime" prepend="and">
+				<![CDATA[ 
+				t.createtime >= to_date(#stime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]> 
+			</isNotEmpty>
+			<isNotEmpty property="etime" prepend="and">
+				<![CDATA[ 
+				t.createtime <= to_date(#etime#, 'yyyy-mm-dd hh24:mi:ss')  
+				]]> 
+			</isNotEmpty>
+			<isNotEmpty property="carnumber" prepend="and">
+				t.carnumber like '%'||#carnumber#||'%'
+			</isNotEmpty>
+			<isNotNull property="type" prepend="and">
+				t.type like '%'||#type#||'%'
+			</isNotNull>
+			<isNotNull property="status" prepend="and">
+				t.status=#status#
+			</isNotNull>
+		</dynamic>
+		order by t.id desc
+     </select>
+     
+</sqlMap>

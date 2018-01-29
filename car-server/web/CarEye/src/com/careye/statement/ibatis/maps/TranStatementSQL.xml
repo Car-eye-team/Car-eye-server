@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-transtatementSQL">
+
+	<typeAlias alias="cusCancel" type="com.careye.statement.domain.CusCancel" />
+	<typeAlias alias="carDriverCancel" type="com.careye.statement.domain.CarDriverCancel" />
+	<typeAlias alias="cusBreach" type="com.careye.statement.domain.CusBreach" />
+	<typeAlias alias="terminalFunCount" type="com.careye.statement.domain.TerminalFunCount" />
+	<typeAlias alias="dayuploadCount" type="com.careye.statement.domain.DayuploadCount" />
+	
+	<typeAlias alias="tfc" type="com.careye.statement.domain.TFC" />
+	
+	  <!-- 客户取消查询列表-->
+	<select id="findCusCancelPageList" resultClass="cusCancel" parameterClass="cusCancel">
+		select t.id, 
+		       t.orderid, 
+		       t.username, 
+		       t.phone, 
+		       t.wy, 
+		       t.remark, 
+		       to_char(t.canceltime , 'yyyy-mm-dd hh24:mi:ss') canceltime
+		       from 
+		TO_TRAN_CUSTOMER_CANCEL t
+		where 1=1 
+		<dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.canceltime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.canceltime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		   <isNotEmpty prepend="and" property="username">
+				t.username like  '%$username$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="phone">
+				t.phone like  '%$phone$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="wy">
+				t.wy = #wy#
+			</isNotEmpty>
+		</dynamic>
+		order by t.id desc
+     </select>
+     
+     
+      <!-- 客户取消查询列表总数-->
+	<select id="findCusCancelPageListCount" resultClass="int" parameterClass="cusCancel">
+		select count(t.id)
+		       from 
+		TO_TRAN_CUSTOMER_CANCEL t
+		where 1=1 
+		<dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.canceltime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.canceltime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		   <isNotEmpty prepend="and" property="username">
+				t.username like  '%$username$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="phone">
+				t.phone like  '%$phone$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="wy">
+				t.wy = #wy#
+			</isNotEmpty>
+		</dynamic>
+     </select>
+     
+     
+     
+     
+     
+    <!-- 司机取消查询列表-->
+	<select id="findCarDrviverCancelPageList" resultClass="carDriverCancel" parameterClass="carDriverCancel">
+		select 
+		   t.id, 
+		   t.orderid, 
+		   t.driverid, 
+		   t.carid, 
+		   t.carnumber, 
+		   t.wy, 
+		   t.remark, 
+		   to_char(t.canceltime , 'yyyy-mm-dd hh24:mi:ss') canceltime,
+		   cdi.drivername,
+		   b.bloc_name blocname
+        from 
+		TO_TRAN_Driver_CANCEL t,to_car_driver_info cdi,to_car_info ci,to_bloc b
+		where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.canceltime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.canceltime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		   <isNotEmpty prepend="and" property="carnumber">
+				t.carnumber like  '%$carnumber$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="drivername">
+				cdi.drivername like  '%$drivername$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="blocid">
+                 b.id in (SELECT t.id FROM TO_BLOC t 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+            </isNotEmpty>  
+			<isNotEmpty prepend="and" property="wy">
+				t.wy = #wy#
+			</isNotEmpty>
+		</dynamic>
+			and cdi.blocid=b.id(+)
+			and t.driverid=cdi.id(+)
+			and t.carid=ci.id(+)
+		order by t.id desc
+     </select>
+     
+     
+      <!--  司机取消查询列表总数-->
+	<select id="findCarDrviverCancelPageListCount" resultClass="int" parameterClass="carDriverCancel">
+		select count(t.id)
+        from 
+		TO_TRAN_Driver_CANCEL t,to_car_driver_info cdi,to_car_info ci,to_bloc b
+		where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.canceltime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.canceltime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		   <isNotEmpty prepend="and" property="carnumber">
+				t.carnumber like  '%$carnumber$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="drivername">
+				cdi.drivername like  '%$drivername$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="blocid">
+                 b.id in (SELECT t.id FROM TO_BLOC t 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+            </isNotEmpty>  
+			<isNotEmpty prepend="and" property="wy">
+				t.wy = #wy#
+			</isNotEmpty>
+		</dynamic>
+			and cdi.blocid=b.id(+)
+			and t.driverid=cdi.id(+)
+			and t.carid=ci.id(+)
+     </select>
+     
+     
+     
+	  <!-- 客户违约查询列表-->
+	<select id="findCusBreachPageList" resultClass="cusBreach" parameterClass="cusBreach">
+		select t.id, 
+		       t.orderid, 
+		       t.username, 
+		       t.phone, 
+		       t.wy, 
+		       t.remark, 
+		       to_char(t.canceltime , 'yyyy-mm-dd hh24:mi:ss') canceltime
+		       from 
+		TO_TRAN_CUSTOMER_CANCEL t
+		where 1=1 
+		and t.wy=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.canceltime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.canceltime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		   <isNotEmpty prepend="and" property="username">
+				t.username like  '%$username$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="phone">
+				t.phone like  '%$phone$%'
+			</isNotEmpty>
+		</dynamic>
+		order by t.id desc
+     </select>
+     
+     
+      <!-- 客户违约查询列表总数-->
+	<select id="findCusBreachPageListCount" resultClass="int" parameterClass="cusBreach">
+		select count(t.id)
+		       from 
+		TO_TRAN_CUSTOMER_CANCEL t
+		where 1=1 
+		and t.wy=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.canceltime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.canceltime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		   <isNotEmpty prepend="and" property="username">
+				t.username like  '%$username$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="phone">
+				t.phone like  '%$phone$%'
+			</isNotEmpty>
+		</dynamic>
+     </select>
+     
+     
+     <!-- 终端功能使用查询列表-->
+	<select id="findTerminalFunCountPageList" resultClass="terminalFunCount" parameterClass="terminalFunCount">
+		select t.id, 
+       t.carid, 
+       t.terminal, 
+       t.carnumber, 
+       nvl(t.count1,0) count1, 
+       nvl(t.count2,0) count2, 
+       nvl(t.count3,0) count3, 
+       nvl(t.count4,0) count4, 
+       nvl(t.count5,0) count5, 
+       nvl(t.count6,0) count6, 
+       nvl(t.count7,0) count7, 
+       nvl(t.count8,0) count8, 
+       nvl(t.count9,0) count9, 
+       nvl(t.count10,0) count10, 
+       nvl(t.count11,0) count11, 
+       nvl(t.count12,0) count12, 
+       nvl(t.count13,0) count13, 
+       nvl(t.count14,0) count14, 
+       nvl(t.count15,0) count15, 
+       nvl(t.count16,0) count16, 
+       nvl(t.count17,0) count17, 
+       nvl(t.count18,0) count18, 
+       nvl(t.count19,0) count19, 
+       nvl(t.count20,0) count20, 
+       b.bloc_name blocname
+       from  
+       TO_TERMINAL_FUN_COUNT t,to_car_info  c,to_bloc b
+       where 1=1
+		<dynamic>
+		   <isNotEmpty prepend="and" property="carnumber">
+				t.carnumber like  '%$carnumber$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="terminal">
+				t.terminal like  '%$terminal$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="blocid">
+                b.id in (SELECT t.id FROM TO_BLOC t 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+            </isNotEmpty>  
+		</dynamic>
+		and t.carid=c.id(+)
+        and c.blocid=b.id(+)
+		order by t.id desc
+     </select>
+     
+     
+      <!-- 终端功能使用列表总数-->
+	<select id="findTerminalFunCountPageListCount" resultClass="int" parameterClass="terminalFunCount">
+		select count(t.id)+1
+        from  
+        TO_TERMINAL_FUN_COUNT t,to_car_info  c,to_bloc b
+       where 1=1
+		<dynamic>
+		   <isNotEmpty prepend="and" property="carnumber">
+				t.carnumber like  '%$carnumber$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="terminal">
+				t.terminal like  '%$terminal$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="blocid">
+                b.id in (SELECT t.id FROM TO_BLOC t 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+            </isNotEmpty>  
+		</dynamic>
+		and t.carid=c.id(+)
+        and c.blocid=b.id(+)
+     </select>
+	 <!-- 日上报统计列表-->
+	<select id="findDayuploadList" resultClass="dayuploadCount" parameterClass="dayuploadCount">
+		select t.id, 
+       t.carid, 
+       t.terminal, 
+       t.carnumber, 
+       t.type, 
+       t.numbercount, 
+       t.usinglen, 
+       t.flow, 
+       to_char(to_date(t.time,'yy-mm-dd-hh24-mi-ss'),'yyyy-mm-dd hh24:mi:ss') time,
+       to_char(t.createtime , 'yyyy-mm-dd hh24:mi:ss') createtime,
+       b.bloc_name blocname
+       from  
+       TO_TERMINAL_DAYUPLOAD_COUNT t,to_car_info  c,to_bloc b
+       where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		to_date(t.time,'yy-mm-dd-hh24-mi-ss') >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		to_date(t.time,'yy-mm-dd-hh24-mi-ss') <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		   <isNotEmpty prepend="and" property="carnumber">
+				t.carnumber like  '%$carnumber$%'
+			</isNotEmpty>
+		   <isNotEmpty prepend="and" property="type">
+				t.type =#type#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="terminal">
+				t.terminal like  '%$terminal$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="blocid">
+                b.id in (SELECT t.id FROM TO_BLOC t 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+            </isNotEmpty>  
+		</dynamic>
+		and t.carid=c.id(+)
+        and c.blocid=b.id(+)
+		order by t.id desc
+     </select>
+     
+     
+      <!-- 日上报列表总数-->
+	<select id="findDayuploadListCount" resultClass="int" parameterClass="dayuploadCount">
+		select count(t.id)
+        from  
+        TO_TERMINAL_DAYUPLOAD_COUNT t,to_car_info  c,to_bloc b
+        where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		to_date(t.time,'yy-mm-dd-hh24-mi-ss') >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		to_date(t.time,'yy-mm-dd-hh24-mi-ss') <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		   <isNotEmpty prepend="and" property="carnumber">
+				t.carnumber like  '%$carnumber$%'
+			</isNotEmpty>
+		   <isNotEmpty prepend="and" property="type">
+				t.type =#type#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="terminal">
+				t.terminal like  '%$terminal$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="blocid">
+                b.id in (SELECT t.id FROM TO_BLOC t 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+            </isNotEmpty>  
+		</dynamic>
+		and t.carid=c.id(+)
+        and c.blocid=b.id(+)
+     </select>
+     
+     
+     <!-- 终端功能使用查询列表-->
+	<select id="selTFC" resultClass="tfc" parameterClass="terminalFunCount">
+		select 
+	       sum(nvl(t.count1,0)) as sumcount1, 
+	       sum(nvl(t.count2,0)) as sumcount2, 
+	       sum(nvl(t.count3,0)) as sumcount3, 
+	       sum(nvl(t.count4,0)) as sumcount4, 
+	       sum(nvl(t.count5,0)) as sumcount5, 
+	       sum(nvl(t.count6,0)) as sumcount6, 
+	       sum(nvl(t.count7,0)) as sumcount7, 
+	       sum(nvl(t.count8,0)) as sumcount8, 
+	       sum(nvl(t.count9,0)) as sumcount9, 
+	       sum(nvl(t.count10,0)) as sumcount10, 
+	       sum(nvl(t.count11,0)) as sumcount11, 
+	       sum(nvl(t.count12,0)) as sumcount12, 
+	       sum(nvl(t.count13,0)) as sumcount13, 
+	       sum(nvl(t.count14,0)) as sumcount14, 
+	       sum(nvl(t.count15,0)) as sumcount15, 
+	       sum(nvl(t.count16,0)) as sumcount16, 
+	       sum(nvl(t.count17,0)) as sumcount17, 
+	       sum(nvl(t.count18,0)) as sumcount18, 
+	       sum(nvl(t.count19,0)) as sumcount19, 
+	       sum(nvl(t.count20,0)) as sumcount20 
+       from  
+       TO_TERMINAL_FUN_COUNT t,to_car_info  c,to_bloc b
+       where 1=1
+		<dynamic>
+		   <isNotEmpty prepend="and" property="carnumber">
+				t.carnumber like  '%$carnumber$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="terminal">
+				t.terminal like  '%$terminal$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="blocid">
+                b.id in (SELECT t.id FROM TO_BLOC t 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+            </isNotEmpty>  
+		</dynamic>
+		and t.carid=c.id(+)
+        and c.blocid=b.id(+)
+     </select>
+     
+     
+      <!-- 终端功能使用word导出-->
+	<select id="getTFCWord" resultClass="terminalFunCount" parameterClass="terminalFunCount">
+		select 
+       t.carnumber, 
+       nvl(t.count4,0) count4, 
+       nvl(t.count8,0) count8, 
+       nvl(t.count11,0) count11, 
+       nvl(t.count12,0) count12, 
+       nvl(t.count13,0) count13, 
+       nvl(t.count14,0) count14, 
+       nvl(t.count15,0) count15, 
+       nvl(t.count16,0) count16, 
+       nvl(t.count17,0) count17, 
+       nvl(t.count18,0) count18
+       from  
+       TO_TERMINAL_FUN_COUNT t,to_car_info  c,to_bloc b
+       where 1=1
+		<dynamic>
+		   <isNotEmpty prepend="and" property="carnumber">
+				t.carnumber like  '%$carnumber$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="terminal">
+				t.terminal like  '%$terminal$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="blocid">
+                b.id in (SELECT t.id FROM TO_BLOC t 
+                          START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id)
+            </isNotEmpty>  
+		</dynamic>
+		and t.carid=c.id(+)
+        and c.blocid=b.id(+)
+		order by t.id desc
+     </select>
+</sqlMap>

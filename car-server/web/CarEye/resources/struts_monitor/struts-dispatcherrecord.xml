@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- json包 -->
+	<package name="dispatcherrecordjson" extends="qhtaxijson" namespace="/dispatcherrecord/dispatcherrecordjson">
+	<!-- 调度记录列表 -->
+	<action name="*" method="{1}"
+			class="com.careye.monitor.action.DispatcherRecordAction">
+			<result name="success" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+			<result name="error" type="json">
+				<param name="includeProperties">success,result.*</param>
+			</result>
+	</action>
+	
+	<!-- 调度记录Excel导出 -->
+	<action name="exportDispatcherRecord" method="exportDispatcherRecord"
+			class="com.careye.monitor.action.DispatcherRecordAction">
+	</action>
+	</package>
+	
+</struts>

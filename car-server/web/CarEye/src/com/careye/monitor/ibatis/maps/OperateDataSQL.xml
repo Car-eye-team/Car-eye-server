@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-OperateDataSQL">
+
+	<typeAlias alias="operateData" type="com.careye.monitor.domain.OperateData" />
+
+	<!-- 营运信息查询-->
+	<select id="getOperateDataList" resultClass="operateData"
+		parameterClass="operateData">
+		select 
+			t.id,
+			t.carid,
+			c.blocid,
+			b.bloc_name blocname,
+			c.terminal,
+			t.kalarminfo,
+			t.kstateinfo,
+			t.klat,
+			t.klng,
+			t.kaltitude,
+			t.kspeed,
+			t.kdirection,
+			t.ktime,
+			t.zalarminfo,
+			t.zstateinfo,
+			t.zlat,
+			t.zlng,
+			t.zaltitude,
+			t.zspeed,
+			t.zdirection,
+			t.ztime,
+			t.runid,
+			t.peoplenumber,
+			t.evaluateid,
+			t.options,
+			t.carnumber,
+			t.companycode,
+			t.drivercode,
+			t.driverid,
+			t.stime,
+			t.etime,
+			t.mileage,
+			t.airmileage,
+			t.fuelsurcharge,
+			t.waitingtime,
+			t.tradeamount,
+			t.vehicletrips,
+			t.tradetime,
+			t.tradetype,
+			t.cardtype,
+			t.cardoem,
+			t.csn,
+			t.tradecardno,
+			t.tradeseq,
+			t.samno,
+			t.samseq,
+			t.cardtradeamount,
+			t.tradebalance,
+			t.extend,
+			t.kaddress,
+			t.zaddress,
+	        to_char(t.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime
+	     from TO_OPERATE_DATA t, TO_CAR_INFO c, TO_BLOC b
+	     where t.carid = c.id(+) and c.blocid = b.id(+)
+	     <dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id ))
+			   	    </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="carnumber">
+					 	t.carnumber  like '%'||#carnumber#||'%'
+					</isNotEmpty>
+			<isNotEmpty prepend="and" property="terminal">
+					 		t.carid in (select id from to_car_info where terminal  like '%'||#terminal#||'%')
+					</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.createtime desc
+	</select>
+	
+	<!-- 营运信息查询总条数-->
+	<select id="getOperateDataListCount" resultClass="int" parameterClass="operateData">
+		select 
+			count(t.id)
+	     from TO_OPERATE_DATA t, TO_CAR_INFO c, TO_BLOC b
+	     where t.carid = c.id(+) and c.blocid = b.id(+)
+	     <dynamic>
+			<isNotNull prepend="and" property="userid">
+				t.carid in (select id from to_car_info where blocid in (SELECT id FROM TO_BLOC START WITH id =
+				(select bloc_id from TO_BLOC_USER where id = #userid#) CONNECT BY PRIOR id
+				= parent_id ))
+			   	    </isNotNull>
+			  <isNotEmpty prepend="and" property="blocid">
+					  t.carid in ( select id from to_car_info where	blocid in (SELECT t.id FROM TO_BLOC t 
+					 		START WITH id = #blocid# CONNECT BY PRIOR  id = parent_id))
+				</isNotEmpty>
+			<isNotEmpty prepend="and" property="carnumber">
+					 	t.carnumber  like '%'||#carnumber#||'%'
+					</isNotEmpty>
+			<isNotEmpty prepend="and" property="terminal">
+					 		t.carid in (select id from to_car_info where terminal  like '%'||#terminal#||'%')
+					</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		t.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		t.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+</sqlMap>

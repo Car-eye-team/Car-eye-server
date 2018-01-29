@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-advertTypeSQL">
+
+	<typeAlias alias="advertType" type="com.careye.advert.domain.AdvertType" />
+	
+	<!-- 列表 -->
+	<select id="getAdvertTypeList"  resultClass="advertType" parameterClass="advertType">
+		select 
+				id,
+				typename,
+				to_char(createtime,'yyyy-mm-dd hh24:mi:ss') createtime
+		
+		from TO_ADVERT_TYPE where 1=1
+		<dynamic>
+			<isNotEmpty prepend="AND" property="typename">
+				typename like '%'||#typename#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+					createtime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					createtime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+			</isNotEmpty>
+		</dynamic>
+		order by id desc
+	</select>
+	
+	<!-- 数量 -->
+	<select id="getAdvertTypeListCount" resultClass="int" parameterClass="advertType">
+		select count(*) 
+			from TO_ADVERT_TYPE
+			where 1=1
+			<dynamic>
+			<isNotEmpty prepend="AND" property="typename">
+				typename like '%'||#typename#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stime">
+				<![CDATA[
+					createtime >=  to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+			    ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="etime">
+					<![CDATA[
+					createtime <=  to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 是否存在 -->
+	<select id="nameIsExist" parameterClass="advertType" resultClass="int">
+		select count(*) from TO_ADVERT_TYPE  where  typename = #typename#
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[
+					id <> #id#
+			    ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 修改-->
+     <update id="updateType" parameterClass="advertType">
+         update TO_ADVERT_TYPE SET
+		        typename = #typename#
+         WHERE id = #id#
+     </update>
+	
+	<!-- 添加-->
+     <insert id="saveType" parameterClass="advertType">
+         insert into TO_ADVERT_TYPE(
+	              typename,
+                  createtime
+               )
+          values(
+         	   #typename#,
+         	   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+             )
+           <selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_ADVERT_TYPE_SEQ.CURRVAL AS id FROM DUAL]]>
+		</selectKey>
+     </insert>
+	
+	<!-- 删除 -->
+     <delete id="deleteAdvertType">
+         delete from TO_ADVERT_TYPE where id=#id#
+     </delete>
+     
+     
+     <!-- 是否被使用-->
+     <select id="queryAdvert" resultClass="int"  parameterClass="int">
+		select count(*) from TO_ADVERT_CONTENT  where typeid = #id#
+	 </select>
+    
+	
+</sqlMap>
+
+
+
+
+
+
+

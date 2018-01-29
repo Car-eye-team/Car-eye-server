@@ -1,0 +1,261 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	 <!-- 定时获取全部车辆信息至本地缓存   -->
+	<bean name="carInfoJob" class="com.careye.job.CarInfoJob"></bean>
+	
+	<bean id="methodInvokingCarInfoJob"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="carInfoJob" />
+		</property>
+		<property name="targetMethod">
+			<value>startJob</value>
+		</property>
+	</bean>
+	
+	<bean id="carInfoJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="methodInvokingCarInfoJob" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0/2 * * * ?</value> 
+		</property>
+	</bean>
+	
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+	            <ref local="carInfoJobTrigger" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- 多媒体数据检测  -->
+	<bean name="multimediaData" class="com.careye.job.MultimediaDataJob"></bean>
+
+	<bean id="methodInvokingJobMultimediaData"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="multimediaData" />
+		</property>
+		<property name="targetMethod">
+			<value>startJob</value>
+		</property>
+	</bean>
+
+	<bean id="multimediaDataJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="methodInvokingJobMultimediaData" />
+		</property>
+		<property name="cronExpression">
+			<value>0/5 * * * * ?</value>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="multimediaDataJobTrigger" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- 自动任务更新组织机构下面车辆在线离线数量  -->
+	<bean name="deptCarCount" class="com.careye.job.DeptCarCountJob"></bean>
+
+	<bean id="methodInvokingJobDeptCarCount"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="deptCarCount" />
+		</property>
+		<property name="targetMethod">
+			<value>startJob</value>
+		</property>
+	</bean>
+
+	<bean id="deptCarCountJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="methodInvokingJobDeptCarCount" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0/5 * * * ?</value>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="deptCarCountJobTrigger" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- 检测车辆在线状态  -->
+	<bean name="carOnlineStatus" class="com.careye.job.CarOnlineStatusJob"></bean>
+
+	<bean id="methodInvokingCarOnlineStatusJob"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="carOnlineStatus" />
+		</property>
+		<property name="targetMethod">
+			<value>startJob</value>
+		</property>
+	</bean>
+
+	<bean id="carOnlineStatusJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="methodInvokingCarOnlineStatusJob" />
+		</property>
+		<property name="cronExpression">
+			<!--<value>0/300 * * * * ?</value>-->
+			<value>0 0/5 0-23 * * ?</value>
+			<!-- <value>0 0 8,12,18,23 * * ?</value> -->
+		</property>
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="carOnlineStatusJobTrigger" />
+			</list>
+		</property>
+	</bean>
+
+
+
+	<!-- 离线时间超过7天，状态变成长离线 -->
+	<bean name="carOffLine" class="com.careye.job.CarOffLineJob"></bean>
+
+	<bean id="methodInvokingCarOffLineJob"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="carOffLine" />
+		</property>
+		<property name="targetMethod">
+			<value>startJob</value>
+		</property>
+	</bean>
+
+	<bean id="carOffLineJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="methodInvokingCarOffLineJob" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0 8,12,23 * * ?</value>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="carOffLineJobTrigger" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- 检测订单是否超时  -->
+	<bean name="orderOutdateCheck" class="com.careye.job.OrderOutdateCheckJob"></bean>
+
+	<bean id="methodInvokingOrderOutdateJob"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="orderOutdateCheck" />
+		</property>
+		<property name="targetMethod">
+			<value>startJob</value>
+		</property>
+	</bean>
+
+	<bean id="orderOutdateCheckJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="methodInvokingOrderOutdateJob" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0/5 0-23 * * ?</value>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="orderOutdateCheckJobTrigger" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- 车辆信息统计  -->
+	<bean name="carCondition" class="com.careye.job.CarConditionJob"></bean>
+
+	<bean id="methodInvokingCarConditionJob"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="carCondition" />
+		</property>
+		<property name="targetMethod">
+			<value>startJob</value>
+		</property>
+	</bean>
+
+	<bean id="carConditionJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="methodInvokingCarConditionJob" />
+		</property>
+		<property name="cronExpression">
+			<value>0 5 0 * * ?</value>
+		</property>
+	</bean>
+
+	<bean id="carCondition2JobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="methodInvokingCarConditionJob" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="carConditionJobTrigger" />
+				<ref local="carCondition2JobTrigger" />
+			</list>
+		</property>
+	</bean>
+
+	<!--
+		预约业务在线状态 <bean name="reservationService"
+		class="com.careye.job.ReservationServiceJob"></bean> <bean
+		id="methodInvokingReservationServiceJob"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject"> <ref bean="reservationService" />
+		</property> <property name="targetMethod"> <value>startJob</value>
+		</property> </bean> <bean id="reservationServiceJobTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail"> <ref
+		bean="methodInvokingReservationServiceJob" /> </property> <property
+		name="cronExpression"> <value>0 0/1 0-23 * * ?</value> </property>
+		</bean> <bean
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers"> <list> <ref
+		local="reservationServiceJobTrigger" /> </list> </property> </bean>
+	-->
+</beans>
+
+	<!--
+		<value>0 0/100 * * * ?</value> 附表： "0 0 12 * * ?" 每天中午12 点触发 "0 15 10
+		? * *"每天上午10:15 触发 "0 15 10 ** ?" 每天上午10:15 触发 "0 15 10 * * ? *"
+		每天上午10:15 触发 "0 15 10 * * ? 2005"2005 年的每天上午10:15 触发 "0 * 14 * *
+		?"在每天下午2 点到下午2:59 期间的每1 分钟触发 "0 0/5 14 * * ?"在每天下午2 点到下午2:55 期间的每5
+		分钟触发 "0 0/5 14,18 * * ?"在每天下午2 点到2:55期间和下午6 点到6:55 期间的每5 分钟触发 "0 0-5
+		14 * * ?"在每天下午2 点到下午2:05 期间的每1 分钟触发 "0 10,44 14 ? 3 WED"
+		每年三月的星期三的下午2:10 和2:44 触发 "0 15 10 ? * MON-FRI"周一至周五的上午10:15 触发 "0 15
+		10 15 * ?" 每月15 日上午10:15 触发 "0 15 10 L * ?"每月最后一日的上午10:15 触发 "0 15 10
+		? * 6L" 每月的最后一个星期五上午10:15 触发 "0 15 10 ? *6L 2002-2005" 2002 年至2005
+		年的每月的最后一个星期五上午10:15 触发 "0 15 10 ? * 6#3"每月的第三个星期五上午10:15 触发 至于每个符号
+		看看例子就好了. 很简单.
+	-->

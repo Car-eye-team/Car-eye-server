@@ -1,0 +1,56 @@
+/* CSS Document */
+@charset "utf-8"; 
+body{
+ margin:0px;
+ padding:0px;
+ font-family:"宋体",Arial;
+ color:#003366;
+ font-size:12px;
+ background-color:#fff;
+ }
+#container ul{
+   margin:0px;
+   padding:0px;
+   width:600px;
+}
+
+#container ul li{
+ float:left;
+ height:25px;
+ list-style:none;
+ line-height:26px;
+ background-image: url(../../images/lyzbtn00001_02.jpg)!important;
+ background-repeat: repeat-x;
+ }
+
+
+#container .head{
+   height:30px;
+   background-color:#D7E3F3;
+   line-height:30px;
+   color:#123A66;
+   text-align:center;
+   border-bottom:1px solid #99BCE8;
+}
+
+#container .content1{
+	list-style-image:url(../../images/icon004.gif)!important;
+}
+#container .content1:hover {
+	list-style-image:url(../../images/icon002.jpg)!important;
+}
+#container .content:hover{
+	cursor: pointer;
+	color: red;
+}
+
+
+
+#container li .download{
+	background-image: url(../../images/down.jpg)!important;
+	background-repeat: no-repeat;
+}
+#container li .search{
+	background-image: url(../../images/index_search_btn.jpg)!important;
+	background-repeat: no-repeat;
+}

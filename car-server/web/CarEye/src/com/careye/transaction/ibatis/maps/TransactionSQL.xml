@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+	<!-- Always ensure to use the correct XML header as above! -->
+<sqlMap namespace="oracle-transactionSQL">
+
+	<typeAlias alias="transaction" type="com.careye.transaction.domain.Transaction"/>
+	<typeAlias alias="transactionType" type="com.careye.transaction.domain.TransactionType"/>
+	<typeAlias alias="transactionAnswer" type="com.careye.transaction.domain.TransactionAnswer"/>
+
+
+
+	<!-- 根据车牌获取最新信息-->
+	<select id="queryLastOrderInfo" resultClass="transaction" parameterClass="String">
+		select *
+			  from (SELECT a.id,
+			               a.orderid,
+			               to_char(a.createtime, 'yyyy-mm-dd hh24:mi:ss') createtime,
+			               a.source,
+			               a.tratype,
+			               a.status,
+			               a.pay,
+			               a.username usernametwo,
+			               a.phone,
+			               a.saddress,
+			               a.eaddress,
+			               to_char(a.answertime, 'yyyy-mm-dd hh24:mi:ss') answertime,
+			               driver.drivername
+			          from TO_TRANSACTION_INFO a,
+			               to_car_info         ci,
+			               TO_CAR_DRIVER_INFO  driver
+			         where 1 = 1
+			           and a.carid = ci.id(+)
+			           and ci.drivercode = driver.drivercode(+)
+			           and ci.carnumber = #carnumber#
+			         order by a.createtime desc)
+			 where rownum = 1
+	</select>
+	
+	<!-- 根据条件得到所有的约车信息calltype=1文本  calltype=2语音-->
+	<select id="getAllTransaction" resultClass="transaction"
+		parameterClass="transaction">
+		 SELECT
+        a.id, 
+		a.cid, 
+		a.source, 
+		a.typeid, 
+		a.phone, 
+		a.username usernametwo, 
+		a.saddress, 
+		a.slat, 
+		a.slng, 
+		a.eaddress, 
+		a.elat, 
+		a.elng, 
+		a.status, 
+		a.tratype, 
+		a.resstatus, 
+		a.carid, 
+		to_char(a.answertime,'yyyy-mm-dd hh24:mi:ss') answertime,
+		to_char(a.starttime,'yyyy-mm-dd hh24:mi:ss') starttime,
+		to_char(a.endtime,'yyyy-mm-dd hh24:mi:ss') endtime,
+		a.userid, 
+		a.remark,
+		a.callbackphone,
+		a.carpool,
+		a.carpoolpersonnum,
+		decode(a.tratype,'1',to_char(a.appointmenttime,'yyyy-mm-dd hh24:mi:ss') ,'') appointmenttime,
+		a.callfee,
+		a.sex,
+		a.orderid,
+		t.typename,
+		cui.cname,
+		ci.carnumber,
+        to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name  username,
+        
+        a.isup,
+        to_char(a.usetime,'yyyy-mm-dd hh24:mi:ss') usetime,
+        a.pay,
+        a.calltype,
+        a.filepath,
+        driver.drivername
+      from TO_TRANSACTION_INFO a,to_bloc_user u,TO_TRANSACTION_TYPE t,to_customer_info cui,to_car_info ci,TO_CAR_DRIVER_INFO driver
+      where 1=1
+      <dynamic>
+      		<isNotEmpty prepend="and" property="orderid">
+					 a.orderid like  '%$orderid$%'
+			</isNotEmpty>
+      		<isNotEmpty prepend="and" property="phone">
+					 a.phone like  '%$phone$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.answertime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.answertime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime1">
+					 	<![CDATA[
+					 		a.starttime >= to_date(#stime1#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime1">
+					 	<![CDATA[
+					 		a.starttime <= to_date(#etime1#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime2">
+					 	<![CDATA[
+					 		a.endtime >= to_date(#stime2#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime2">
+					 	<![CDATA[
+					 		a.endtime <= to_date(#etime2#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="carpool">
+				a.carpool =#carpool#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="typeid">
+				a.typeid =#typeid#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="tratype">
+				a.tratype =#tratype#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				a.status =#status#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="source">
+				a.source =#source#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="resstatus">
+				a.resstatus =#resstatus#
+			</isNotEmpty>
+		    <isNotEmpty prepend="and" property="ids">
+			    a.typeid in
+               <iterate property="ids"  conjunction="," open="(" close=")">#ids[]#</iterate>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="calltype">
+				a.calltype =#calltype#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userid">
+				a.userid =#userid#
+			</isNotEmpty>
+		</dynamic>
+      and  a.userid=u.id(+)
+      and  a.typeid=t.id(+)
+      and  a.cid=cui.id(+)
+      and  a.carid=ci.id(+)
+      and ci.drivercode = driver.drivercode(+)
+      order by a.createtime
+      desc 
+	</select>
+
+	<!--  根据条件得到所有的约车信息 数量-->
+	<select id="getAllTransactionCount" resultClass="int"
+		parameterClass="transaction">
+	  SELECT
+      count(a.id) 
+            from TO_TRANSACTION_INFO a,to_bloc_user u,TO_TRANSACTION_TYPE t,to_customer_info cui,to_car_info ci,TO_CAR_DRIVER_INFO driver
+      where 1=1
+      <dynamic>
+      		<isNotEmpty prepend="and" property="orderid">
+					 a.orderid like  '%$orderid$%'
+			</isNotEmpty>
+      		<isNotEmpty prepend="and" property="phone">
+					 a.phone like  '%$phone$%'
+			</isNotEmpty>
+            <isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.answertime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.answertime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime1">
+					 	<![CDATA[
+					 		a.starttime >= to_date(#stime1#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime1">
+					 	<![CDATA[
+					 		a.starttime <= to_date(#etime1#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="stime2">
+					 	<![CDATA[
+					 		a.endtime >= to_date(#stime2#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime2">
+					 	<![CDATA[
+					 		a.endtime <= to_date(#etime2#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="carpool">
+				a.carpool =#carpool#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="tratype">
+				a.tratype =#tratype#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="typeid">
+				a.typeid =#typeid#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				a.status =#status#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="source">
+				a.source =#source#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="resstatus">
+				a.resstatus =#resstatus#
+			</isNotEmpty>
+		    <isNotEmpty prepend="and" property="ids">
+			    a.typeid in
+               <iterate property="ids"  conjunction="," open="(" close=")">#ids[]#</iterate>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="calltype">
+				a.calltype =#calltype#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userid">
+				a.userid =#userid#
+			</isNotEmpty>
+		</dynamic>
+      and  a.userid=u.id(+)
+      and  a.typeid=t.id(+)
+      and  a.cid=cui.id(+)
+      and  a.carid=ci.id(+)
+      and ci.drivercode = driver.drivercode(+)
+	</select>
+	
+	
+	<!-- 判断是否是最近的一次约车记录-->
+	<select id="queryTransactionIsNew" resultClass="int" parameterClass="transaction">
+	    select max(t.id) from to_transaction_info t where phone=#phone#
+	</select>
+	
+
+	<!--  添加约车信息 -->
+	<insert id="addTransaction" parameterClass="transaction">
+		<![CDATA[ 
+		INSERT INTO TO_TRANSACTION_INFO(
+			orderid,
+			cid, 
+			source, 
+			typeid, 
+			phone, 
+			username, 
+			saddress, 
+			slat, 
+			slng, 
+			eaddress, 
+			elat, 
+			elng, 
+			status, 
+			tratype, 
+			carid, 
+			answertime, 
+			starttime, 
+			endtime, 
+			useTime,
+			appointmenttime,
+			userid, 
+			remark,
+			createtime
+         ) VALUES (
+			#orderid#, 
+			#cid#, 
+			#source#, 
+			#typeid#, 
+			#phone#, 
+			#usernametwo#, 
+			#saddress#, 
+			#slat#, 
+			#slng#, 
+			#eaddress#, 
+			#elat#, 
+			#elng#, 
+			#status#, 
+			#tratype#, 
+			#carid#, 
+			#answertime#, 
+			to_date(#starttime#,'yyyy-mm-dd hh24:mi:ss'),
+			to_date(#endtime#,'yyyy-mm-dd hh24:mi:ss'),
+			to_date(#usetime#,'yyyy-mm-dd hh24:mi:ss'),
+			to_date(#appointmenttime#,'yyyy-mm-dd hh24:mi:ss'),
+			#userid#, 
+			#remark#,
+			to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+		]]>
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_TRANSACTION_INFO_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+
+	<!--  删除约车信息 -->
+	<delete id="delTransaction" parameterClass="java.util.List">
+     DELETE FROM TO_TRANSACTION_INFO where
+    <iterate property=""  conjunction="," open="id in (" close=")">#list[]#</iterate>
+    </delete> 
+    
+    
+	<!-- 修改约车信息 -->
+	<update id="updateTransaction" parameterClass="transaction">
+		UPDATE TO_TRANSACTION_INFO set
+				cid=#cid#, 
+				typeid=#typeid#,
+				tratype=#tratype#, 
+				phone=#phone#, 
+				username=#usernametwo#, 
+				saddress=#saddress#, 
+				slat=#slat#, 
+				slng=#slng#, 
+				<isNotEmpty prepend="" property="eaddress">
+				 	eaddress=#eaddress#,
+				</isNotEmpty>
+				elat=#elat#, 
+				elng=#elng#, 
+				resstatus=#resstatus#,
+				remark=#remark#
+			WHERE id = #id#
+	</update>
+
+
+
+    <!-- 根据id得到约车对象 -->
+	<select id="getTransactionById" resultClass="transaction"
+			parameterClass="int">
+		    SELECT
+        a.id, 
+		a.cid, 
+		a.source, 
+		a.typeid, 
+		a.phone, 
+		a.username usernametwo, 
+		a.saddress, 
+		a.slat, 
+		a.slng, 
+		a.eaddress, 
+		a.elat, 
+		a.elng, 
+		a.status, 
+		a.tratype, 
+		a.resstatus, 
+		a.carid, 
+		a.answertime, 
+		a.starttime, 
+		a.endtime, 
+		a.userid, 
+		a.remark,
+		t.typename,
+		cui.cname,
+		ci.carnumber,
+        to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name  username
+      from TO_TRANSACTION_INFO a,to_bloc_user u,TO_TRANSACTION_TYPE t,to_customer_info cui,to_car_info ci
+      where 1=1
+			  and  a.id=#id#
+		      and  a.userid=u.id(+)
+		      and  a.typeid=t.id(+)
+		      and  a.cid=cui.id(+)
+		      and  a.carid=ci.id(+)
+		</select>
+		
+    <!-- ###################### 约车类型       ###################### -->
+     <!-- 得到所有下拉约车类型信息 -->
+    <select id="selTransactionTypeList" resultClass="transactionType">
+	  select id,typename  from  TO_TRANSACTION_TYPE 
+	</select>
+		
+	<!-- 根据条件得到所有的约车类型信息-->
+	<select id="getAllTransactionType" resultClass="transactionType"
+		parameterClass="transactionType">
+		SELECT
+      a.id, 
+      a.typename, 
+      a.remark, 
+      a.userid, 
+      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name username 
+      from TO_TRANSACTION_TYPE a,to_bloc_user u
+      where 1=1  
+      <dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="typename">
+					 a.typename like  '%$typename$%'
+			</isNotEmpty>
+		</dynamic>
+		and  a.userid=u.id(+)
+        order by a.createtime
+	    desc 
+	</select>
+
+	<!--  根据条件得到所有的约车类型信息 数量-->
+	<select id="getAllTransactionTypeCount" resultClass="int"
+		parameterClass="transactionType">
+	 SELECT
+	   count(a.id) 
+      from TO_TRANSACTION_TYPE a,to_bloc_user u
+      where 1=1  
+      <dynamic>
+			<isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		a.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		a.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="typename">
+					 a.typename like  '%$typename$%'
+			</isNotEmpty>
+		</dynamic>
+		and  a.userid=u.id(+)
+	</select>
+
+	<!--  添加约车类型信息 -->
+	<insert id="addTransactionType" parameterClass="transactionType">
+		<![CDATA[ 
+		INSERT INTO TO_TRANSACTION_TYPE(
+                typename, 
+                remark, 
+                userid, 
+                createtime
+         ) VALUES (
+               #typename#, 
+               #remark#, 
+               #userid#, 
+			   to_date(#createtime#,'yyyy-mm-dd hh24:mi:ss')
+        )
+		]]>
+		<selectKey resultClass="Integer" keyProperty="id">
+  			<![CDATA[SELECT TO_TRANSACTION_TYPE_ID_SEQ.CURRVAL AS  FROM DUAL]]>
+		</selectKey>
+	</insert>
+	
+
+	<!--  删除约车类型信息 -->
+	<delete id="delTransactionType" parameterClass="java.util.List">
+     DELETE FROM TO_TRANSACTION_TYPE where
+    <iterate property=""  conjunction="," open="id in (" close=")">#list[]#</iterate>
+    </delete> 
+    
+    <select id="getTransactionCountById" resultClass="int"
+			parameterClass="int">
+	  SELECT
+      count(a.id)
+      from TO_TRANSACTION_INFO a
+      where 1=1  
+      and  a.typeid=#typeid#
+	</select>	
+    
+	<!-- 修改约车类型信息 -->
+	<update id="updateTransactionType" parameterClass="transactionType">
+		UPDATE TO_TRANSACTION_TYPE set
+			    typename=#typename#, 
+			    remark=#remark#
+			WHERE id = #id#
+	</update>
+
+    <!-- 查询当前约车类型名称是否存在-->
+	<select id="queryTransactionTypeNameIsExits" resultClass="int" parameterClass="transactionType">
+	    select count(a.id) from  TO_TRANSACTION_TYPE  a  where  a.typename=rtrim(ltrim(#typename#))
+	    <dynamic>
+			<isNotEmpty prepend="and" property="id">
+				<![CDATA[ id <> #id# ]]>
+			</isNotEmpty>
+		  </dynamic>
+	</select>
+	 <!-- 根据id得到约车类型对象 -->
+	<select id="getTransactionTypeById" resultClass="transactionType"
+			parameterClass="int">
+        SELECT
+      a.id, 
+      a.typename, 
+      a.remark, 
+      a.userid, 
+      to_char(a.createtime,'yyyy-mm-dd hh24:mi:ss') createtime,u.user_name username 
+      from TO_TRANSACTION_TYPE a,to_bloc_user u
+      where 1=1 
+        and  a.id=#id# 
+		and  a.userid=u.id(+)
+	</select>	
+	
+	<!-- 获取最后一次约车信息-->
+	<select id="loadLastTransaction" resultClass="transaction" parameterClass="String">
+		 SELECT
+        a.id t_id, 
+        a.cid,
+		a.typeid t_typeid, 
+		a.phone t_phone, 
+		a.saddress, 
+		a.slat, 
+		a.slng, 
+		a.eaddress, 
+		a.elat, 
+		a.elng, 
+		a.status, 
+		a.tratype, 
+		a.resstatus, 
+		a.carid, 
+		a.username, 
+		a.remark t_remark,
+		to_char(a.useTime, 'yyyy-mm-dd hh24:mi:ss') usetime,
+		t.typename,
+		cui.cname
+      from TO_TRANSACTION_INFO a,TO_TRANSACTION_TYPE t,to_customer_info cui
+      where a.phone = #phone#
+      and  a.typeid=t.id(+)
+      and  a.cid=cui.id(+)
+      and a.id =(select max(id) from TO_TRANSACTION_INFO where phone = #phone#)
+	</select>
+	
+	
+	
+	<!-- **********************************************     -->
+	
+    <!-- 根据条件得到所有的抢单信息-->
+	<select id="getAllTransactionAnswer" resultClass="transactionAnswer"
+		parameterClass="transactionAnswer">
+      select 
+             t.blocid,
+             t.userid,
+             t.password,
+             t.phone,
+             t.province,
+             t.city,
+             t.district,
+             t.devicetype,
+             t.remark,
+            
+             s.bloc_name blocname,
+             dt.usertype ,
+             dt.typename,
+             cs.carstatus,
+             tcu.usename,
+             tct.typename cartypename,
+             tcd.drivername drivername1,
+             
+             a.cnname provincename,
+             b.cnname cityname,
+             c.cnname districtname,
+             ta.orderid,
+             ta.id,
+             ta.terminal,
+             ta.carnumber,
+             ta.zbstatus isbidwin,
+             to_char(ta.createtime, 'yyyy-mm-dd hh24:mi:ss') sendtime
+        from TO_CAR_INFO t, TO_BLOC s, TO_CAR_DEVICE_TYPE dt,TO_CAR_USE tcu,
+             TO_CAR_STATE cs,TO_CAR_TYPE tct,TO_CAR_DRIVER_INFO tcd,
+             to_transaction_answer ta,to_transaction_info ti,
+               tb_city_info                  a,
+               tb_city_info                  b,
+               tb_city_info                  c
+       where 1=1
+        <dynamic>
+            <isNotEmpty prepend="and" property="stime">
+					 	<![CDATA[
+					 		ta.createtime >= to_date(#stime#,'yyyy-mm-dd hh24:mi:ss')
+					 	]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="etime">
+					 	<![CDATA[
+					 		ta.createtime <= to_date(#etime#,'yyyy-mm-dd hh24:mi:ss')
+					 	 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="carnumber">
+				ta.carnumber =#carnumber#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="orderid">
+				ta.orderid =#orderid#
+			</isNotEmpty>
+		</dynamic>
+         and t.blocid = s.id(+)
+         and t.province = a.szcode(+)
+         and t.city = b.szcode(+)
+         and t.district = c.szcode(+)
+         and t.devicetype = dt.typeid(+)
+         and t.id = cs.carid(+)
+         and t.cartype = tct.id(+)
+         and t.caruse = tcu.id(+)
+         and ti.drivercode = tcd.drivercode(+)
+         and ta.orderid=ti.orderid(+)
+         and ta.carid=t.id(+)
+         order by ta.createtime desc 
+	</select>
+
+	<!--  根据条件得到所有的抢单信息 数量-->
+	<select id="getAllTransactionAnswerCount" resultClass="int"
+		parameterClass="transactionAnswer">
+	  select 
+		count(ta.id) 
+     from TO_CAR_INFO t, to_transaction_answer ta
+       where ta.carid=t.id
+         and ta.orderid =#orderid#
+	</select>
+	
+    
+    
+</sqlMap>
+
+
+

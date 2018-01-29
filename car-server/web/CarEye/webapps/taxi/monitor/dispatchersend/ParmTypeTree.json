@@ -1,0 +1,264 @@
+{
+	"text" : "终端参数设置",
+	"children" : [{
+				"text" : "服务器设置",
+				"children" : [{
+							"text" : "主服务器APN",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "11",
+							"parentId" : "1"
+						},{
+							"text" : "主服务器地址,IP或域名",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "12",
+							"parentId" : "1"
+						},{
+							"text" : "备份服务器APN",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "13",
+							"parentId" : "1"
+						},{
+							"text" : "备份服务器地址,IP或域名",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "14",
+							"parentId" : "1"
+						},{
+							"text" : "服务器TCP端口",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "15",
+							"parentId" : "1"
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "1",
+				"parentId" : "0"
+			}, {
+				"text" : "道路运输证",
+				"children" : [{
+							"text" : "道路运输证IC卡认证主服务器IP地址或域名",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "21",
+							"parentId" : "2"
+						},{
+							"text" : "道路运输证IC卡认证主服务器TCP端口",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "22",
+							"parentId" : "2"
+						},{
+							"text" : "道路运输证IC卡认证主服务器UDP端口",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "23",
+							"parentId" : "2"
+						},{
+							"text" : "道路运输证IC卡认证备份服务器IP地址",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "24",
+							"parentId" : "2"
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "2",
+				"parentId" : "0"
+			},{
+				"text" : "汇报时间间隔",
+				"children" : [{
+							"text" : "驾驶员未登录汇报时间间隔，单位为秒（s）",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "31",
+							"parentId" : "3"
+						},{
+							"text" : "休眠时汇报时间间隔，单位为秒（s）",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "32",
+							"parentId" : "3"
+						},{
+							"text" : "紧急报警时汇报时间间隔，单位为秒（s）",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "33",
+							"parentId" : "3"
+						},{
+							"text" : "缺省时间汇报间隔，单位为秒（s）",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "34",
+							"parentId" : "3"
+						},{
+							"text" : "缺省距离汇报间隔，单位为米（m）",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "35",
+							"parentId" : "3"
+						},{
+							"text" : "驾驶员未登录汇报距离间隔，单位为米（m）",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "36",
+							"parentId" : "3"
+						},{
+							"text" : "休眠时汇报距离间隔，单位为米（m）",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "37",
+							"parentId" : "3"
+						},{
+							"text" : "紧急报警时汇报距离间隔，单位为米（m）",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "38",
+							"parentId" : "3"
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "3",
+				"parentId" : "0"
+			},{
+				"text" : "电话/短信",
+				"children" : [{
+							"text" : "监控平台电话号码",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "41",
+							"parentId" : "4"
+						},{
+							"text" : "复位电话号码",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "42",
+							"parentId" : "4"
+						},{
+							"text" : "恢复出厂设置电话号码",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "43",
+							"parentId" : "4"
+						},{
+							"text" : "监控平台SMS电话号码",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "44",
+							"parentId" : "4"
+						},{
+							"text" : "接收终端SMS文本报警号码",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "45",
+							"parentId" : "4"
+						},{
+							"text" : "终端电话接听策略",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "46",
+							"parentId" : "4"
+						},{
+							"text" : "每次最长通话时间",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "47",
+							"parentId" : "4"
+						},{
+							"text" : "当月最长通话时间",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "48",
+							"parentId" : "4"
+						},{
+							"text" : "监听电话号码",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "49",
+							"parentId" : "4"
+						},{
+							"text" : "监管平台特权短信号码",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "4A",
+							"parentId" : "4"
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "4",
+				"parentId" : "0"
+			},{
+				"text" : "报警设置",
+				"children" : [{
+							"text" : "最高速度",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "51",
+							"parentId" : "5"
+						},{
+							"text" : "超速持续时间",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "52",
+							"parentId" : "5"
+						},{
+							"text" : "连续驾驶时间门限",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "53",
+							"parentId" : "5"
+						},{
+							"text" : "当天累计驾驶时间门限",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "54",
+							"parentId" : "5"
+						},{
+							"text" : "最小休息时间",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "55",
+							"parentId" : "5"
+						},{
+							"text" : "最长停车时间",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "56",
+							"parentId" : "5"
+						},{
+							"text" : "超速报警预警差值",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "57",
+							"parentId" : "5"
+						},{
+							"text" : "疲劳驾驶预警差值",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "58",
+							"parentId" : "5"
+						},{
+							"text" : "碰撞报警参数设置",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "59",
+							"parentId" : "5"
+						},{
+							"text" : "侧翻报警参数设置",
+							"leaf" : true,
+							"expanded" : false,
+							"id" : "5A",
+							"parentId" : "5"
+						}],
+				"leaf" : false,
+				"expanded" : true,
+				"id" : "5",
+				"parentId" : "0"
+			}],
+	"leaf" : false,
+	"expanded" : true,
+	"id" : "0"
+}
