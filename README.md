@@ -24,7 +24,7 @@ https://github.com/Car-eye-team/Car-eye-OBD/tree/master/Car-Eye-DTU
 # 通信网络
 
 car-eye-server 与其他外围设备之间的通信网络
-![](https://github.com/Car-eye-team/Car-eye-server/tree/master/car-server/doc/raw/master/车辆管理平台.jpg)
+![](https://github.com/Car-eye-team/Car-eye-server/blob/master/car-server/doc/%E8%BD%A6%E8%BE%86%E7%AE%A1%E7%90%86%E5%B9%B3%E5%8F%B0.jpg)
 
 
 # 联系我们
