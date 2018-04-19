@@ -29,11 +29,11 @@ car-eye-server 与其他外围设备之间的通信网络
 
 # 联系我们
 
-car-eye 开源官方网址：www.car-eye.cn;    
+car-eye 开源官方网址：www.car-eye.cn    
 
 car-eye 流媒体平台网址：www.liveoss.com  
 
-car-eye 技术官方邮箱:support@car-eye.cn
+car-eye 技术官方邮箱: support@car-eye.cn
 
 car-eye技术交流QQ群: 590411159        
 
