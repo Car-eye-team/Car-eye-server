@@ -36,7 +36,7 @@ car-eye 流媒体平台网址：www.liveoss.com
 car-eye 技术支持官方邮箱:support@car-eye.cn
 
 car-eye技术交流QQ群: 590411159
-![](https://github.com/Car-eye-team/Car-eye-server/blob/master/car-server/doc/%E8%BD%A6%E8%BE%86%E7%AE%A1%E7%90%86%E5%B9%B3%E5%8F%B0.jpg)  
+![](https://github.com/Car-eye-team/Car-eye-server/blob/master/car-server/doc/QQ.jpg)  
 
 
 CopyRight©  car-eye 开源团队 2018
