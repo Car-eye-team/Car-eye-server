@@ -12,10 +12,12 @@ car-eye 服务器主要包含车辆设备管理平台,采用最先进的架构�
 
 
 # API 接口
-请参考doc目录下客户端API接口文档.doc 实现对外接口，我们有一个windows实现的car-eye client 与平台之间通信，相关代码可以从下面地址获得：
-https://github.com/Car-eye-team/Car-eye-client
-在android下实现平台跟car-eye-server进行通信和管理：https://github.com/Car-eye-team/Car-eye-device
-在linux环境下实现GPS上传到car-eye-server:
+请参考doc目录下客户端API接口文档.doc 实现对外接口。
+windows实现的car-eye client 与平台之间通信，相关代码可以从下面地址获得：    
+https://github.com/Car-eye-team/Car-eye-client    
+在android下实现平台跟car-eye-server进行通信和管理：    
+https://github.com/Car-eye-team/Car-eye-device    
+在linux环境下实现GPS上传到car-eye-server:    
 https://github.com/Car-eye-team/Car-eye-OBD/tree/master/Car-Eye-DTU
 
 
