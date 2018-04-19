@@ -8,18 +8,28 @@ car-eye 服务器主要包含车辆设备管理平台,采用最先进的架构�
 ![架构](https://github.com/Car-eye-team/Car-eye-server/blob/master/car-server/doc/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84.png)
 
 # 操作说明
-
-
+请参考doc目录下的web平台操作手册.doc 使用平台，参考doc目录下的用户创建操作说明.docx 创建一个新用户
 
 
 # API 接口
-![API接口](https://github.com/Car-eye-team/Car-eye-server/blob/master/car-server/doc/%E5%AE%A2%E6%88%B7%E7%AB%AFAPI%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3.doc)
+请参考doc目录下客户端API接口文档.doc 实现对外接口，我们有一个windows实现的car-eye client 与平台之间通信，相关代码可以从下面地址获得：
+https://github.com/Car-eye-team/Car-eye-client
+在android下实现平台跟car-eye-server进行通信和管理：https://github.com/Car-eye-team/Car-eye-device
+在linux环境下实现GPS上传到car-eye-server:
+https://github.com/Car-eye-team/Car-eye-OBD/tree/master/Car-Eye-DTU
+
+
+# 通信网络
+
+car-eye-server 与其他外围设备之间的通信网络
+
+
+
 
 
 # 联系我们
 
 car-eye 开源官方网址：www.car-eye.cn; car-eye开源源码下载网址：https://github.com/Car-eye-team 有关car-eye 问题咨询可以加QQ群590411159。
-
 
 
 
