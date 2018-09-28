@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# chkconfig: - 57 75
+# description: test service
+start() {
+echo "Starting qidong ..."
+sh  /home/java/comm/qidong.sh
+}
+
+stop() {
+echo "Stopping qidong ..."
+}
+
+# See how we were called.
+case "$1" in
+  start)
+start
+;;
+  stop)
+stop
+;;
+  restart|force-reload)
+stop
+start
+;;
+  *)
+echo $"Usage: $0 {start|stop|restart|force-reload}"
+exit 2
+esac
